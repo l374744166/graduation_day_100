@@ -1,0 +1,72 @@
+[
+	{
+		"day": 1,
+		"title": "毕业宿舍最后一晚",
+		"description": "宿舍的灯最后一次亮着，大家都在收拾行李。有人明天去深圳，有人准备二战，有人回老家，而你还不知道下一站在哪里。",
+		"choices": [
+			{"text": "再聊一会儿吧", "effects": {"relationship": 5, "mood": 3}},
+			{"text": "假装睡着", "effects": {"relationship": -2, "mood": -2}},
+			{"text": "偷偷哭一下", "effects": {"mood": -1, "self_identity": 3}}
+		]
+	},
+	{
+		"day": 2,
+		"title": "搬离宿舍",
+		"description": "你拖着行李站在宿舍楼下，回头看了一眼住了四年的地方。",
+		"choices": [
+			{"text": "拍一张空宿舍照片", "effects": {"self_identity": 2, "mood": -1}},
+			{"text": "赶紧离开", "effects": {"pressure": -1, "relationship": -1}},
+			{"text": "给室友发消息", "effects": {"relationship": 3, "mood": 2}}
+		]
+	},
+	{
+		"day": 3,
+		"title": "第一次投简历",
+		"description": "你打开电脑，盯着简历文件看了很久。光标闪烁，像是在催你快点开始。",
+		"choices": [
+			{"text": "认真修改简历", "effects": {"skill": 3, "pressure": 2}},
+			{"text": "海投 30 家", "effects": {"pressure": 4, "mood": -3}},
+			{"text": "先拖一天", "effects": {"mood": 2, "pressure": 5}}
+		]
+	},
+	{
+		"day": 4,
+		"title": "朋友拿到 offer",
+		"description": "朋友发来消息：我拿到 offer 了。你盯着屏幕，打了几个字又删掉。",
+		"choices": [
+			{"text": "真心祝福", "effects": {"relationship": 4, "self_identity": 2}},
+			{"text": "装作开心", "effects": {"pressure": 3, "mood": -2}},
+			{"text": "不回复", "effects": {"relationship": -3, "mood": -1}}
+		]
+	},
+	{
+		"day": 5,
+		"title": "父母电话",
+		"description": "晚上，父母打来电话。电话那头问：工作找得怎么样了？",
+		"choices": [
+			{"text": "说一切顺利", "effects": {"pressure": 5, "relationship": -1}},
+			{"text": "坦白自己迷茫", "effects": {"mood": 3, "relationship": 4, "pressure": -2}},
+			{"text": "敷衍几句挂掉", "effects": {"mood": -3, "relationship": -4}}
+		]
+	},
+	{
+		"day": 6,
+		"title": "第一次面试",
+		"description": "你坐在会议室里，对面的人问：你对自己的职业规划是什么？",
+		"choices": [
+			{"text": "诚实回答", "effects": {"self_identity": 4, "skill": 1}},
+			{"text": "尽力包装自己", "effects": {"pressure": 3, "skill": 2}},
+			{"text": "表现得很紧张", "effects": {"mood": -3, "pressure": 2}}
+		]
+	},
+	{
+		"day": 7,
+		"title": "第一周结束",
+		"description": "毕业后的第一周结束了。你没有想象中那么快上岸，但也没有真的停下来。",
+		"choices": [
+			{"text": "写下这一周的感受", "effects": {"self_identity": 3, "mood": 2}},
+			{"text": "继续投简历", "effects": {"skill": 2, "pressure": 2}},
+			{"text": "早点睡觉", "effects": {"mood": 5, "pressure": -3}}
+		]
+	}
+]

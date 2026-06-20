@@ -1,0 +1,10 @@
+[
+	{"id": "dorm", "name": "宿舍", "description": "最后几天还残留着行李箱滚轮的声音。"},
+	{"id": "rental_room", "name": "出租屋", "description": "小而安静，租金提醒你已经离开了校园。"},
+	{"id": "convenience_store", "name": "便利店", "description": "灯光很亮，货架整齐，夜班店员看起来很困。"},
+	{"id": "subway_station", "name": "地铁站", "description": "每个人都在赶路，好像只有你不知道终点。"},
+	{"id": "coffee_shop", "name": "咖啡店", "description": "适合改简历，也适合假装自己很稳定。"},
+	{"id": "interview_company", "name": "面试公司", "description": "玻璃门、前台、访客登记和突然变快的心跳。"},
+	{"id": "park", "name": "公园", "description": "树荫下有人散步，时间暂时没有那么锋利。"},
+	{"id": "train_station", "name": "火车站", "description": "离开和抵达在这里不断交换位置。"}
+]

@@ -1,0 +1,62 @@
+[
+	{
+		"id": "send_resume",
+		"name": "投简历",
+		"description": "把简历投向几个看起来合适、又好像有点遥远的岗位。",
+		"effects": {"mood": -3, "pressure": 2, "skill": 1}
+	},
+	{
+		"id": "edit_resume",
+		"name": "修改简历",
+		"description": "删掉空话，补上项目经历，试着让自己看起来更清楚一点。",
+		"effects": {"skill": 3, "pressure": 1, "mood": -2}
+	},
+	{
+		"id": "study_skill",
+		"name": "学习技能",
+		"description": "打开课程和笔记，把注意力从焦虑里挪出来。",
+		"effects": {"skill": 4, "mood": -2, "pressure": 1}
+	},
+	{
+		"id": "prepare_interview",
+		"name": "准备面试",
+		"description": "对着空房间练习自我介绍，听见自己的声音有点陌生。",
+		"effects": {"skill": 2, "pressure": 2, "self_identity": 1}
+	},
+	{
+		"id": "part_time",
+		"name": "打零工",
+		"description": "用半天换一点现金，也换来一点真实的疲惫。",
+		"effects": {"money": 180, "mood": -5, "pressure": -1}
+	},
+	{
+		"id": "walk",
+		"name": "出门散步",
+		"description": "在路边走一会儿，看陌生人正常地生活。",
+		"effects": {"mood": 5, "pressure": -3}
+	},
+	{
+		"id": "contact_friend",
+		"name": "联系朋友",
+		"description": "发出一句'最近怎么样'，等一个不那么客套的回复。",
+		"effects": {"relationship": 4, "mood": 2}
+	},
+	{
+		"id": "call_parents",
+		"name": "和父母通话",
+		"description": "听见熟悉的声音，你把很多话在心里排了队。",
+		"effects": {"relationship": 3, "pressure": -2, "mood": 1}
+	},
+	{
+		"id": "clean_room",
+		"name": "整理房间",
+		"description": "把书、衣服和没说出口的话都先归到一个地方。",
+		"effects": {"mood": 2, "pressure": -2, "self_identity": 1}
+	},
+	{
+		"id": "rest",
+		"name": "休息",
+		"description": "关掉屏幕，允许自己暂时什么都不证明。",
+		"effects": {"mood": 8, "pressure": -4}
+	}
+]
