@@ -1,220 +1,658 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
-		<title>毕业后的第100天</title>
-		<style>
-html, body, #canvas {
-	margin: 0;
-	padding: 0;
-	border: 0;
-}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#202424" />
+  <title>毕业后的第100天</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151818;
+      --panel: #222727;
+      --panel-2: #2c3130;
+      --line: #424b49;
+      --text: #eef5f3;
+      --muted: #aebbb8;
+      --accent: #f3c66f;
+      --good: #8dd9ad;
+      --bad: #f08b83;
+      --button: #49645c;
+      --button-on: #6f8d77;
+    }
 
-body {
-	color: white;
-	background-color: black;
-	overflow: hidden;
-	touch-action: none;
-}
+    * { box-sizing: border-box; }
 
-#canvas {
-	display: block;
-}
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+        "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", Arial, sans-serif;
+      letter-spacing: 0;
+    }
 
-#canvas:focus {
-	outline: none;
-}
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
 
-#status, #status-splash, #status-progress {
-	position: absolute;
-	left: 0;
-	right: 0;
-}
+    button {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      background: var(--button);
+      color: var(--text);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
 
-#status, #status-splash {
-	top: 0;
-	bottom: 0;
-}
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity: .45; cursor: default; }
 
-#status {
-	background-color: #242424;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	visibility: hidden;
-}
+    .screen {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: max(16px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+        max(18px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+    }
 
-#status-splash {
-	max-height: 100%;
-	max-width: 100%;
-	margin: auto;
-}
+    .menu {
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(rgba(18, 21, 20, .86), rgba(18, 21, 20, .92)),
+        radial-gradient(circle at 30% 12%, rgba(243, 198, 111, .18), transparent 32%),
+        linear-gradient(145deg, #14211e, #1c2021 52%, #261d1b);
+    }
 
-#status-splash.show-image--false {
-	display: none;
-}
+    .menu-inner {
+      width: min(480px, 100%);
+      display: grid;
+      gap: 14px;
+      text-align: center;
+    }
 
-#status-splash.fullsize--true {
-	height: 100%;
-	width: 100%;
-	object-fit: contain;
-}
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: clamp(34px, 11vw, 56px); line-height: 1.05; }
+    h2 { font-size: clamp(25px, 7vw, 36px); }
+    h3 { font-size: 20px; }
 
-#status-splash.use-filter--false {
-	image-rendering: pixelated;
-}
+    .subtitle, .muted { color: var(--muted); }
+    .subtitle { font-size: 17px; margin-bottom: 18px; }
 
-#status-progress, #status-notice {
-	display: none;
-}
+    .game {
+      display: grid;
+      gap: 14px;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
 
-#status-progress {
-	bottom: 10%;
-	width: 50%;
-	margin: 0 auto;
-}
+    .sidebar, .content, .card, .event-box {
+      border: 1px solid rgba(255, 255, 255, .06);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 18px 44px rgba(0, 0, 0, .18);
+    }
 
-#status-notice {
-	background-color: #5b3943;
-	border-radius: 0.5rem;
-	border: 1px solid #9b3943;
-	color: #e0e0e0;
-	font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
-	line-height: 1.3;
-	margin: 0 2rem;
-	overflow: hidden;
-	padding: 1rem;
-	text-align: center;
-	z-index: 1;
-}
-		</style>
-		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
-<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
+    .sidebar, .content, .event-box { padding: 16px; }
+    .sidebar { display: grid; gap: 13px; align-content: start; }
+    .content { display: grid; gap: 14px; min-height: 420px; align-content: start; }
 
-	</head>
-	<body>
-		<canvas id="canvas">
-			Your browser does not support the canvas tag.
-		</canvas>
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
 
-		<noscript>
-			Your browser does not support JavaScript.
-		</noscript>
+    .place { color: var(--muted); font-size: 14px; }
+    .divider { height: 1px; background: var(--line); opacity: .7; }
 
-		<div id="status">
-			<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="index.png" alt="">
-			<progress id="status-progress"></progress>
-			<div id="status-notice"></div>
-		</div>
+    .stats { display: grid; gap: 9px; }
+    .stat {
+      display: grid;
+      grid-template-columns: 76px 1fr auto;
+      gap: 9px;
+      align-items: center;
+      font-size: 14px;
+    }
 
-		<script src="index.js"></script>
-		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":38964,"index.wasm":37686550},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
-const GODOT_THREADS_ENABLED = false;
-const engine = new Engine(GODOT_CONFIG);
+    .bar {
+      height: 9px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #151818;
+    }
 
-(function () {
-	const statusOverlay = document.getElementById('status');
-	const statusProgress = document.getElementById('status-progress');
-	const statusNotice = document.getElementById('status-notice');
+    .bar span {
+      display: block;
+      height: 100%;
+      width: var(--w);
+      background: var(--c);
+    }
 
-	let initializing = true;
-	let statusMode = '';
+    .money-bar {
+      grid-column: 2 / 4;
+      height: 1px;
+      background: transparent;
+    }
 
-	function setStatusMode(mode) {
-		if (statusMode === mode || !initializing) {
-			return;
-		}
-		if (mode === 'hidden') {
-			statusOverlay.remove();
-			initializing = false;
-			return;
-		}
-		statusOverlay.style.visibility = 'visible';
-		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
-		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
-		statusMode = mode;
-	}
+    .nav-grid, .system-grid, .choice-grid {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 
-	function setStatusNotice(text) {
-		while (statusNotice.lastChild) {
-			statusNotice.removeChild(statusNotice.lastChild);
-		}
-		const lines = text.split('\n');
-		lines.forEach((line) => {
-			statusNotice.appendChild(document.createTextNode(line));
-			statusNotice.appendChild(document.createElement('br'));
-		});
-	}
+    .system-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .nav-grid button.active { background: var(--button-on); }
 
-	function displayFailureNotice(err) {
-		console.error(err);
-		if (err instanceof Error) {
-			setStatusNotice(err.message);
-		} else if (typeof err === 'string') {
-			setStatusNotice(err);
-		} else {
-			setStatusNotice('An unknown error occurred.');
-		}
-		setStatusMode('notice');
-		initializing = false;
-	}
+    .room-text {
+      color: #d7e0de;
+      line-height: 1.75;
+      white-space: pre-line;
+    }
 
-	const missing = Engine.getMissingFeatures({
-		threads: GODOT_THREADS_ENABLED,
-	});
+    .notice {
+      min-height: 24px;
+      color: var(--accent);
+      line-height: 1.55;
+    }
 
-	if (missing.length !== 0) {
-		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
-			let serviceWorkerRegistrationPromise;
-			try {
-				serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
-			} catch (err) {
-				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
-			}
-			// There's a chance that installing the service worker would fix the issue
-			Promise.race([
-				serviceWorkerRegistrationPromise.then((registration) => {
-					if (registration != null) {
-						return Promise.reject(new Error('Service worker already exists.'));
-					}
-					return registration;
-				}).then(() => engine.installServiceWorker()),
-				// For some reason, `getRegistration()` can stall
-				new Promise((resolve) => {
-					setTimeout(() => resolve(), 2000);
-				}),
-			]).then(() => {
-				// Reload if there was no error.
-				window.location.reload();
-			}).catch((err) => {
-				console.error('Error while registering service worker:', err);
-			});
-		} else {
-			// Display the message as usual
-			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
-			displayFailureNotice(missingMsg + missing.join('\n'));
-		}
-	} else {
-		setStatusMode('progress');
-		engine.startGame({
-			'onProgress': function (current, total) {
-				if (current > 0 && total > 0) {
-					statusProgress.value = current;
-					statusProgress.max = total;
-				} else {
-					statusProgress.removeAttribute('value');
-					statusProgress.removeAttribute('max');
-				}
-			},
-		}).then(() => {
-			setStatusMode('hidden');
-		}, displayFailureNotice);
-	}
-}());
-		</script>
-	</body>
+    .hint {
+      padding: 12px;
+      border-left: 3px solid var(--accent);
+      background: rgba(243, 198, 111, .08);
+      color: #d9dfdc;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    }
+
+    .card {
+      padding: 14px;
+      display: grid;
+      gap: 9px;
+      align-content: start;
+      background: var(--panel-2);
+    }
+
+    .card p {
+      color: #c6d0cd;
+      line-height: 1.55;
+      min-height: 48px;
+    }
+
+    .effects {
+      color: var(--accent);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .computer-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .mail {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 8px;
+      background: var(--panel-2);
+      color: var(--text);
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .detail {
+      min-height: 130px;
+      padding: 14px;
+      border-radius: 8px;
+      background: #181b1b;
+      color: #d6dfdc;
+      line-height: 1.7;
+      white-space: pre-line;
+    }
+
+    .event-screen {
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(rgba(16, 18, 18, .9), rgba(18, 20, 20, .96)),
+        linear-gradient(130deg, #202827, #191c1b 56%, #2b2320);
+    }
+
+    .event-box {
+      width: min(660px, 100%);
+      display: grid;
+      gap: 16px;
+    }
+
+    .event-box p {
+      color: #d2dcda;
+      line-height: 1.75;
+    }
+
+    .ending {
+      display: grid;
+      gap: 13px;
+      width: min(720px, 100%);
+      margin: 0 auto;
+    }
+
+    .ending .content { min-height: auto; }
+
+    @media (min-width: 780px) {
+      .screen { padding: 28px; }
+      .game { grid-template-columns: 292px 1fr; }
+      .nav-grid, .system-grid { grid-template-columns: 1fr; }
+      .content, .sidebar { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <main id="app"></main>
+
+  <script>
+    "use strict";
+
+    const SAVE_KEY = "graduation_day_100_save_v2";
+    const STAT_LABELS = {
+      money: "金钱",
+      mood: "情绪",
+      skill: "能力",
+      relationship: "关系",
+      pressure: "压力",
+      self_identity: "自我认同"
+    };
+    const STAT_ORDER = ["money", "mood", "skill", "relationship", "pressure", "self_identity"];
+    const TIME_SLOTS = ["morning", "afternoon", "night"];
+    const TIME_LABELS = { morning: "上午", afternoon: "下午", night: "晚上" };
+
+    const actions = [
+      { id: "send_resume", name: "投简历", description: "把简历投向几个看起来合适、又好像有点遥远的岗位。", effects: { mood: -3, pressure: 2, skill: 1 } },
+      { id: "edit_resume", name: "修改简历", description: "删掉空话，补上项目经历，试着让自己看起来更清楚一点。", effects: { skill: 3, pressure: 1, mood: -2 } },
+      { id: "study_skill", name: "学习技能", description: "打开课程和笔记，把注意力从焦虑里挪出来。", effects: { skill: 4, mood: -2, pressure: 1 } },
+      { id: "prepare_interview", name: "准备面试", description: "对着空房间练习自我介绍，听见自己的声音有点陌生。", effects: { skill: 2, pressure: 2, self_identity: 1 } },
+      { id: "part_time", name: "打零工", description: "用半天换一点现金，也换来一点真实的疲惫。", effects: { money: 180, mood: -5, pressure: -1 } },
+      { id: "walk", name: "出门散步", description: "在路边走一会儿，看陌生人正常地生活。", effects: { mood: 5, pressure: -3 } },
+      { id: "contact_friend", name: "联系朋友", description: "发出一句“最近怎么样”，等一个不那么客套的回复。", effects: { relationship: 4, mood: 2 } },
+      { id: "call_parents", name: "和父母通话", description: "听见熟悉的声音，你把很多话在心里排了队。", effects: { relationship: 3, pressure: -2, mood: 1 } },
+      { id: "clean_room", name: "整理房间", description: "把书、衣服和没说出口的话都先归到一个地方。", effects: { mood: 2, pressure: -2, self_identity: 1 } },
+      { id: "rest", name: "休息", description: "关掉屏幕，允许自己暂时什么都不证明。", effects: { mood: 8, pressure: -4 } }
+    ];
+
+    const locations = [
+      { id: "dorm", name: "宿舍", description: "最后几天还残留着行李箱滚轮的声音。" },
+      { id: "rental_room", name: "出租屋", description: "小而安静，租金提醒你已经离开了校园。" },
+      { id: "convenience_store", name: "便利店", description: "灯光很亮，货架整齐，夜班店员看起来很困。" },
+      { id: "subway_station", name: "地铁站", description: "每个人都在赶路，好像只有你不知道终点。" },
+      { id: "coffee_shop", name: "咖啡店", description: "适合改简历，也适合假装自己很稳定。" },
+      { id: "interview_company", name: "面试公司", description: "玻璃门、前台、访客登记和突然变快的心跳。" },
+      { id: "park", name: "公园", description: "树荫下有人散步，时间暂时没有那么锋利。" },
+      { id: "train_station", name: "火车站", description: "离开和抵达在这里不断交换位置。" }
+    ];
+
+    const events = [
+      { day: 1, title: "毕业宿舍最后一晚", description: "宿舍的灯最后一次亮着，大家都在收拾行李。有人明天去深圳，有人准备二战，有人回老家，而你还不知道下一站在哪里。", choices: [
+        { text: "再聊一会儿吧", effects: { relationship: 5, mood: 3 } },
+        { text: "假装睡着", effects: { relationship: -2, mood: -2 } },
+        { text: "偷偷哭一下", effects: { mood: -1, self_identity: 3 } }
+      ] },
+      { day: 2, title: "搬离宿舍", description: "你拖着行李站在宿舍楼下，回头看了一眼住了四年的地方。", choices: [
+        { text: "拍一张空宿舍照片", effects: { self_identity: 2, mood: -1 } },
+        { text: "赶紧离开", effects: { pressure: -1, relationship: -1 } },
+        { text: "给室友发消息", effects: { relationship: 3, mood: 2 } }
+      ] },
+      { day: 3, title: "第一次投简历", description: "你打开电脑，盯着简历文件看了很久。光标闪烁，像是在催你快点开始。", choices: [
+        { text: "认真修改简历", effects: { skill: 3, pressure: 2 } },
+        { text: "海投 30 家", effects: { pressure: 4, mood: -3 } },
+        { text: "先拖一天", effects: { mood: 2, pressure: 5 } }
+      ] },
+      { day: 4, title: "朋友拿到 offer", description: "朋友发来消息：我拿到 offer 了。你盯着屏幕，打了几个字又删掉。", choices: [
+        { text: "真心祝福", effects: { relationship: 4, self_identity: 2 } },
+        { text: "装作开心", effects: { pressure: 3, mood: -2 } },
+        { text: "不回复", effects: { relationship: -3, mood: -1 } }
+      ] },
+      { day: 5, title: "父母电话", description: "晚上，父母打来电话。电话那头问：工作找得怎么样了？", choices: [
+        { text: "说一切顺利", effects: { pressure: 5, relationship: -1 } },
+        { text: "坦白自己迷茫", effects: { mood: 3, relationship: 4, pressure: -2 } },
+        { text: "敷衍几句挂掉", effects: { mood: -3, relationship: -4 } }
+      ] },
+      { day: 6, title: "第一次面试", description: "你坐在会议室里，对面的人问：你对自己的职业规划是什么？", choices: [
+        { text: "诚实回答", effects: { self_identity: 4, skill: 1 } },
+        { text: "尽力包装自己", effects: { pressure: 3, skill: 2 } },
+        { text: "表现得很紧张", effects: { mood: -3, pressure: 2 } }
+      ] },
+      { day: 7, title: "第一周结束", description: "毕业后的第一周结束了。你没有想象中那么快上岸，但也没有真的停下来。", choices: [
+        { text: "写下这一周的感受", effects: { self_identity: 3, mood: 2 } },
+        { text: "继续投简历", effects: { skill: 2, pressure: 2 } },
+        { text: "早点睡觉", effects: { mood: 5, pressure: -3 } }
+      ] }
+    ];
+
+    const app = document.querySelector("#app");
+    let noticeText = "";
+    let state = freshState();
+
+    function freshState() {
+      return {
+        day: 1,
+        time_slot: "morning",
+        money: 3000,
+        mood: 70,
+        skill: 20,
+        relationship: 50,
+        pressure: 30,
+        self_identity: 40,
+        current_location: "dorm",
+        flags: {}
+      };
+    }
+
+    function clampStats() {
+      for (const key of ["mood", "skill", "relationship", "pressure", "self_identity"]) {
+        state[key] = Math.max(0, Math.min(100, Number(state[key]) || 0));
+      }
+      state.money = Math.max(0, Number(state.money) || 0);
+    }
+
+    function applyEffects(effects) {
+      for (const [key, value] of Object.entries(effects || {})) {
+        state[key] = (Number(state[key]) || 0) + Number(value);
+      }
+      clampStats();
+    }
+
+    function advanceTime() {
+      const current = TIME_SLOTS.indexOf(state.time_slot);
+      if (current >= 0 && current < TIME_SLOTS.length - 1) {
+        state.time_slot = TIME_SLOTS[current + 1];
+        return;
+      }
+      state.money -= 60;
+      if (state.money < 500) state.pressure += 5;
+      state.day += 1;
+      state.time_slot = "morning";
+      clampStats();
+    }
+
+    function nextEvent() {
+      return events.find((event) => event.day === state.day && !state.flags[`event_day_${event.day}`]);
+    }
+
+    function saveGame() {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+      noticeText = "已保存到当前浏览器。";
+      renderRoom("room");
+    }
+
+    function loadGame() {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) {
+        noticeText = "没有找到可读取的存档。";
+        renderMenu();
+        return;
+      }
+      state = { ...freshState(), ...JSON.parse(raw) };
+      state.flags = state.flags || {};
+      clampStats();
+      noticeText = "已读取当前浏览器存档。";
+      routeNext();
+    }
+
+    function routeNext() {
+      if (state.day > 7) renderEnding();
+      else {
+        const event = nextEvent();
+        if (event) renderEvent(event);
+        else renderRoom("room");
+      }
+    }
+
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function button(text, onClick, className) {
+      const node = el("button", className, text);
+      node.addEventListener("click", onClick);
+      return node;
+    }
+
+    function renderMenu() {
+      app.innerHTML = "";
+      const screen = el("section", "screen menu");
+      const inner = el("div", "menu-inner");
+      inner.append(
+        el("h1", "", "毕业后的第100天"),
+        el("p", "subtitle", "7 天 Demo | 手机网页试玩版"),
+        button("新游戏", () => {
+          state = freshState();
+          noticeText = "";
+          routeNext();
+        }),
+        button("继续游戏", loadGame)
+      );
+      const continueButton = inner.querySelectorAll("button")[1];
+      continueButton.disabled = !localStorage.getItem(SAVE_KEY);
+      screen.append(inner);
+      app.append(screen);
+    }
+
+    function renderShell(activeView) {
+      app.innerHTML = "";
+      const screen = el("section", "screen");
+      const game = el("div", "game");
+      const sidebar = renderSidebar(activeView);
+      const content = el("section", "content");
+      game.append(sidebar, content);
+      screen.append(game);
+      app.append(screen);
+      return content;
+    }
+
+    function renderSidebar(activeView) {
+      const sidebar = el("aside", "sidebar");
+      const top = el("div", "topline");
+      top.append(el("h3", "", `第 ${state.day} 天  ${TIME_LABELS[state.time_slot]}`), el("span", "place", `当前位置：${locationName(state.current_location)}`));
+      sidebar.append(top, divider(), renderStats(), divider());
+
+      const nav = el("div", "nav-grid");
+      nav.append(
+        button("行动", () => renderRoom("actions"), activeView === "actions" ? "active" : ""),
+        button("出门", () => renderRoom("locations"), activeView === "locations" ? "active" : ""),
+        button("电脑", () => renderRoom("computer"), activeView === "computer" ? "active" : ""),
+        button("休息", () => performAction(actions.find((item) => item.id === "rest")))
+      );
+      sidebar.append(nav, divider());
+
+      const system = el("div", "system-grid");
+      system.append(
+        button("存档", saveGame),
+        button("读档", loadGame),
+        button("主菜单", renderMenu)
+      );
+      sidebar.append(system);
+      return sidebar;
+    }
+
+    function divider() {
+      return el("div", "divider");
+    }
+
+    function renderStats() {
+      const wrap = el("div", "stats");
+      for (const key of STAT_ORDER) {
+        const row = el("div", "stat");
+        row.append(el("span", "", STAT_LABELS[key]));
+        if (key === "money") {
+          row.append(el("span", "money-bar"), el("strong", "", `¥${state.money}`));
+        } else {
+          const bar = el("span", "bar");
+          const fill = el("span");
+          fill.style.setProperty("--w", `${state[key]}%`);
+          fill.style.setProperty("--c", key === "pressure" ? "var(--bad)" : "var(--good)");
+          bar.append(fill);
+          row.append(bar, el("strong", "", String(state[key])));
+        }
+        wrap.append(row);
+      }
+      return wrap;
+    }
+
+    function renderRoom(activeView) {
+      if (state.day > 7) {
+        renderEnding();
+        return;
+      }
+      const content = renderShell(activeView);
+      if (activeView === "actions") renderActions(content);
+      else if (activeView === "locations") renderLocations(content);
+      else if (activeView === "computer") renderComputer(content);
+      else renderRoomHome(content);
+    }
+
+    function renderRoomHome(content) {
+      content.append(
+        el("h2", "", "房间"),
+        el("p", "room-text", "桌上放着电脑、纸杯和还没整理完的证件袋。窗外不是校园广播，而是城市里连续不断的车声。\n\n今天还有一个时段可以安排。你可以处理求职、出门换换空气，或者坐在电脑前假装自己很有计划。"),
+        el("p", "notice", noticeText),
+        el("p", "hint", "日程：上午 / 下午 / 晚上。每次行动会推进一个时段，晚上结束后扣除 60 生活费。")
+      );
+    }
+
+    function renderActions(content) {
+      content.append(el("h2", "", "选择行动"), el("p", "muted", `当前时段：${TIME_LABELS[state.time_slot]}。选择一个行动后，时间会向前推进。`));
+      const grid = el("div", "grid");
+      for (const action of actions) {
+        if (action.id !== "rest") grid.append(actionCard(action));
+      }
+      content.append(grid);
+    }
+
+    function actionCard(action) {
+      const card = el("article", "card");
+      card.append(el("h3", "", action.name), el("p", "", action.description), el("div", "effects", formatEffects(action.effects)), button("执行", () => performAction(action)));
+      return card;
+    }
+
+    function renderLocations(content) {
+      content.append(el("h2", "", "出门"), el("p", "muted", "换个地方，不一定能解决问题，但至少能让今天有一点变化。"));
+      const grid = el("div", "grid");
+      for (const location of locations) {
+        const card = el("article", "card");
+        card.append(el("h3", "", location.name), el("p", "", location.description), button(location.id === state.current_location ? "已在这里" : "前往", () => {
+          state.current_location = location.id;
+          noticeText = `你来到了${location.name}。`;
+          renderRoom("room");
+        }));
+        grid.append(card);
+      }
+      content.append(grid);
+    }
+
+    function renderComputer(content) {
+      content.append(el("h2", "", "电脑"), el("p", "muted", "收件箱、简历文件、招聘网站和一个迟迟没有关闭的文档。"));
+      const list = el("div", "computer-list");
+      const detail = el("div", "detail", "点开左边的内容，看看今天的电脑屏幕里有什么。");
+      const mails = [
+        ["招聘网站", "你收藏了很多岗位，也关闭了很多岗位。每一个“经验不限”下面，好像都藏着一行小字：最好什么都会。"],
+        ["简历文件", "文件名从 resume_final 到 resume_final_真的最终版。你删掉几句漂亮话，补上一点更具体的经历。"],
+        ["聊天窗口", "朋友的头像亮了一下。你想问问近况，又怕对方真的过得很好，也怕对方其实和你一样。"]
+      ];
+      for (const [title, text] of mails) {
+        list.append(button(title, () => { detail.textContent = text; }, "mail"));
+      }
+      content.append(list, detail);
+    }
+
+    function performAction(action) {
+      if (!action) return;
+      applyEffects(action.effects);
+      advanceTime();
+      noticeText = `${action.name}：${formatEffects(action.effects)}`;
+      routeNext();
+    }
+
+    function renderEvent(event) {
+      app.innerHTML = "";
+      const screen = el("section", "screen event-screen");
+      const box = el("article", "event-box");
+      box.append(el("h2", "", event.title), el("p", "", event.description));
+      const choices = el("div", "choice-grid");
+      for (const choice of event.choices) {
+        choices.append(button(choice.text, () => {
+          applyEffects(choice.effects);
+          state.flags[`event_day_${event.day}`] = true;
+          noticeText = `${choice.text}：${formatEffects(choice.effects)}`;
+          renderRoom("room");
+        }));
+      }
+      box.append(choices);
+      screen.append(box);
+      app.append(screen);
+    }
+
+    function renderEnding() {
+      app.innerHTML = "";
+      const screen = el("section", "screen menu");
+      const wrap = el("div", "ending");
+      const report = endingReport();
+      const content = el("section", "content");
+      content.append(
+        el("h1", "", "Demo 结束"),
+        el("h2", "", report.title),
+        el("p", "room-text", report.description),
+        renderStats(),
+        button("重新开始", () => {
+          state = freshState();
+          noticeText = "";
+          routeNext();
+        })
+      );
+      wrap.append(content);
+      screen.append(wrap);
+      app.append(screen);
+    }
+
+    function endingReport() {
+      if (state.skill >= 35 && state.mood >= 40) return { title: "还没有上岸，但开始有方向", description: "你还没抵达，但已经开始走了。" };
+      if (state.money < 1000) return { title: "钱开始变紧，但你还在坚持", description: "生活没有给你太多余地，但你还没有放弃。" };
+      if (state.relationship >= 60) return { title: "至少你还没有和重要的人走散", description: "长大不是一个人消失，而是学会认真告别。" };
+      if (state.pressure >= 70) return { title: "你太累了，需要停下来喘口气", description: "不是你不够努力，是你已经撑了很久。" };
+      return { title: "普通但真实的一周", description: "你没有立刻变好，也没有彻底变坏。生活大概就是这样慢慢往前。" };
+    }
+
+    function formatEffects(effects) {
+      const parts = [];
+      for (const [key, value] of Object.entries(effects || {})) {
+        const label = STAT_LABELS[key] || key;
+        const sign = Number(value) >= 0 ? "+" : "";
+        parts.push(`${label}${sign}${value}`);
+      }
+      return parts.join("  ");
+    }
+
+    function locationName(id) {
+      return (locations.find((location) => location.id === id) || locations[0]).name;
+    }
+
+    renderMenu();
+  </script>
+</body>
 </html>
-
