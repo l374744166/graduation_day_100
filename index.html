@@ -268,6 +268,7 @@
     .modal p, .log-item p, .summary-list p {
       color: #d7e0de;
       line-height: 1.65;
+      white-space: pre-line;
     }
 
     .effect-list {
@@ -297,6 +298,55 @@
       color: var(--accent);
       font-size: 14px;
       font-weight: 700;
+    }
+
+    .profile {
+      width: min(760px, 100%);
+      display: grid;
+      gap: 13px;
+    }
+
+    .profile-card {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 18px 44px rgba(0, 0, 0, .22);
+    }
+
+    .profile-stats {
+      display: grid;
+      gap: 9px;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    }
+
+    .profile-stat {
+      display: grid;
+      gap: 4px;
+      padding: 11px;
+      border-radius: 8px;
+      background: var(--panel-2);
+    }
+
+    .profile-stat strong {
+      font-size: 20px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(243, 198, 111, .13);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 14px;
     }
 
     .ending {
@@ -334,6 +384,48 @@
     const STAT_ORDER = ["money", "mood", "skill", "relationship", "pressure", "self_identity"];
     const TIME_SLOTS = ["morning", "afternoon", "night"];
     const TIME_LABELS = { morning: "上午", afternoon: "下午", night: "晚上" };
+    const MAX_REROLLS = 3;
+
+    const startProfiles = [
+      { name: "穷但乐观", ranges: { money: [1200, 2200], mood: [60, 80], skill: [30, 50], relationship: [50, 75], pressure: [35, 60], self_identity: [40, 60] }, evaluation: "你没什么钱，但暂时还笑得出来。这可能是天赋，也可能是还没看清现实。" },
+      { name: "有点能力但焦虑", ranges: { money: [2500, 4500], mood: [35, 55], skill: [50, 65], relationship: [35, 60], pressure: [60, 80], self_identity: [35, 55] }, evaluation: "你不是没有能力，只是脑子每天都在模拟失败。" },
+      { name: "关系好但没方向", ranges: { money: [2000, 4000], mood: [45, 65], skill: [25, 45], relationship: [60, 80], pressure: [40, 65], self_identity: [20, 45] }, evaluation: "你身边还有人，但你不知道自己要去哪。幸好，迷路的时候有人骂你两句也算陪伴。" },
+      { name: "钱还行但很空", ranges: { money: [4000, 6000], mood: [35, 55], skill: [35, 55], relationship: [25, 50], pressure: [45, 70], self_identity: [20, 45] }, evaluation: "你暂时不缺饭钱，但缺一个能解释自己的理由。" },
+      { name: "普通但真实", ranges: { money: [2200, 3800], mood: [45, 65], skill: [35, 55], relationship: [40, 60], pressure: [40, 65], self_identity: [35, 55] }, evaluation: "没有特别惨，也没有特别顺。这可能才是最常见的开局。" }
+    ];
+
+    const conditionalEvents = [
+      { id: "low_money_balance", day: 1, title: "余额羞辱", description: "舍友 A：晚上吃顿好的？毕业最后一顿。\n你打开余额，看见那个数字安静地躺在那里。\n舍友 B 凑过来看了一眼：你这余额挺环保啊，低碳生活。", condition: (s) => s.initial_stats && s.initial_stats.money < 2000, choices: [
+        { text: "嘴硬说自己在极简主义", result: "你说这是主动降低物欲。舍友说：“那你物欲挺配合，已经低到没了。”", effects: { mood: 2, pressure: 1 } },
+        { text: "让他闭嘴", result: "他闭嘴了三秒，然后开始用眼神朗读你的余额。", effects: { relationship: 1, mood: -1 } },
+        { text: "问能不能先 AA 但晚点转", result: "舍友 A 叹气说：“可以，但你别晚到我退休。”", effects: { relationship: 2, pressure: -1 } }
+      ] },
+      { id: "high_pressure_night", day: 1, time_slot: "night", title: "睡前焦虑", description: "宿舍灯关了。\n你闭上眼睛，脑子里开始自动播放：简历、房租、面试、父母电话、同学 offer、银行余额。", condition: (s) => s.initial_stats && s.initial_stats.pressure >= 65, choices: [
+        { text: "强行睡觉", result: "你把被子盖过头顶。焦虑没有消失，只是音量小了一点。", effects: { mood: 1, pressure: -1 } },
+        { text: "起床改简历", result: "你打开电脑，简历像一张还没写完的检讨书。", effects: { skill: 2, pressure: 1 } },
+        { text: "打开游戏逃避现实", result: "你赢了一局游戏，现实没有掉线，但至少暂时没来抓你。", effects: { mood: 3, pressure: -2 } }
+      ] },
+      { id: "low_mood_morning", day: 2, title: "起床失败", description: "闹钟响了三遍。\n你没有赖床，你只是暂时和现实断开连接。", condition: (s) => s.initial_stats && s.initial_stats.mood < 45, choices: [
+        { text: "再躺五分钟", result: "五分钟拥有很强的繁殖能力，很快变成了四十分钟。", effects: { mood: 2, pressure: 2 } },
+        { text: "把自己从床上拔起来", result: "你像拔充电线一样把自己拔了起来，过程不优雅，但成功了。", effects: { pressure: -1, self_identity: 1 } },
+        { text: "给今天请个心理假", result: "没人批准，但你先批准了自己。", effects: { mood: 4, pressure: -1 } }
+      ] },
+      { id: "strong_goodbye", day: 2, title: "舍友告别加强版", description: "舍友偷偷给你塞了一张纸。\n上面写着：以后混不下去了来找我，虽然我大概率也混不下去。", condition: (s) => s.initial_stats && s.initial_stats.relationship >= 60, choices: [
+        { text: "骂他晦气", result: "你骂他晦气，他笑得很欠。你们都知道这句话其实挺认真。", effects: { relationship: 3, mood: 2 } },
+        { text: "收起来", result: "你把纸折好塞进口袋。口袋突然比刚才重了一点。", effects: { relationship: 4, self_identity: 1 } },
+        { text: "说你俩可以一起破产", result: "他点头说可以，但希望破产前先吃顿好的。", effects: { mood: 3, relationship: 2 } }
+      ] },
+      { id: "low_skill_resume", day: 3, title: "简历公开处刑", description: "舍友看了你的简历三秒，沉默了。\n你问：怎么样？\n他说：排版挺干净的，主要是因为内容少。", condition: (s) => s.initial_stats && s.initial_stats.skill < 35, choices: [
+        { text: "夺回简历", result: "你夺回简历，像夺回一份还没成熟的尊严。", effects: { mood: -1, pressure: 1 } },
+        { text: "让他帮你改", result: "他嘴很毒，但键盘敲得很认真。你突然觉得被骂也有售后。", effects: { skill: 3, relationship: 2 } },
+        { text: "说这是留白美学", result: "他说：“那你这美学挺空旷。”你们都笑了。", effects: { mood: 3, relationship: 1 } }
+      ] },
+      { id: "low_identity_summary", day: 3, title: "自我介绍卡住", description: "毕业登记表上有一栏：个人总结。\n你盯着空白处看了很久。\n最后只想写：此人大学期间基本存活。", condition: (s) => s.initial_stats && s.initial_stats.self_identity < 35, choices: [
+        { text: "写得很官方", result: "你写下积极、认真、团结同学。每个词都像借来的。", effects: { pressure: 1, self_identity: -1 } },
+        { text: "写一句真话", result: "你写：我还在寻找自己。它不像总结，但至少不像撒谎。", effects: { self_identity: 3, mood: 1 } },
+        { text: "先空着", result: "空白也算一种回答，只是老师大概不会这么认为。", effects: { mood: 1, pressure: 2 } }
+      ] }
+    ];
 
     const actions = [
       { id: "send_resume", name: "投简历", description: "把简历投向几个看起来合适、又好像有点遥远的岗位。", feedback_text: "你打开电脑，把简历投给了几家公司。有一家显示“已读”，然后就没有然后了。", effects: { mood: -3, pressure: 2, skill: 1 } },
@@ -423,6 +515,8 @@
     let noticeText = "";
     let processing = false;
     let state = freshState();
+    let draftProfile = null;
+    let draftRerolls = 0;
 
     function freshState() {
       const base = {
@@ -436,7 +530,12 @@
         self_identity: 40,
         current_location: "dorm",
         flags: {},
-        action_log: []
+        action_log: [],
+        start_profile_name: "",
+        initial_stats: null,
+        start_tags: [],
+        reroll_used: 0,
+        start_evaluation: ""
       };
       base.day_start_stats = snapshotStats(base);
       return base;
@@ -496,6 +595,12 @@
     }
 
     function nextEvent() {
+      const special = conditionalEvents.find((event) => {
+        if (event.day !== state.day || state.flags[`conditional_${event.id}`]) return false;
+        if (event.time_slot && event.time_slot !== state.time_slot) return false;
+        return event.condition(state);
+      });
+      if (special) return { ...special, conditional: true };
       return events.find((event) => event.day === state.day && !state.flags[`event_day_${event.day}`]);
     }
 
@@ -515,6 +620,11 @@
       state = { ...freshState(), ...JSON.parse(raw) };
       state.flags = state.flags || {};
       state.action_log = state.action_log || [];
+      state.start_tags = state.start_tags || [];
+      state.initial_stats = state.initial_stats || snapshotStats(state);
+      state.start_profile_name = state.start_profile_name || "旧版开局";
+      state.start_evaluation = state.start_evaluation || "这份存档来自毕业档案系统上线之前，但你依然得继续往前。";
+      state.reroll_used = Number(state.reroll_used) || 0;
       state.day_start_stats = state.day_start_stats || snapshotStats(state);
       clampStats();
       noticeText = "已读取当前浏览器存档。";
@@ -543,6 +653,166 @@
       return node;
     }
 
+    function renderStartProfile() {
+      app.innerHTML = "";
+      const screen = el("section", "screen menu");
+      const wrap = el("div", "profile");
+      wrap.append(el("h1", "", "毕业后的第100天"), el("p", "subtitle", "第 0 天：毕业档案"));
+
+      const card = el("section", "profile-card");
+      if (!draftProfile) {
+        card.append(
+          el("h2", "", "毕业档案生成中"),
+          el("p", "room-text", "你不能决定自己从哪里开始，但可以决定怎么走下去。\n\n先抽一份毕业后的起点。满意也好，不满意也好，毕业不会等你准备好。"),
+          button("生成我的毕业档案", () => {
+            draftProfile = generateStartProfile();
+            renderStartProfile();
+          })
+        );
+      } else {
+        card.append(el("h2", "", `开局模板：${draftProfile.name}`), el("p", "room-text", draftProfile.evaluation));
+        const stats = el("div", "profile-stats");
+        for (const key of STAT_ORDER) {
+          const item = el("div", "profile-stat");
+          const value = key === "money" ? `¥${draftProfile.stats[key]}` : String(draftProfile.stats[key]);
+          item.append(el("span", "muted", STAT_LABELS[key]), el("strong", "", value), el("p", "", statStatusText(key, draftProfile.stats[key])));
+          stats.append(item);
+        }
+        const tags = el("div", "tags");
+        for (const tag of draftProfile.tags) tags.append(el("span", "tag", `【${tag.name}】`));
+        const rerollText = draftRerolls >= MAX_REROLLS ? "重抽次数已用完。差不多得了，人生不是刷初始号。" : `剩余重抽次数：${MAX_REROLLS - draftRerolls}`;
+        const rerollButton = button("不服，再抽一次", () => {
+          if (draftRerolls >= MAX_REROLLS) return;
+          draftRerolls += 1;
+          draftProfile = generateStartProfile();
+          renderStartProfile();
+        });
+        rerollButton.disabled = draftRerolls >= MAX_REROLLS;
+        card.append(stats, el("h3", "", "你的开局标签"), tags, el("p", "hint", `系统评价：${draftProfile.evaluation}`), el("p", "notice", rerollText), rerollButton, button("就这样活下去", acceptStartProfile));
+      }
+      wrap.append(card, button("返回主菜单", renderMenu));
+      screen.append(wrap);
+      app.append(screen);
+    }
+
+    function generateStartProfile() {
+      const profile = startProfiles[randomInt(0, startProfiles.length - 1)];
+      const stats = {};
+      for (const key of STAT_ORDER) {
+        const [min, max] = profile.ranges[key];
+        stats[key] = randomInt(min, max);
+      }
+      return {
+        name: profile.name,
+        stats,
+        tags: generateStartTags(stats),
+        evaluation: profile.evaluation
+      };
+    }
+
+    function acceptStartProfile() {
+      if (!draftProfile) return;
+      state = { ...freshState(), ...draftProfile.stats };
+      state.initial_stats = { ...draftProfile.stats };
+      state.start_profile_name = draftProfile.name;
+      state.start_tags = draftProfile.tags;
+      state.reroll_used = draftRerolls;
+      state.start_evaluation = draftProfile.evaluation;
+      state.day_start_stats = snapshotStats(state);
+      clampStats();
+      draftProfile = null;
+      noticeText = "你的毕业档案已生成。你不算准备好了，但毕业不会等你准备好。";
+      showFeedback({
+        title: "你的毕业档案已生成",
+        description: "你不算准备好了。\n但毕业不会等你准备好。\n\n第 1 天：毕业宿舍最后一晚。",
+        effects: {},
+        meta: `开局：${state.start_profile_name}`,
+        onContinue: routeNext
+      });
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function generateStartTags(stats) {
+      return [
+        tagForMoney(stats.money),
+        tagForMood(stats.mood),
+        tagForSkill(stats.skill),
+        tagForRelationship(stats.relationship),
+        tagForPressure(stats.pressure),
+        tagForIdentity(stats.self_identity)
+      ];
+    }
+
+    function tagForMoney(value) {
+      if (value >= 4000) return { name: "家里临时打了一笔钱", description: "你暂时不用为下周饭钱发愁。" };
+      if (value >= 2000) return { name: "普通钱包", description: "你有一点存款，但每花一笔都会心疼。" };
+      return { name: "钱包轻得像未来", description: "你打开余额看了一眼，决定先深呼吸。" };
+    }
+
+    function tagForMood(value) {
+      if (value >= 65) return { name: "暂时还挺精神", description: "你甚至觉得毕业后也许没那么可怕。" };
+      if (value >= 45) return { name: "正常迷茫", description: "你说不上坏，但也说不上好。" };
+      return { name: "电量不足", description: "你不是不努力，只是醒着已经很费劲。" };
+    }
+
+    function tagForSkill(value) {
+      if (value >= 55) return { name: "简历看起来还行", description: "至少 HR 打开时不会立刻关掉。" };
+      if (value >= 35) return { name: "什么都会一点", description: "你觉得自己能干很多事，但简历上写出来都像兴趣爱好。" };
+      return { name: "大学四年像按了跳过", description: "你会的不是没有，只是不知道怎么证明。" };
+    }
+
+    function tagForRelationship(value) {
+      if (value >= 60) return { name: "还有人惦记你", description: "你不是一个人走出学校的。" };
+      if (value >= 40) return { name: "普通联系", description: "群聊还在，但大家都开始变忙。" };
+      return { name: "正在失联", description: "你很少主动找人，也很少有人问你在干嘛。" };
+    }
+
+    function tagForPressure(value) {
+      if (value >= 65) return { name: "脑内 HR 常驻", description: "你还没开始投简历，就已经开始想象失败。" };
+      if (value >= 40) return { name: "压力正常运行", description: "焦虑在后台挂着，偶尔弹窗。" };
+      return { name: "暂时没反应过来", description: "你可能还没意识到毕业是真的。" };
+    }
+
+    function tagForIdentity(value) {
+      if (value >= 55) return { name: "还算认识自己", description: "你不确定未来，但大概知道自己讨厌什么。" };
+      if (value >= 35) return { name: "自我介绍困难户", description: "每次被问“你是什么样的人”，你都想跳过。" };
+      return { name: "人生加载失败", description: "你不知道自己适合什么，也不知道自己想成为什么。" };
+    }
+
+    function statStatusText(key, value) {
+      if (key === "money") {
+        if (value >= 4000) return "饭钱暂时不用报警";
+        if (value >= 2000) return "能活，但得算";
+        return "钱包轻得像未来";
+      }
+      if (key === "mood") {
+        if (value >= 65) return "暂时还挺精神";
+        if (value >= 45) return "能运行，但风扇很响";
+        return "醒着已经很费劲";
+      }
+      if (key === "skill") {
+        if (value >= 55) return "简历看起来还行";
+        if (value >= 35) return "什么都会一点";
+        return "简历写到第二行开始心虚";
+      }
+      if (key === "relationship") {
+        if (value >= 60) return "还有人会认真回你消息";
+        if (value >= 40) return "群聊还在，但大家都忙";
+        return "正在缓慢失联";
+      }
+      if (key === "pressure") {
+        if (value >= 65) return "脑内 HR 正在开会";
+        if (value >= 40) return "焦虑在后台挂着";
+        return "暂时没反应过来";
+      }
+      if (value >= 55) return "大概知道自己讨厌什么";
+      if (value >= 35) return "自我介绍时想跳过";
+      return "人生加载失败";
+    }
+
     function renderMenu() {
       app.innerHTML = "";
       const screen = el("section", "screen menu");
@@ -553,7 +823,9 @@
         button("新游戏", () => {
           state = freshState();
           noticeText = "";
-          routeNext();
+          draftProfile = null;
+          draftRerolls = 0;
+          renderStartProfile();
         }),
         button("继续游戏", loadGame)
       );
@@ -813,7 +1085,8 @@
           processing = true;
           disablePageButtons();
           applyEffects(choice.effects);
-          state.flags[`event_day_${event.day}`] = true;
+          if (event.conditional) state.flags[`conditional_${event.id}`] = true;
+          else state.flags[`event_day_${event.day}`] = true;
           addLogEntry({ type: "event", title: `${event.title}：${choice.text}`, description: choice.result || choice.text, effects: choice.effects });
           noticeText = `${choice.text}：${formatEffects(choice.effects)}`;
           showFeedback({
@@ -895,16 +1168,31 @@
         el("h1", "", "Demo 结束"),
         el("h2", "", report.title),
         el("p", "room-text", report.description),
+        renderStartReview(),
         renderStats(),
         button("重新开始", () => {
           state = freshState();
           noticeText = "";
-          routeNext();
+          draftProfile = null;
+          draftRerolls = 0;
+          renderStartProfile();
         })
       );
       wrap.append(content);
       screen.append(wrap);
       app.append(screen);
+    }
+
+    function renderStartReview() {
+      const box = el("div", "log-item");
+      const names = (state.start_tags || []).map((tag) => `【${tag.name || tag}】`).join("");
+      const profile = state.start_profile_name || "未知开局";
+      box.append(
+        el("div", "log-time", `你的开局：${profile}`),
+        el("p", "", names ? `你带着${names}的开局，走过了毕业后的第一周。` : "你从一个没有被记录的旧开局，走过了毕业后的第一周。"),
+        el("p", "muted", `重抽次数：${state.reroll_used || 0}`)
+      );
+      return box;
     }
 
     function endingReport() {
