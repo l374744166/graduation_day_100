@@ -244,6 +244,61 @@
       line-height: 1.75;
     }
 
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(8, 10, 10, .74);
+    }
+
+    .modal {
+      width: min(560px, 100%);
+      display: grid;
+      gap: 13px;
+      padding: 18px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 8px;
+      background: #222727;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .45);
+    }
+
+    .modal p, .log-item p, .summary-list p {
+      color: #d7e0de;
+      line-height: 1.65;
+    }
+
+    .effect-list {
+      display: grid;
+      gap: 6px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #181b1b;
+      color: var(--accent);
+      font-size: 14px;
+    }
+
+    .log-list, .summary-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .log-item {
+      display: grid;
+      gap: 5px;
+      padding: 12px;
+      border-radius: 8px;
+      background: var(--panel-2);
+    }
+
+    .log-time {
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
     .ending {
       display: grid;
       gap: 13px;
@@ -281,16 +336,38 @@
     const TIME_LABELS = { morning: "上午", afternoon: "下午", night: "晚上" };
 
     const actions = [
-      { id: "send_resume", name: "投简历", description: "把简历投向几个看起来合适、又好像有点遥远的岗位。", effects: { mood: -3, pressure: 2, skill: 1 } },
-      { id: "edit_resume", name: "修改简历", description: "删掉空话，补上项目经历，试着让自己看起来更清楚一点。", effects: { skill: 3, pressure: 1, mood: -2 } },
-      { id: "study_skill", name: "学习技能", description: "打开课程和笔记，把注意力从焦虑里挪出来。", effects: { skill: 4, mood: -2, pressure: 1 } },
-      { id: "prepare_interview", name: "准备面试", description: "对着空房间练习自我介绍，听见自己的声音有点陌生。", effects: { skill: 2, pressure: 2, self_identity: 1 } },
-      { id: "part_time", name: "打零工", description: "用半天换一点现金，也换来一点真实的疲惫。", effects: { money: 180, mood: -5, pressure: -1 } },
-      { id: "walk", name: "出门散步", description: "在路边走一会儿，看陌生人正常地生活。", effects: { mood: 5, pressure: -3 } },
-      { id: "contact_friend", name: "联系朋友", description: "发出一句“最近怎么样”，等一个不那么客套的回复。", effects: { relationship: 4, mood: 2 } },
-      { id: "call_parents", name: "和父母通话", description: "听见熟悉的声音，你把很多话在心里排了队。", effects: { relationship: 3, pressure: -2, mood: 1 } },
-      { id: "clean_room", name: "整理房间", description: "把书、衣服和没说出口的话都先归到一个地方。", effects: { mood: 2, pressure: -2, self_identity: 1 } },
-      { id: "rest", name: "休息", description: "关掉屏幕，允许自己暂时什么都不证明。", effects: { mood: 8, pressure: -4 } }
+      { id: "send_resume", name: "投简历", description: "把简历投向几个看起来合适、又好像有点遥远的岗位。", feedback_text: "你打开电脑，把简历投给了几家公司。有一家显示“已读”，然后就没有然后了。", effects: { mood: -3, pressure: 2, skill: 1 } },
+      { id: "edit_resume", name: "修改简历", description: "删掉空话，补上项目经历，试着让自己看起来更清楚一点。", feedback_text: "你把“熟练掌握 Office”改成了“具备良好的文档处理能力”。看起来专业了一点，也虚了一点。", effects: { skill: 3, pressure: 1, mood: -2 } },
+      { id: "study_skill", name: "学习技能", description: "打开课程和笔记，把注意力从焦虑里挪出来。", feedback_text: "你看了两个小时课程，笔记写了半页。你懂了一点，也更清楚自己不会什么。", effects: { skill: 4, mood: -2, pressure: 1 } },
+      { id: "prepare_interview", name: "准备面试", description: "对着空房间练习自我介绍，听见自己的声音有点陌生。", feedback_text: "你对着镜子练习“我的优势是学习能力强”。镜子没有反驳你。", effects: { skill: 2, pressure: 2, self_identity: 1 } },
+      { id: "part_time", name: "打零工", description: "用半天换一点现金，也换来一点真实的疲惫。", feedback_text: "你在便利店站了几个小时。腿很酸，但钱包终于有了一点动静。", effects: { money: 180, mood: -5, pressure: -1 } },
+      { id: "walk", name: "出门散步", description: "在路边走一会儿，看陌生人正常地生活。", feedback_text: "你在街上走了一圈。城市没有理你，但风吹过来的时候，你稍微舒服了一点。", effects: { mood: 5, pressure: -3 } },
+      { id: "contact_friend", name: "联系朋友", description: "发出一句“最近怎么样”，等一个不那么客套的回复。", feedback_text: "你们互相说最近还行，然后又同时沉默。幸好，沉默也算一种联系。", effects: { relationship: 4, mood: 2 } },
+      { id: "call_parents", name: "和父母通话", description: "听见熟悉的声音，你把很多话在心里排了队。", feedback_text: "你说自己挺好的。电话那头停顿了一下，说：别省饭钱。", effects: { relationship: 3, pressure: -2, mood: 1 } },
+      { id: "clean_room", name: "整理房间", description: "把书、衣服和没说出口的话都先归到一个地方。", feedback_text: "你把乱七八糟的东西收进箱子里。房间变干净了，但未来还是乱的。", effects: { mood: 2, pressure: -2, self_identity: 1 } },
+      { id: "mock_roommate", name: "互损舍友", description: "把离别焦虑包装成精准嘴欠，打出去，接回来。", feedback_text: "你们互相攻击了十分钟，从就业方向攻击到发际线。最后谁也没赢，但大家都轻松了一点。", effects: { mood: 5, relationship: 3, pressure: -1 }, dorm_only: true },
+      { id: "last_game", name: "开毕业前最后一局游戏", description: "用一局游戏证明，毕业不影响你们稳定地输。", feedback_text: "本来说打一局，结果打到了凌晨两点。你们输得很难看，但骂得很整齐。", effects: { mood: 6, relationship: 4, pressure: 1, skill: -1 }, dorm_only: true },
+      { id: "roast_resume", name: "给舍友简历挑刺", description: "互相审判简历，也互相放过人生。", feedback_text: "你指出他的项目经历太水。他指出你的人生经历也挺水。双方达成和平。", effects: { skill: 2, relationship: 1, mood: 2 }, dorm_only: true },
+      { id: "fake_plan", name: "假装自己已经有规划", description: "用“先沉淀一下”给迷茫盖个章。", feedback_text: "你说自己“先沉淀一下”。舍友说：“你这是失业的文学表达。”", effects: { pressure: 3, self_identity: -1, mood: 2 }, dorm_only: true },
+      { id: "rest", name: "休息", description: "关掉屏幕，允许自己暂时什么都不证明。", feedback_text: "你决定今天不逼自己。醒来的时候，天已经黑了，但你没有那么想逃了。", effects: { mood: 8, pressure: -4 } }
+    ];
+
+    const dormEvents = [
+      { id: "bathroom_shadow", title: "厕所门口的阴影", description: "舍友 B 从厕所出来，神情庄重，像刚和命运谈判完。", choices: [
+        { text: "问他洗手了吗", result: "他说：“真正的兄弟，不该被细菌定义。”你后退了两步。", effects: { mood: 3, relationship: 1 } },
+        { text: "假装没看见", result: "他径直走过来拍了拍你的肩。你感觉自己的灵魂被污染了。", effects: { mood: -1, pressure: 1 } },
+        { text: "递给他纸巾", result: "他沉默三秒，说：“你变了，你开始讲卫生了。”", effects: { relationship: 2, self_identity: 1 } }
+      ] },
+      { id: "blanket_creature", title: "床上的不明生物", description: "舍友 A 的被子鼓成一团，你分不清里面是人、衣服，还是他破碎的就业计划。", choices: [
+        { text: "掀开被子", result: "舍友 A 像被挖出的文物一样坐起来：“谁把我的未来掀开了？”", effects: { mood: 4, relationship: 2 } },
+        { text: "喊“HR 来了”", result: "他瞬间弹起：“在哪？五险一金有吗？”", effects: { mood: 5, pressure: -1 } },
+        { text: "放一份招聘传单", result: "十秒后，被子里伸出一只手，把传单揉成球扔了出来。", effects: { relationship: 1, mood: 2 } }
+      ] },
+      { id: "trash_future", title: "垃圾桶里的未来", description: "你看见垃圾桶里有三份外卖盒、两张草稿纸，还有一份写了一半的简历。", choices: [
+        { text: "捡起来看看", result: "你发现那份简历的求职意向写着：“能活着就行。”", effects: { skill: 1, mood: 2 } },
+        { text: "尊重垃圾桶的隐私", result: "你突然意识到，有些东西留在垃圾桶里也挺好。", effects: { pressure: -1 } },
+        { text: "问是谁把人生扔里面了", result: "三个舍友同时说：“不是我。”宿舍安静了两秒。", effects: { mood: 3, relationship: 1 } }
+      ] }
     ];
 
     const locations = [
@@ -305,49 +382,50 @@
     ];
 
     const events = [
-      { day: 1, title: "毕业宿舍最后一晚", description: "宿舍的灯最后一次亮着，大家都在收拾行李。有人明天去深圳，有人准备二战，有人回老家，而你还不知道下一站在哪里。", choices: [
-        { text: "再聊一会儿吧", effects: { relationship: 5, mood: 3 } },
-        { text: "假装睡着", effects: { relationship: -2, mood: -2 } },
-        { text: "偷偷哭一下", effects: { mood: -1, self_identity: 3 } }
+      { day: 1, title: "毕业宿舍最后一晚", description: "宿舍的灯最后一次亮着。行李箱摊在地上，外卖盒堆在桌边，四个人表面都在收拾东西，实际上谁也没认真收拾。", choices: [
+        { text: "再聊一会儿吧", result: "你们从工作聊到人生，又从人生聊到谁上厕所不洗手。话题逐渐失控，但谁也没有喊停。", effects: { relationship: 5, mood: 4 } },
+        { text: "开最后一局游戏", result: "本来说打一局就睡，结果三局之后你们开始复盘人生。舍友说，你的问题不是操作菜，是命运匹配机制有问题。", effects: { relationship: 4, mood: 5, pressure: 1 } },
+        { text: "假装自己很成熟", result: "你说：“毕业了，大家以后都要成为更好的人。”宿舍沉默三秒，舍友回你：“你先把欠我的十五块奶茶钱还了。”", effects: { mood: 3, relationship: 2, self_identity: -1 } }
       ] },
       { day: 2, title: "搬离宿舍", description: "你拖着行李站在宿舍楼下，回头看了一眼住了四年的地方。", choices: [
-        { text: "拍一张空宿舍照片", effects: { self_identity: 2, mood: -1 } },
-        { text: "赶紧离开", effects: { pressure: -1, relationship: -1 } },
-        { text: "给室友发消息", effects: { relationship: 3, mood: 2 } }
+        { text: "拍一张空宿舍照片", result: "照片里没有人，只有一地快递箱和一把快散架的椅子。你突然觉得它们也像室友。", effects: { self_identity: 2, mood: -1 } },
+        { text: "赶紧离开", result: "你把行李箱拖得很响，像是在给自己配一个不回头的音效。", effects: { pressure: -1, relationship: -1 } },
+        { text: "给室友发消息", result: "你发了句“到家说一声”。三个人都回了表情包，没人认真说再见。这样反而刚好。", effects: { relationship: 3, mood: 2 } }
       ] },
       { day: 3, title: "第一次投简历", description: "你打开电脑，盯着简历文件看了很久。光标闪烁，像是在催你快点开始。", choices: [
-        { text: "认真修改简历", effects: { skill: 3, pressure: 2 } },
-        { text: "海投 30 家", effects: { pressure: 4, mood: -3 } },
-        { text: "先拖一天", effects: { mood: 2, pressure: 5 } }
+        { text: "认真修改简历", result: "你把每一句都改得更像成年人说的话。代价是你差点认不出自己。", effects: { skill: 3, pressure: 2 } },
+        { text: "海投 30 家", result: "你像撒传单一样投出简历。邮箱安静得像一间没人租的房。", effects: { pressure: 4, mood: -3 } },
+        { text: "先拖一天", result: "你告诉自己这是战略性休整。手机告诉你，今天的屏幕使用时间又赢了。", effects: { mood: 2, pressure: 5 } }
       ] },
       { day: 4, title: "朋友拿到 offer", description: "朋友发来消息：我拿到 offer 了。你盯着屏幕，打了几个字又删掉。", choices: [
-        { text: "真心祝福", effects: { relationship: 4, self_identity: 2 } },
-        { text: "装作开心", effects: { pressure: 3, mood: -2 } },
-        { text: "不回复", effects: { relationship: -3, mood: -1 } }
+        { text: "真心祝福", result: "你回：“牛啊，等你发工资请饭。”他回：“可以，但你得先活到我发工资那天。”", effects: { relationship: 4, self_identity: 2 } },
+        { text: "装作开心", result: "你发了三个感叹号。每个感叹号都比你本人更有精神。", effects: { pressure: 3, mood: -2 } },
+        { text: "不回复", result: "你把手机扣在桌上。过了一会儿，又偷偷翻回来确认他没有追问。", effects: { relationship: -3, mood: -1 } }
       ] },
       { day: 5, title: "父母电话", description: "晚上，父母打来电话。电话那头问：工作找得怎么样了？", choices: [
-        { text: "说一切顺利", effects: { pressure: 5, relationship: -1 } },
-        { text: "坦白自己迷茫", effects: { mood: 3, relationship: 4, pressure: -2 } },
-        { text: "敷衍几句挂掉", effects: { mood: -3, relationship: -4 } }
+        { text: "说一切顺利", result: "你说挺好的。电话那头放心了一半，你把另一半压力留给了自己。", effects: { pressure: 5, relationship: -1 } },
+        { text: "坦白自己迷茫", result: "你说还没想清楚。电话那头沉默了一下，说：那就先吃好饭。", effects: { mood: 3, relationship: 4, pressure: -2 } },
+        { text: "敷衍几句挂掉", result: "你说信号不好。挂掉后，房间里的信号突然好得过分。", effects: { mood: -3, relationship: -4 } }
       ] },
       { day: 6, title: "第一次面试", description: "你坐在会议室里，对面的人问：你对自己的职业规划是什么？", choices: [
-        { text: "诚实回答", effects: { self_identity: 4, skill: 1 } },
-        { text: "尽力包装自己", effects: { pressure: 3, skill: 2 } },
-        { text: "表现得很紧张", effects: { mood: -3, pressure: 2 } }
+        { text: "诚实回答", result: "你说自己还在摸索。HR 点了点头，你不知道那是理解，还是已经在心里翻页。", effects: { self_identity: 4, skill: 1 } },
+        { text: "尽力包装自己", result: "你把“会百度”包装成“具备独立问题解决能力”。说完你都想给自己鼓掌。", effects: { pressure: 3, skill: 2 } },
+        { text: "表现得很紧张", result: "你拿水杯的手比简历还诚实。至少他们看出了你很重视这次机会。", effects: { mood: -3, pressure: 2 } }
       ] },
       { day: 7, title: "第一周结束", description: "毕业后的第一周结束了。你没有想象中那么快上岸，但也没有真的停下来。", choices: [
-        { text: "写下这一周的感受", effects: { self_identity: 3, mood: 2 } },
-        { text: "继续投简历", effects: { skill: 2, pressure: 2 } },
-        { text: "早点睡觉", effects: { mood: 5, pressure: -3 } }
+        { text: "写下这一周的感受", result: "你写下：我还没有变好，但我已经比昨天更知道自己在怕什么。", effects: { self_identity: 3, mood: 2 } },
+        { text: "继续投简历", result: "你又投了几份。动作已经熟练了，心跳还是没有。", effects: { skill: 2, pressure: 2 } },
+        { text: "早点睡觉", result: "你关掉屏幕。未来没有立刻清晰，但天花板至少不再发光。", effects: { mood: 5, pressure: -3 } }
       ] }
     ];
 
     const app = document.querySelector("#app");
     let noticeText = "";
+    let processing = false;
     let state = freshState();
 
     function freshState() {
-      return {
+      const base = {
         day: 1,
         time_slot: "morning",
         money: 3000,
@@ -357,8 +435,11 @@
         pressure: 30,
         self_identity: 40,
         current_location: "dorm",
-        flags: {}
+        flags: {},
+        action_log: []
       };
+      base.day_start_stats = snapshotStats(base);
+      return base;
     }
 
     function clampStats() {
@@ -375,17 +456,43 @@
       clampStats();
     }
 
+    function snapshotStats(source = state) {
+      const stats = {};
+      for (const key of STAT_ORDER) stats[key] = Number(source[key]) || 0;
+      return stats;
+    }
+
+    function statDiff(start, end = snapshotStats()) {
+      const diff = {};
+      for (const key of STAT_ORDER) diff[key] = (Number(end[key]) || 0) - (Number(start[key]) || 0);
+      return diff;
+    }
+
+    function addLogEntry(entry) {
+      state.action_log = state.action_log || [];
+      state.action_log.push({
+        day: state.day,
+        time_slot: state.time_slot,
+        type: entry.type,
+        title: entry.title,
+        description: entry.description,
+        effects: { ...(entry.effects || {}) }
+      });
+    }
+
     function advanceTime() {
       const current = TIME_SLOTS.indexOf(state.time_slot);
       if (current >= 0 && current < TIME_SLOTS.length - 1) {
         state.time_slot = TIME_SLOTS[current + 1];
-        return;
+        return { endedDay: false, previousDay: state.day };
       }
+      const previousDay = state.day;
       state.money -= 60;
       if (state.money < 500) state.pressure += 5;
       state.day += 1;
       state.time_slot = "morning";
       clampStats();
+      return { endedDay: true, previousDay };
     }
 
     function nextEvent() {
@@ -407,6 +514,8 @@
       }
       state = { ...freshState(), ...JSON.parse(raw) };
       state.flags = state.flags || {};
+      state.action_log = state.action_log || [];
+      state.day_start_stats = state.day_start_stats || snapshotStats(state);
       clampStats();
       noticeText = "已读取当前浏览器存档。";
       routeNext();
@@ -483,6 +592,7 @@
 
       const system = el("div", "system-grid");
       system.append(
+        button("今日记录", () => renderRoom("log")),
         button("存档", saveGame),
         button("读档", loadGame),
         button("主菜单", renderMenu)
@@ -524,23 +634,44 @@
       if (activeView === "actions") renderActions(content);
       else if (activeView === "locations") renderLocations(content);
       else if (activeView === "computer") renderComputer(content);
+      else if (activeView === "log") renderTodayLog(content);
       else renderRoomHome(content);
     }
 
     function renderRoomHome(content) {
       content.append(
         el("h2", "", "房间"),
-        el("p", "room-text", "桌上放着电脑、纸杯和还没整理完的证件袋。窗外不是校园广播，而是城市里连续不断的车声。\n\n今天还有一个时段可以安排。你可以处理求职、出门换换空气，或者坐在电脑前假装自己很有计划。"),
+        el("p", "room-text", roomCopy()),
         el("p", "notice", noticeText),
         el("p", "hint", "日程：上午 / 下午 / 晚上。每次行动会推进一个时段，晚上结束后扣除 60 生活费。")
       );
+      if (state.day <= 2) {
+        content.append(el("h3", "", "宿舍里还能点点什么"));
+        const grid = el("div", "grid");
+        for (const event of dormEvents) {
+          if (!state.flags[`dorm_${event.id}`]) {
+            const card = el("article", "card");
+            card.append(el("h3", "", event.title), el("p", "", event.description), button("查看", () => renderDormEvent(event)));
+            grid.append(card);
+          }
+        }
+        if (!grid.childElementCount) grid.append(el("p", "muted", "宿舍里的离谱事件暂时都被你处理完了。"));
+        content.append(grid);
+      }
+    }
+
+    function roomCopy() {
+      if (state.day <= 2) {
+        return "桌上堆着外卖盒、简历草稿和不知道谁的袜子。舍友 A 嘴上说在收拾，实际上把人生一起塞进了行李箱。舍友 B 正在研究泡面箱能不能托运，舍友 C 说自己明天入职，今晚已经开始想辞职。\n\n今天还有一个时段可以安排。你可以正经一点，也可以在宿舍最后整点活。";
+      }
+      return "桌上放着电脑、纸杯和还没整理完的证件袋。窗外不是校园广播，而是城市里连续不断的车声。\n\n今天还有一个时段可以安排。你可以处理求职、出门换换空气，或者坐在电脑前假装自己很有计划。";
     }
 
     function renderActions(content) {
       content.append(el("h2", "", "选择行动"), el("p", "muted", `当前时段：${TIME_LABELS[state.time_slot]}。选择一个行动后，时间会向前推进。`));
       const grid = el("div", "grid");
       for (const action of actions) {
-        if (action.id !== "rest") grid.append(actionCard(action));
+        if (action.id !== "rest" && (!action.dorm_only || state.day <= 2)) grid.append(actionCard(action));
       }
       content.append(grid);
     }
@@ -557,9 +688,23 @@
       for (const location of locations) {
         const card = el("article", "card");
         card.append(el("h3", "", location.name), el("p", "", location.description), button(location.id === state.current_location ? "已在这里" : "前往", () => {
+          if (processing || location.id === state.current_location) return;
+          processing = true;
+          disablePageButtons();
           state.current_location = location.id;
+          const description = `你来到了${location.name}。${location.description}`;
+          addLogEntry({ type: "location", title: `前往${location.name}`, description, effects: {} });
           noticeText = `你来到了${location.name}。`;
-          renderRoom("room");
+          showFeedback({
+            title: `地点变更：${location.name}`,
+            description,
+            effects: {},
+            meta: `第 ${state.day} 天 ${TIME_LABELS[state.time_slot]}`,
+            onContinue: () => {
+              processing = false;
+              renderRoom("room");
+            }
+          });
         }));
         grid.append(card);
       }
@@ -581,12 +726,79 @@
       content.append(list, detail);
     }
 
+    function renderTodayLog(content) {
+      content.append(el("h2", "", `第 ${state.day} 天记录`), el("p", "muted", "你今天确实做过一些事。哪怕其中有些事看起来像是在和人生互相试探。"));
+      const logs = (state.action_log || []).filter((entry) => entry.day === state.day);
+      const list = el("div", "log-list");
+      if (!logs.length) {
+        list.append(el("p", "muted", "今天还没有记录。先去点一个行动，或者在宿舍里找点事情发生。"));
+      } else {
+        for (const entry of logs) list.append(logItem(entry));
+      }
+      content.append(list);
+    }
+
+    function logItem(entry) {
+      const item = el("article", "log-item");
+      const prefix = entry.type === "event" ? "剧情事件" : entry.type === "location" ? "地点事件" : TIME_LABELS[entry.time_slot] || "记录";
+      item.append(el("div", "log-time", `${prefix}：${entry.title}`), el("p", "", entry.description), el("div", "effects", formatEffects(entry.effects)));
+      return item;
+    }
+
+    function renderDormEvent(event) {
+      if (processing) return;
+      app.innerHTML = "";
+      const screen = el("section", "screen event-screen");
+      const box = el("article", "event-box");
+      box.append(el("h2", "", event.title), el("p", "", event.description));
+      const choices = el("div", "choice-grid");
+      for (const choice of event.choices) {
+        choices.append(button(choice.text, () => chooseDormEvent(event, choice)));
+      }
+      box.append(choices);
+      screen.append(box);
+      app.append(screen);
+    }
+
+    function chooseDormEvent(event, choice) {
+      if (processing) return;
+      processing = true;
+      disablePageButtons();
+      applyEffects(choice.effects);
+      state.flags[`dorm_${event.id}`] = true;
+      addLogEntry({ type: "location", title: `${event.title}：${choice.text}`, description: choice.result, effects: choice.effects });
+      noticeText = `${event.title}：${choice.text}`;
+      showFeedback({
+        title: `你选择了：${choice.text}`,
+        description: choice.result,
+        effects: choice.effects,
+        meta: `第 ${state.day} 天 ${TIME_LABELS[state.time_slot]}`,
+        onContinue: () => {
+          processing = false;
+          renderRoom("room");
+        }
+      });
+    }
+
     function performAction(action) {
-      if (!action) return;
+      if (!action || processing) return;
+      processing = true;
+      disablePageButtons();
       applyEffects(action.effects);
-      advanceTime();
+      addLogEntry({ type: "action", title: action.name, description: action.feedback_text || action.description, effects: action.effects });
       noticeText = `${action.name}：${formatEffects(action.effects)}`;
-      routeNext();
+      showFeedback({
+        title: `行动完成：${action.name}`,
+        description: action.feedback_text || action.description,
+        effects: action.effects,
+        meta: `第 ${state.day} 天 ${TIME_LABELS[state.time_slot]}`,
+        onContinue: () => {
+          const result = advanceTime();
+          processing = false;
+          if (result.endedDay) renderDaySummary(result.previousDay);
+          else routeNext();
+        }
+      });
     }
 
     function renderEvent(event) {
@@ -597,15 +809,80 @@
       const choices = el("div", "choice-grid");
       for (const choice of event.choices) {
         choices.append(button(choice.text, () => {
+          if (processing) return;
+          processing = true;
+          disablePageButtons();
           applyEffects(choice.effects);
           state.flags[`event_day_${event.day}`] = true;
+          addLogEntry({ type: "event", title: `${event.title}：${choice.text}`, description: choice.result || choice.text, effects: choice.effects });
           noticeText = `${choice.text}：${formatEffects(choice.effects)}`;
-          renderRoom("room");
+          showFeedback({
+            title: `你选择了：${choice.text}`,
+            description: choice.result || choice.text,
+            effects: choice.effects,
+            meta: `第 ${state.day} 天 剧情事件`,
+            onContinue: () => {
+              processing = false;
+              renderRoom("room");
+            }
+          });
         }));
       }
       box.append(choices);
       screen.append(box);
       app.append(screen);
+    }
+
+    function renderDaySummary(day) {
+      const logs = (state.action_log || []).filter((entry) => entry.day === day);
+      const changes = statDiff(state.day_start_stats || snapshotStats(), snapshotStats());
+      app.innerHTML = "";
+      const screen = el("section", "screen event-screen");
+      const box = el("article", "event-box");
+      box.append(el("h2", "", `第 ${day} 天结束`));
+      const list = el("div", "summary-list");
+      if (!logs.length) {
+        list.append(el("p", "", "今天像一张空白日程表，安静得有点可疑。"));
+      } else {
+        for (const entry of logs) list.append(logItem(entry));
+      }
+      box.append(list, el("div", "effect-list", `今日变化：${formatEffects(changes)}`), el("p", "room-text", daySummaryText(day, logs, changes)));
+      box.append(button(state.day > 7 ? "查看结局" : "进入下一天", () => {
+        state.day_start_stats = snapshotStats();
+        noticeText = "";
+        if (state.day > 7) renderEnding();
+        else routeNext();
+      }));
+      screen.append(box);
+      app.append(screen);
+    }
+
+    function daySummaryText(day, logs, changes) {
+      if (day <= 2 && logs.some((entry) => entry.title.includes("舍友") || entry.title.includes("宿舍") || entry.title.includes("游戏"))) {
+        return "今天的宿舍依然很吵。你们笑得像没毕业一样，但每个行李箱都在提醒大家，明天会换一种吵法。";
+      }
+      if (changes.pressure > 3) return "今天压力往上冒了一截。不是你没努力，是毕业后的空气本来就有点缺氧。";
+      if (changes.relationship > 3) return "今天你和别人多连上了一点。长大不一定是一个人硬扛，也可以是把话说出去。";
+      if (changes.skill > 3) return "今天你稍微变强了一点。虽然还没到能改写命运，但至少能改一版简历。";
+      return "今天普通得很真实。没有立刻变好，也没有彻底变坏，你只是继续往前挪了一点。";
+    }
+
+    function showFeedback({ title, description, effects, meta, onContinue }) {
+      const backdrop = el("div", "modal-backdrop");
+      const modal = el("section", "modal");
+      modal.append(el("h2", "", title), el("p", "", description), el("div", "effect-list", `数值变化：${formatEffects(effects)}`), el("p", "muted", `当前：${meta}`));
+      const next = button("继续", () => {
+        backdrop.remove();
+        onContinue();
+      });
+      modal.append(next);
+      backdrop.append(modal);
+      document.body.append(backdrop);
+      next.focus();
+    }
+
+    function disablePageButtons() {
+      for (const node of app.querySelectorAll("button")) node.disabled = true;
     }
 
     function renderEnding() {
@@ -641,11 +918,12 @@
     function formatEffects(effects) {
       const parts = [];
       for (const [key, value] of Object.entries(effects || {})) {
+        if (Number(value) === 0) continue;
         const label = STAT_LABELS[key] || key;
         const sign = Number(value) >= 0 ? "+" : "";
         parts.push(`${label}${sign}${value}`);
       }
-      return parts.join("  ");
+      return parts.length ? parts.join("  ") : "无数值变化";
     }
 
     function locationName(id) {

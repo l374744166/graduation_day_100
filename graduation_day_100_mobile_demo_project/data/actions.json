@@ -3,60 +3,102 @@
 		"id": "send_resume",
 		"name": "投简历",
 		"description": "把简历投向几个看起来合适、又好像有点遥远的岗位。",
+		"feedback_text": "你打开电脑，把简历投给了几家公司。有一家显示“已读”，然后就没有然后了。",
 		"effects": {"mood": -3, "pressure": 2, "skill": 1}
 	},
 	{
 		"id": "edit_resume",
 		"name": "修改简历",
 		"description": "删掉空话，补上项目经历，试着让自己看起来更清楚一点。",
+		"feedback_text": "你把“熟练掌握 Office”改成了“具备良好的文档处理能力”。看起来专业了一点，也虚了一点。",
 		"effects": {"skill": 3, "pressure": 1, "mood": -2}
 	},
 	{
 		"id": "study_skill",
 		"name": "学习技能",
 		"description": "打开课程和笔记，把注意力从焦虑里挪出来。",
+		"feedback_text": "你看了两个小时课程，笔记写了半页。你懂了一点，也更清楚自己不会什么。",
 		"effects": {"skill": 4, "mood": -2, "pressure": 1}
 	},
 	{
 		"id": "prepare_interview",
 		"name": "准备面试",
 		"description": "对着空房间练习自我介绍，听见自己的声音有点陌生。",
+		"feedback_text": "你对着镜子练习“我的优势是学习能力强”。镜子没有反驳你。",
 		"effects": {"skill": 2, "pressure": 2, "self_identity": 1}
 	},
 	{
 		"id": "part_time",
 		"name": "打零工",
 		"description": "用半天换一点现金，也换来一点真实的疲惫。",
+		"feedback_text": "你在便利店站了几个小时。腿很酸，但钱包终于有了一点动静。",
 		"effects": {"money": 180, "mood": -5, "pressure": -1}
 	},
 	{
 		"id": "walk",
 		"name": "出门散步",
 		"description": "在路边走一会儿，看陌生人正常地生活。",
+		"feedback_text": "你在街上走了一圈。城市没有理你，但风吹过来的时候，你稍微舒服了一点。",
 		"effects": {"mood": 5, "pressure": -3}
 	},
 	{
 		"id": "contact_friend",
 		"name": "联系朋友",
 		"description": "发出一句'最近怎么样'，等一个不那么客套的回复。",
+		"feedback_text": "你们互相说最近还行，然后又同时沉默。幸好，沉默也算一种联系。",
 		"effects": {"relationship": 4, "mood": 2}
 	},
 	{
 		"id": "call_parents",
 		"name": "和父母通话",
 		"description": "听见熟悉的声音，你把很多话在心里排了队。",
+		"feedback_text": "你说自己挺好的。电话那头停顿了一下，说：别省饭钱。",
 		"effects": {"relationship": 3, "pressure": -2, "mood": 1}
 	},
 	{
 		"id": "clean_room",
 		"name": "整理房间",
 		"description": "把书、衣服和没说出口的话都先归到一个地方。",
+		"feedback_text": "你把乱七八糟的东西收进箱子里。房间变干净了，但未来还是乱的。",
 		"effects": {"mood": 2, "pressure": -2, "self_identity": 1}
+	},
+	{
+		"id": "mock_roommate",
+		"name": "互损舍友",
+		"description": "把离别焦虑包装成精准嘴欠，打出去，接回来。",
+		"feedback_text": "你们互相攻击了十分钟，从就业方向攻击到发际线。最后谁也没赢，但大家都轻松了一点。",
+		"effects": {"mood": 5, "relationship": 3, "pressure": -1},
+		"dorm_only": true
+	},
+	{
+		"id": "last_game",
+		"name": "开毕业前最后一局游戏",
+		"description": "用一局游戏证明，毕业不影响你们稳定地输。",
+		"feedback_text": "本来说打一局，结果打到了凌晨两点。你们输得很难看，但骂得很整齐。",
+		"effects": {"mood": 6, "relationship": 4, "pressure": 1, "skill": -1},
+		"dorm_only": true
+	},
+	{
+		"id": "roast_resume",
+		"name": "给舍友简历挑刺",
+		"description": "互相审判简历，也互相放过人生。",
+		"feedback_text": "你指出他的项目经历太水。他指出你的人生经历也挺水。双方达成和平。",
+		"effects": {"skill": 2, "relationship": 1, "mood": 2},
+		"dorm_only": true
+	},
+	{
+		"id": "fake_plan",
+		"name": "假装自己已经有规划",
+		"description": "用“先沉淀一下”给迷茫盖个章。",
+		"feedback_text": "你说自己“先沉淀一下”。舍友说：“你这是失业的文学表达。”",
+		"effects": {"pressure": 3, "self_identity": -1, "mood": 2},
+		"dorm_only": true
 	},
 	{
 		"id": "rest",
 		"name": "休息",
 		"description": "关掉屏幕，允许自己暂时什么都不证明。",
+		"feedback_text": "你决定今天不逼自己。醒来的时候，天已经黑了，但你没有那么想逃了。",
 		"effects": {"mood": 8, "pressure": -4}
 	}
 ]

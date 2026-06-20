@@ -2,11 +2,11 @@
 	{
 		"day": 1,
 		"title": "毕业宿舍最后一晚",
-		"description": "宿舍的灯最后一次亮着，大家都在收拾行李。有人明天去深圳，有人准备二战，有人回老家，而你还不知道下一站在哪里。",
+		"description": "宿舍的灯最后一次亮着。行李箱摊在地上，外卖盒堆在桌边，四个人表面都在收拾东西，实际上谁也没认真收拾。",
 		"choices": [
-			{"text": "再聊一会儿吧", "effects": {"relationship": 5, "mood": 3}},
-			{"text": "假装睡着", "effects": {"relationship": -2, "mood": -2}},
-			{"text": "偷偷哭一下", "effects": {"mood": -1, "self_identity": 3}}
+			{"text": "再聊一会儿吧", "result": "你们从工作聊到人生，又从人生聊到谁上厕所不洗手。话题逐渐失控，但谁也没有喊停。", "effects": {"relationship": 5, "mood": 4}},
+			{"text": "开最后一局游戏", "result": "本来说打一局就睡，结果三局之后你们开始复盘人生。舍友说，你的问题不是操作菜，是命运匹配机制有问题。", "effects": {"relationship": 4, "mood": 5, "pressure": 1}},
+			{"text": "假装自己很成熟", "result": "你说：“毕业了，大家以后都要成为更好的人。”宿舍沉默三秒，舍友回你：“你先把欠我的十五块奶茶钱还了。”", "effects": {"mood": 3, "relationship": 2, "self_identity": -1}}
 		]
 	},
 	{
@@ -14,9 +14,9 @@
 		"title": "搬离宿舍",
 		"description": "你拖着行李站在宿舍楼下，回头看了一眼住了四年的地方。",
 		"choices": [
-			{"text": "拍一张空宿舍照片", "effects": {"self_identity": 2, "mood": -1}},
-			{"text": "赶紧离开", "effects": {"pressure": -1, "relationship": -1}},
-			{"text": "给室友发消息", "effects": {"relationship": 3, "mood": 2}}
+			{"text": "拍一张空宿舍照片", "result": "照片里没有人，只有一地快递箱和一把快散架的椅子。你突然觉得它们也像室友。", "effects": {"self_identity": 2, "mood": -1}},
+			{"text": "赶紧离开", "result": "你把行李箱拖得很响，像是在给自己配一个不回头的音效。", "effects": {"pressure": -1, "relationship": -1}},
+			{"text": "给室友发消息", "result": "你发了句“到家说一声”。三个人都回了表情包，没人认真说再见。这样反而刚好。", "effects": {"relationship": 3, "mood": 2}}
 		]
 	},
 	{
@@ -24,9 +24,9 @@
 		"title": "第一次投简历",
 		"description": "你打开电脑，盯着简历文件看了很久。光标闪烁，像是在催你快点开始。",
 		"choices": [
-			{"text": "认真修改简历", "effects": {"skill": 3, "pressure": 2}},
-			{"text": "海投 30 家", "effects": {"pressure": 4, "mood": -3}},
-			{"text": "先拖一天", "effects": {"mood": 2, "pressure": 5}}
+			{"text": "认真修改简历", "result": "你把每一句都改得更像成年人说的话。代价是你差点认不出自己。", "effects": {"skill": 3, "pressure": 2}},
+			{"text": "海投 30 家", "result": "你像撒传单一样投出简历。邮箱安静得像一间没人租的房。", "effects": {"pressure": 4, "mood": -3}},
+			{"text": "先拖一天", "result": "你告诉自己这是战略性休整。手机告诉你，今天的屏幕使用时间又赢了。", "effects": {"mood": 2, "pressure": 5}}
 		]
 	},
 	{
@@ -34,9 +34,9 @@
 		"title": "朋友拿到 offer",
 		"description": "朋友发来消息：我拿到 offer 了。你盯着屏幕，打了几个字又删掉。",
 		"choices": [
-			{"text": "真心祝福", "effects": {"relationship": 4, "self_identity": 2}},
-			{"text": "装作开心", "effects": {"pressure": 3, "mood": -2}},
-			{"text": "不回复", "effects": {"relationship": -3, "mood": -1}}
+			{"text": "真心祝福", "result": "你回：“牛啊，等你发工资请饭。”他回：“可以，但你得先活到我发工资那天。”", "effects": {"relationship": 4, "self_identity": 2}},
+			{"text": "装作开心", "result": "你发了三个感叹号。每个感叹号都比你本人更有精神。", "effects": {"pressure": 3, "mood": -2}},
+			{"text": "不回复", "result": "你把手机扣在桌上。过了一会儿，又偷偷翻回来确认他没有追问。", "effects": {"relationship": -3, "mood": -1}}
 		]
 	},
 	{
@@ -44,9 +44,9 @@
 		"title": "父母电话",
 		"description": "晚上，父母打来电话。电话那头问：工作找得怎么样了？",
 		"choices": [
-			{"text": "说一切顺利", "effects": {"pressure": 5, "relationship": -1}},
-			{"text": "坦白自己迷茫", "effects": {"mood": 3, "relationship": 4, "pressure": -2}},
-			{"text": "敷衍几句挂掉", "effects": {"mood": -3, "relationship": -4}}
+			{"text": "说一切顺利", "result": "你说挺好的。电话那头放心了一半，你把另一半压力留给了自己。", "effects": {"pressure": 5, "relationship": -1}},
+			{"text": "坦白自己迷茫", "result": "你说还没想清楚。电话那头沉默了一下，说：那就先吃好饭。", "effects": {"mood": 3, "relationship": 4, "pressure": -2}},
+			{"text": "敷衍几句挂掉", "result": "你说信号不好。挂掉后，房间里的信号突然好得过分。", "effects": {"mood": -3, "relationship": -4}}
 		]
 	},
 	{
@@ -54,9 +54,9 @@
 		"title": "第一次面试",
 		"description": "你坐在会议室里，对面的人问：你对自己的职业规划是什么？",
 		"choices": [
-			{"text": "诚实回答", "effects": {"self_identity": 4, "skill": 1}},
-			{"text": "尽力包装自己", "effects": {"pressure": 3, "skill": 2}},
-			{"text": "表现得很紧张", "effects": {"mood": -3, "pressure": 2}}
+			{"text": "诚实回答", "result": "你说自己还在摸索。HR 点了点头，你不知道那是理解，还是已经在心里翻页。", "effects": {"self_identity": 4, "skill": 1}},
+			{"text": "尽力包装自己", "result": "你把“会百度”包装成“具备独立问题解决能力”。说完你都想给自己鼓掌。", "effects": {"pressure": 3, "skill": 2}},
+			{"text": "表现得很紧张", "result": "你拿水杯的手比简历还诚实。至少他们看出了你很重视这次机会。", "effects": {"mood": -3, "pressure": 2}}
 		]
 	},
 	{
@@ -64,9 +64,9 @@
 		"title": "第一周结束",
 		"description": "毕业后的第一周结束了。你没有想象中那么快上岸，但也没有真的停下来。",
 		"choices": [
-			{"text": "写下这一周的感受", "effects": {"self_identity": 3, "mood": 2}},
-			{"text": "继续投简历", "effects": {"skill": 2, "pressure": 2}},
-			{"text": "早点睡觉", "effects": {"mood": 5, "pressure": -3}}
+			{"text": "写下这一周的感受", "result": "你写下：我还没有变好，但我已经比昨天更知道自己在怕什么。", "effects": {"self_identity": 3, "mood": 2}},
+			{"text": "继续投简历", "result": "你又投了几份。动作已经熟练了，心跳还是没有。", "effects": {"skill": 2, "pressure": 2}},
+			{"text": "早点睡觉", "result": "你关掉屏幕。未来没有立刻清晰，但天花板至少不再发光。", "effects": {"mood": 5, "pressure": -3}}
 		]
 	}
 ]
