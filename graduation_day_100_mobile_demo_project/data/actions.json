@@ -1,104 +1,36 @@
 [
-	{
-		"id": "send_resume",
-		"name": "投简历",
-		"description": "把简历投向几个看起来合适、又好像有点遥远的岗位。",
-		"feedback_text": "你打开电脑，把简历投给了几家公司。有一家显示“已读”，然后就没有然后了。",
-		"effects": {"mood": -3, "pressure": 2, "skill": 1}
-	},
-	{
-		"id": "edit_resume",
-		"name": "修改简历",
-		"description": "删掉空话，补上项目经历，试着让自己看起来更清楚一点。",
-		"feedback_text": "你把“熟练掌握 Office”改成了“具备良好的文档处理能力”。看起来专业了一点，也虚了一点。",
-		"effects": {"skill": 3, "pressure": 1, "mood": -2}
-	},
-	{
-		"id": "study_skill",
-		"name": "学习技能",
-		"description": "打开课程和笔记，把注意力从焦虑里挪出来。",
-		"feedback_text": "你看了两个小时课程，笔记写了半页。你懂了一点，也更清楚自己不会什么。",
-		"effects": {"skill": 4, "mood": -2, "pressure": 1}
-	},
-	{
-		"id": "prepare_interview",
-		"name": "准备面试",
-		"description": "对着空房间练习自我介绍，听见自己的声音有点陌生。",
-		"feedback_text": "你对着镜子练习“我的优势是学习能力强”。镜子没有反驳你。",
-		"effects": {"skill": 2, "pressure": 2, "self_identity": 1}
-	},
-	{
-		"id": "part_time",
-		"name": "打零工",
-		"description": "用半天换一点现金，也换来一点真实的疲惫。",
-		"feedback_text": "你在便利店站了几个小时。腿很酸，但钱包终于有了一点动静。",
-		"effects": {"money": 180, "mood": -5, "pressure": -1}
-	},
-	{
-		"id": "walk",
-		"name": "出门散步",
-		"description": "在路边走一会儿，看陌生人正常地生活。",
-		"feedback_text": "你在街上走了一圈。城市没有理你，但风吹过来的时候，你稍微舒服了一点。",
-		"effects": {"mood": 5, "pressure": -3}
-	},
-	{
-		"id": "contact_friend",
-		"name": "联系朋友",
-		"description": "发出一句'最近怎么样'，等一个不那么客套的回复。",
-		"feedback_text": "你们互相说最近还行，然后又同时沉默。幸好，沉默也算一种联系。",
-		"effects": {"relationship": 4, "mood": 2}
-	},
-	{
-		"id": "call_parents",
-		"name": "和父母通话",
-		"description": "听见熟悉的声音，你把很多话在心里排了队。",
-		"feedback_text": "你说自己挺好的。电话那头停顿了一下，说：别省饭钱。",
-		"effects": {"relationship": 3, "pressure": -2, "mood": 1}
-	},
-	{
-		"id": "clean_room",
-		"name": "整理房间",
-		"description": "把书、衣服和没说出口的话都先归到一个地方。",
-		"feedback_text": "你把乱七八糟的东西收进箱子里。房间变干净了，但未来还是乱的。",
-		"effects": {"mood": 2, "pressure": -2, "self_identity": 1}
-	},
-	{
-		"id": "mock_roommate",
-		"name": "互损舍友",
-		"description": "把离别焦虑包装成精准嘴欠，打出去，接回来。",
-		"feedback_text": "你们互相攻击了十分钟，从就业方向攻击到发际线。最后谁也没赢，但大家都轻松了一点。",
-		"effects": {"mood": 5, "relationship": 3, "pressure": -1},
-		"dorm_only": true
-	},
-	{
-		"id": "last_game",
-		"name": "开毕业前最后一局游戏",
-		"description": "用一局游戏证明，毕业不影响你们稳定地输。",
-		"feedback_text": "本来说打一局，结果打到了凌晨两点。你们输得很难看，但骂得很整齐。",
-		"effects": {"mood": 6, "relationship": 4, "pressure": 1, "skill": -1},
-		"dorm_only": true
-	},
-	{
-		"id": "roast_resume",
-		"name": "给舍友简历挑刺",
-		"description": "互相审判简历，也互相放过人生。",
-		"feedback_text": "你指出他的项目经历太水。他指出你的人生经历也挺水。双方达成和平。",
-		"effects": {"skill": 2, "relationship": 1, "mood": 2},
-		"dorm_only": true
-	},
-	{
-		"id": "fake_plan",
-		"name": "假装自己已经有规划",
-		"description": "用“先沉淀一下”给迷茫盖个章。",
-		"feedback_text": "你说自己“先沉淀一下”。舍友说：“你这是失业的文学表达。”",
-		"effects": {"pressure": 3, "self_identity": -1, "mood": 2},
-		"dorm_only": true
-	},
-	{
-		"id": "rest",
-		"name": "休息",
-		"description": "关掉屏幕，允许自己暂时什么都不证明。",
-		"feedback_text": "你决定今天不逼自己。醒来的时候，天已经黑了，但你没有那么想逃了。",
-		"effects": {"mood": 8, "pressure": -4}
-	}
+	{"id": "rest", "name": "休息", "locations": ["room"], "description": "关掉屏幕，允许自己暂时什么都不证明。", "feedback_text": "你决定今天不逼自己。醒来的时候，天已经黑了，但你没有那么想逃了。", "effects": {"mood": 8, "pressure": -4}},
+	{"id": "organize_room", "name": "整理房间", "locations": ["room"], "description": "把书、衣服和没说出口的话都先归到一个地方。", "feedback_text": "你把乱七八糟的东西收进箱子里。房间变干净了，但未来还是乱的。", "effects": {"mood": 2, "pressure": -2, "self_identity": 1}},
+	{"id": "write_diary", "name": "写日记", "locations": ["room"], "description": "把今天写下来，证明自己没有只是被时间推着走。", "feedback_text": "你写下：今天也没有变成很厉害的人，但至少还在记录。写完之后，你觉得自己没有完全消失。", "effects": {"mood": 2, "self_identity": 3, "pressure": -1}},
+	{"id": "modify_resume", "name": "修改简历", "locations": ["room", "cafe"], "description": "删掉空话，补上项目经历，试着让自己看起来更清楚一点。", "feedback_text": "你把“熟练掌握 Office”改成了“具备良好的文档处理能力”。看起来专业了一点，也虚了一点。", "effects": {"skill": 3, "pressure": 1, "mood": -2}},
+	{"id": "check_jobs", "name": "看招聘网站", "locations": ["room"], "description": "看看世界今天又需要什么样的应届生。", "feedback_text": "你打开招聘网站，发现每个岗位都要求经验丰富、热爱学习、抗压能力强。你怀疑他们要招的不是应届生，是渡劫成功的人。", "effects": {"pressure": 3, "skill": 1, "mood": -2}},
+	{"id": "roast_roommates", "name": "互损舍友", "locations": ["dorm"], "description": "把离别焦虑包装成精准嘴欠，打出去，接回来。", "feedback_text": "你们互相攻击了十分钟，从就业方向攻击到发际线。最后谁也没赢，但大家都轻松了一点。", "effects": {"mood": 5, "relationship": 3, "pressure": -1}},
+	{"id": "last_game", "name": "开毕业前最后一局游戏", "locations": ["dorm"], "description": "用一局游戏证明，毕业不影响你们稳定地输。", "feedback_text": "本来说打一局，结果打到了凌晨两点。你们输得很难看，但骂得很整齐。", "effects": {"mood": 6, "relationship": 4, "pressure": 1, "skill": -1}},
+	{"id": "criticize_roommate_resume", "name": "给舍友简历挑刺", "locations": ["dorm"], "description": "互相审判简历，也互相放过人生。", "feedback_text": "你指出他的项目经历太水。他指出你的人生经历也挺水。双方达成和平。", "effects": {"skill": 2, "relationship": 1, "mood": 2}},
+	{"id": "pretend_have_plan", "name": "假装自己有规划", "locations": ["dorm"], "description": "用“先沉淀一下”给迷茫盖个章。", "feedback_text": "你说自己“先沉淀一下”。舍友说：“你这是失业的文学表达。”", "effects": {"pressure": 3, "self_identity": -1, "mood": 2}},
+	{"id": "pack_luggage", "name": "收拾行李", "locations": ["dorm"], "description": "把四年塞进一个箱子，看看拉链会不会抗议。", "feedback_text": "你把衣服一件件塞进行李箱。箱子越来越满，心里却空出一块。", "effects": {"pressure": 1, "self_identity": 2, "mood": -1}},
+	{"id": "look_at_old_stuff", "name": "翻旧东西", "locations": ["dorm"], "description": "从抽屉里翻出一些没用但舍不得扔的东西。", "feedback_text": "你翻出一张旧饭卡和几张皱巴巴的草稿纸。大学四年突然变成了一堆小物件，安静得让人有点不服。", "effects": {"mood": 2, "self_identity": 2, "pressure": -1}},
+	{"id": "part_time_job", "name": "打零工", "locations": ["convenience_store"], "description": "用半天换一点现金，也换来一点真实的疲惫。", "feedback_text": "你在便利店站了几个小时。腿很酸，但钱包终于有了一点动静。", "effects": {"money": 180, "mood": -5, "pressure": -1}},
+	{"id": "buy_cheap_food", "name": "买便宜饭团", "locations": ["convenience_store"], "description": "在打折贴纸里寻找今天的性价比。", "feedback_text": "你买了一个打折饭团。它不算好吃，但至少很诚实：便宜、冷、能填肚子。", "effects": {"money": -12, "mood": 2, "pressure": -1}},
+	{"id": "chat_with_clerk", "name": "和店员闲聊", "locations": ["convenience_store"], "description": "和另一个清醒着的人短暂交换一下人类信号。", "feedback_text": "店员说他也是刚毕业，先干着再说。你们互相笑了一下，像两个临时玩家在同一个服务器碰头。", "effects": {"mood": 3, "relationship": 1}},
+	{"id": "watch_night_shift_worker", "name": "观察夜班年轻人", "locations": ["convenience_store"], "description": "看一个人怎样熟练地和深夜相处。", "feedback_text": "夜班店员给货架补货，动作熟练得像在整理一段暂时无法解释的人生。你突然觉得，不是只有你在凑合。", "effects": {"self_identity": 2, "pressure": -1}},
+	{"id": "commute", "name": "通勤", "locations": ["subway_station"], "description": "加入人群，假装自己也知道下一站。", "feedback_text": "你被人群推着往前走。地铁门关上的一瞬间，你突然理解了什么叫被生活合并同类项。", "effects": {"money": -6, "pressure": 2, "mood": -1}},
+	{"id": "watch_crowd", "name": "看人群", "locations": ["subway_station"], "description": "站在人流旁边，看每个人都像有明确目的地。", "feedback_text": "每个人都像有明确目的地，只有你站在原地，假装自己也知道下一站是哪。", "effects": {"self_identity": 1, "pressure": 1}},
+	{"id": "miss_train", "name": "错过一班车", "locations": ["subway_station"], "description": "让一班车先走，看看世界会不会塌。", "feedback_text": "你故意慢了一步，看着车门关上。错过一班地铁不会毁掉人生，这个发现让你轻松了一点。", "effects": {"mood": -1, "pressure": -1}},
+	{"id": "stand_in_corner", "name": "站在角落", "locations": ["subway_station"], "description": "找一个不会挡路的位置，把自己暂时放好。", "feedback_text": "你站在角落，看着车窗里自己的影子。它看起来也刚毕业，也没什么计划。", "effects": {"mood": -1, "self_identity": 1}},
+	{"id": "pretend_to_work", "name": "假装办公", "locations": ["cafe"], "description": "用严肃表情给空白文档增加可信度。", "feedback_text": "你打开电脑，表情严肃地盯着空白文档。旁边的人可能以为你在写商业计划，其实你在想午饭吃什么。", "effects": {"mood": 2, "pressure": 2, "self_identity": -1}},
+	{"id": "overhear_interview", "name": "偷听旁边面试", "locations": ["cafe"], "description": "隔壁桌正在模拟面试，你的耳朵开始自动上课。", "feedback_text": "旁边有人在模拟面试。他说自己的缺点是太追求完美。你低头看了看自己的简历，觉得自己的缺点比较朴素：没东西写。", "effects": {"skill": 2, "pressure": 2}},
+	{"id": "order_cheapest_coffee", "name": "点最便宜的咖啡", "locations": ["cafe"], "description": "在菜单最底层找到成年人体验版。", "feedback_text": "你点了菜单上最便宜的美式。它苦得很直接，像成年人世界提前发来的体验版。", "effects": {"money": -18, "mood": 2}},
+	{"id": "attend_interview", "name": "参加面试", "locations": ["interview_company"], "description": "走进会议室，努力把紧张折成一张得体的脸。", "feedback_text": "面试官问你的职业规划。你脑子里闪过很多答案，最后说出了最安全也最空的一版。", "effects": {"skill": 2, "pressure": 4, "mood": -2}},
+	{"id": "wait_for_hr", "name": "等 HR", "locations": ["interview_company"], "description": "坐在等候区，听自己的心跳刷存在感。", "feedback_text": "你坐在等候区，旁边的人简历厚得像说明书。你低头看了看自己这一页，觉得它很环保。", "effects": {"pressure": 3, "mood": -1}},
+	{"id": "observe_front_desk", "name": "观察前台", "locations": ["interview_company"], "description": "研究这间公司的空气为什么能让人自动坐直。", "feedback_text": "前台的绿植长得很好。你忽然羡慕它，至少它的岗位职责很明确：活着，保持绿色。", "effects": {"self_identity": 1, "pressure": 1}},
+	{"id": "pretend_not_nervous", "name": "假装不紧张", "locations": ["interview_company"], "description": "把紧张藏起来，虽然它一直在桌下踢你。", "feedback_text": "你努力坐得很自然，但手已经把简历边角捏出了包浆。", "effects": {"pressure": 2, "self_identity": 1}},
+	{"id": "take_walk", "name": "出门散步", "locations": ["park"], "description": "沿着树荫走一会儿，让脑子慢慢降温。", "feedback_text": "你在街上走了一圈。城市没有理你，但风吹过来的时候，你稍微舒服了一点。", "effects": {"mood": 5, "pressure": -3}},
+	{"id": "sit_on_bench", "name": "坐长椅", "locations": ["park"], "description": "坐下来，不假装自己正在解决人生。", "feedback_text": "你坐在长椅上，没有打开招聘网站，也没有假装努力。风吹过来的时候，你感觉自己暂时不用回答任何问题。", "effects": {"mood": 4, "pressure": -3}},
+	{"id": "watch_old_people_chess", "name": "看大爷下棋", "locations": ["park"], "description": "围观一场没有 KPI 的激烈战争。", "feedback_text": "两个大爷因为一步棋吵了十分钟。你突然发现，人到老了也不一定通透，但至少可以吵得很有精神。", "effects": {"mood": 3, "self_identity": 1}},
+	{"id": "think_about_future", "name": "想一想以后", "locations": ["park"], "description": "试着把未来想清楚一点，哪怕只清楚一小块。", "feedback_text": "你试着想象五年后的自己。画面很模糊，但这次你没有立刻关掉。", "effects": {"self_identity": 3, "pressure": 1}},
+	{"id": "check_train_schedule", "name": "看车次", "locations": ["train_station"], "description": "看屏幕滚动目的地，像看另一种人生列表。", "feedback_text": "屏幕上有很多车次，每一个目的地都很明确。你站在下面，像一条还没被系统识别的路线。", "effects": {"pressure": 2, "self_identity": 1}},
+	{"id": "hesitate_about_home", "name": "犹豫要不要回家", "locations": ["train_station"], "description": "打开购票页，又关掉，再打开。", "feedback_text": "你打开购票页面，又退出。回家好像是退路，又好像只是另一种开始。", "effects": {"mood": -1, "relationship": 2, "pressure": 1}},
+	{"id": "buy_water", "name": "买一瓶水", "locations": ["train_station"], "description": "重大决定之前，先解决口渴。", "feedback_text": "你买了一瓶水。人在做重大决定前，偶尔也只是需要先不渴。", "effects": {"money": -4, "mood": 1}},
+	{"id": "message_parents", "name": "给父母发消息", "locations": ["train_station"], "description": "打一行字，删掉，再打一行更轻松的。", "feedback_text": "你给父母发了句“我挺好的”。对话框很快显示“正在输入中”，你突然有点不敢看。", "effects": {"relationship": 2, "pressure": -1, "mood": 1}}
 ]
