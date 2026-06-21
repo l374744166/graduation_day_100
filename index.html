@@ -373,6 +373,31 @@
       background: var(--panel-2);
     }
 
+    .auto-save {
+      position: fixed;
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      z-index: 30;
+      padding: 8px 11px;
+      border-radius: 999px;
+      background: rgba(141, 217, 173, .15);
+      color: var(--good);
+      border: 1px solid rgba(141, 217, 173, .28);
+      font-size: 13px;
+      font-weight: 700;
+      pointer-events: none;
+    }
+
+    .status-strip {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #181b1b;
+      color: #d7e0de;
+      line-height: 1.55;
+    }
+
     .ending {
       display: grid;
       gap: 13px;
@@ -411,13 +436,53 @@
     const TIME_LABELS = { morning: "上午", afternoon: "下午", night: "晚上" };
     const MAX_REROLLS = 3;
     const DEBUG_MODE = new URLSearchParams(window.location.search).get("debug") === "1";
+    const MAX_ACTION_POINTS = 10;
+    const RANDOM_EVENT_LIMIT = 2;
+    const BUFF_LABELS = { caffeine: "咖啡因", inspiration: "灵感", lucky: "幸运" };
+
+    const actionMeta = {
+      rest: { action_cost: 1, daily_limit: 3, category: "recovery", tags: ["rest"] },
+      organize_room: { action_cost: 1, daily_limit: 2, category: "life", tags: ["identity"] },
+      write_diary: { action_cost: 2, daily_limit: 1, category: "identity", tags: ["identity"] },
+      modify_resume: { action_cost: 2, daily_limit: 2, category: "job", tags: ["job_search", "resume_prepare"] },
+      check_jobs: { action_cost: 2, daily_limit: 2, category: "job", tags: ["job_search"] },
+      roast_roommates: { action_cost: 1, daily_limit: 2, category: "social", tags: ["social_contact"] },
+      last_game: { action_cost: 3, daily_limit: 1, category: "social", tags: ["social_contact"] },
+      criticize_roommate_resume: { action_cost: 2, daily_limit: 1, category: "job", tags: ["resume_prepare", "social_contact"] },
+      pretend_have_plan: { action_cost: 1, daily_limit: 2, category: "identity", tags: ["identity"] },
+      pack_luggage: { action_cost: 2, daily_limit: 1, category: "life", tags: ["identity"] },
+      look_at_old_stuff: { action_cost: 1, daily_limit: 1, category: "identity", tags: ["identity"] },
+      part_time_job: { action_cost: 4, daily_limit: 1, category: "money", tags: ["money"] },
+      buy_cheap_food: { action_cost: 1, daily_limit: 3, category: "life", tags: ["food"] },
+      chat_with_clerk: { action_cost: 2, daily_limit: 2, category: "social", tags: ["social_contact"] },
+      watch_night_shift_worker: { action_cost: 1, daily_limit: 2, category: "identity", tags: ["identity"] },
+      commute: { action_cost: 2, daily_limit: 2, category: "life", tags: ["commute"] },
+      watch_crowd: { action_cost: 1, daily_limit: 2, category: "identity", tags: ["identity"] },
+      miss_train: { action_cost: 1, daily_limit: 2, category: "recovery", tags: ["rest"] },
+      stand_in_corner: { action_cost: 1, daily_limit: 2, category: "identity", tags: ["identity"] },
+      pretend_to_work: { action_cost: 1, daily_limit: 2, category: "job", tags: ["job_search"] },
+      overhear_interview: { action_cost: 2, daily_limit: 1, category: "job", tags: ["interview_prepare"] },
+      order_cheapest_coffee: { action_cost: 1, daily_limit: 2, category: "recovery", tags: ["cafe"] },
+      attend_interview: { action_cost: 4, daily_limit: 1, category: "interview", tags: ["interview_prepare", "interview"] },
+      wait_for_hr: { action_cost: 1, daily_limit: 2, category: "interview", tags: ["interview_prepare"] },
+      observe_front_desk: { action_cost: 1, daily_limit: 2, category: "interview", tags: ["interview_prepare"] },
+      pretend_not_nervous: { action_cost: 2, daily_limit: 1, category: "interview", tags: ["interview_prepare"] },
+      take_walk: { action_cost: 1, daily_limit: 2, category: "recovery", tags: ["rest"] },
+      sit_on_bench: { action_cost: 1, daily_limit: 2, category: "recovery", tags: ["rest"] },
+      watch_old_people_chess: { action_cost: 1, daily_limit: 2, category: "recovery", tags: ["rest"] },
+      think_about_future: { action_cost: 2, daily_limit: 1, category: "identity", tags: ["identity"] },
+      check_train_schedule: { action_cost: 1, daily_limit: 2, category: "life", tags: ["identity"] },
+      hesitate_about_home: { action_cost: 2, daily_limit: 1, category: "identity", tags: ["family_contact"] },
+      buy_water: { action_cost: 1, daily_limit: 2, category: "life", tags: ["food"] },
+      message_parents: { action_cost: 2, daily_limit: 1, category: "social", tags: ["family_contact", "social_contact"] }
+    };
 
     const weeklyGoals = [
-      { id: "job_search", title: "投出 3 次求职相关行动", target: 3, progress: () => countLogsByActions(["check_jobs", "modify_resume", "overhear_interview"]) },
-      { id: "interview_prepare", title: "至少完成 1 次面试行动", target: 1, progress: () => countLogsByActions(["attend_interview", "wait_for_hr", "pretend_not_nervous"]) },
+      { id: "job_search", title: "投出 3 次求职相关行动", target: 3, progress: () => countLogsByTags(["job_search", "resume_prepare"]) },
+      { id: "interview_prepare", title: "至少完成 1 次面试行动", target: 1, progress: () => countLogsByTags(["interview_prepare", "interview"]) },
       { id: "pressure_safe", title: "压力不要达到 90", target: 1, progress: () => state.pressure < 90 ? 1 : 0 },
       { id: "money_safe", title: "金钱不要低于 500", target: 1, progress: () => state.money >= 500 ? 1 : 0 },
-      { id: "keep_contact", title: "和至少一个人保持联系", target: 1, progress: () => countLogsByActions(["chat_with_clerk", "message_parents"]) + countLogsByText(["父母", "朋友", "舍友"]) > 0 ? 1 : 0 }
+      { id: "keep_contact", title: "和至少一个人保持联系", target: 1, progress: () => countLogsByTags(["social_contact", "family_contact"]) + countLogsByText(["父母", "朋友", "舍友"]) > 0 ? 1 : 0 }
     ];
 
     const startProfiles = [
@@ -494,6 +559,48 @@
       ] }
     ];
 
+    const randomEvents = {
+      cafe: [
+        { id: "wrong_coffee", title: "店员送错咖啡", description: "店员把别人的咖啡端给了你，又很快发现搞错了。你们尴尬地笑了一下，他最后给你打了个折。今天好像没那么糟。", effects: { mood: 2 }, buff: "caffeine", npc: "cafe_classmate" },
+        { id: "mock_interview_next_table", title: "旁边有人模拟面试", description: "旁边桌有人在练面试。他说自己的缺点是太追求完美。你低头看了看自己的简历，觉得自己的缺点比较朴素：没东西写。", effects: { skill: 1, pressure: 1 }, tags: ["interview_prepare"] }
+      ],
+      convenience_store: [
+        { id: "half_price_riceball", title: "半价饭团争夺战", description: "你抢到了最后一个半价饭团。胜利不大，但很具体。", effects: { money: -8, mood: 2 } },
+        { id: "extra_shift", title: "店长问你要不要多干一小时", description: "店长问你要不要多干一小时。你想了想余额，还是接了。成年人很多选择都不是选择题，是余额题。", effects: { money: 60, mood: -2 }, npc: "clerk" }
+      ],
+      interview_company: [
+        { id: "hr_delay", title: "HR 临时改时间", description: "HR 说面试要再等等。你坐在前台旁边，感觉自己像一份还没被打开的附件。", effects: { pressure: 3 } },
+        { id: "meet_senior", title: "遇到同校学长", description: "你遇到一个同校学长。他说自己当年也很慌，只是现在装得比较像个人。", effects: { relationship: 2, skill: 1 }, npc: "senior" }
+      ],
+      park: [
+        { id: "park_uncle_jobless", title: "大爷问你是不是刚失业", description: "大爷看了你一眼，问：“刚失业？”你说：“还没就业。”大爷点点头：“那也差不多。”你居然被安慰到了。", effects: { mood: 2, pressure: -1 }, npc: "park_uncle" },
+        { id: "flyer_on_bench", title: "捡到一张招聘传单", description: "你在长椅旁捡到一张招聘传单。岗位听起来很普通，但普通有时候也是一种希望。", effects: { skill: 1 }, tags: ["job_search"] }
+      ],
+      subway_station: [
+        { id: "stranger_asks_way", title: "陌生人问路", description: "有人问你怎么换乘。你帮他指了路。你突然发现，迷茫的人也能给别人指路。", effects: { relationship: 1, mood: 1 } },
+        { id: "hr_phone_call", title: "HR 电话突然打来", description: "电话响起，来电显示是陌生号码。你接起来，对面说：“你好，我们看到你的简历……”你一下坐直了。", effects: { pressure: 4, skill: 1 }, tags: ["job_search"] }
+      ],
+      train_station: [
+        { id: "classmate_with_luggage", title: "看见同学拖箱子回家", description: "你看见一个熟悉的背影拖着箱子进站。原来不止你一个人在考虑退路。", effects: { pressure: 2, self_identity: 1 } },
+        { id: "ticket_notice", title: "车票余票提醒", description: "屏幕上显示回家的车还有余票。你盯着那行字看了很久，像盯着一个不敢承认的选项。", effects: { pressure: 1 } }
+      ],
+      dorm: [
+        { id: "old_photo", title: "舍友突然翻出黑历史照片", description: "舍友翻出一张你大一时的照片。你试图阻止传播，但宿舍群已经完成了历史存档。", effects: { mood: 3, relationship: 2 } },
+        { id: "last_noodle", title: "最后一桶泡面", description: "你们围着最后一桶泡面，像在分配某种古老遗产。最后汤都没剩。", effects: { mood: 2, relationship: 1 } }
+      ],
+      room: [
+        { id: "old_note", title: "桌角的旧纸条", description: "你在桌角发现一张旧纸条，上面写着：“以后一定会变厉害。”你看了很久，没有嘲笑当时的自己。", effects: { self_identity: 2 }, buff: "inspiration" },
+        { id: "rain_outside", title: "窗外突然下雨", description: "雨声把房间填满。你没变好，但世界终于安静了一点。", effects: { mood: 1, pressure: -1 } }
+      ]
+    };
+
+    const npcNames = {
+      clerk: "便利店夜班店员阿明",
+      cafe_classmate: "咖啡店同学",
+      senior: "同校学长",
+      park_uncle: "公园大爷"
+    };
+
     const actions = [
       { id: "rest", name: "休息", locations: ["room"], description: "关掉屏幕，允许自己暂时什么都不证明。", feedback_text: "你决定今天不逼自己。醒来的时候，天已经黑了，但你没有那么想逃了。", effects: { mood: 8, pressure: -4 } },
       { id: "organize_room", name: "整理房间", locations: ["room"], description: "把书、衣服和没说出口的话都先归到一个地方。", feedback_text: "你把乱七八糟的东西收进箱子里。房间变干净了，但未来还是乱的。", effects: { mood: 2, pressure: -2, self_identity: 1 } },
@@ -550,14 +657,14 @@
     ];
 
     const locations = [
-      { id: "room", name: "房间", unlock_day: 1, description: "一间不大的房间，床、书桌、行李箱和未来挤在一起。", actions: ["rest", "organize_room", "write_diary", "modify_resume", "check_jobs"] },
-      { id: "dorm", name: "宿舍", unlock_day: 1, description: "四年生活过的地方，空气里还有泡面、键盘和没说完的话。", actions: ["roast_roommates", "last_game", "criticize_roommate_resume", "pretend_have_plan", "pack_luggage", "look_at_old_stuff"] },
-      { id: "convenience_store", name: "便利店", unlock_day: 1, description: "灯光永远很亮，像是专门给睡不着的人开的。", actions: ["part_time_job", "buy_cheap_food", "chat_with_clerk", "watch_night_shift_worker"] },
-      { id: "park", name: "公园", unlock_day: 1, description: "这里没有人问你职业规划，只有风和长椅。", actions: ["take_walk", "sit_on_bench", "watch_old_people_chess", "think_about_future"] },
-      { id: "subway_station", name: "地铁站", unlock_day: 3, locked_text: "你还没开始真正奔波，地铁站暂时只是城市背景。", description: "人群像流水一样涌过去，你站在里面，感觉自己也被推着走。", actions: ["commute", "watch_crowd", "miss_train", "stand_in_corner"] },
-      { id: "cafe", name: "咖啡店", unlock_day: 3, locked_text: "等你开始认真改简历，这里会变得更有用。", description: "这里的人看起来都很忙，虽然你不知道他们是不是真的有事。", actions: ["modify_resume", "pretend_to_work", "overhear_interview", "order_cheapest_coffee"] },
-      { id: "train_station", name: "火车站", unlock_day: 5, locked_text: "现在还没到认真考虑去留的时候。", description: "屏幕上滚动着很多目的地，每一个都像是另一种人生。", actions: ["check_train_schedule", "hesitate_about_home", "buy_water", "message_parents"] },
-      { id: "interview_company", name: "面试公司", unlock_day: 6, locked_text: "你还没收到面试通知，暂时没理由去这里。", description: "前台很干净，空气里有一种让人自动坐直的味道。", actions: ["attend_interview", "wait_for_hr", "observe_front_desk", "pretend_not_nervous"] }
+      { id: "room", name: "房间", unlock_day: 1, role: "自我整理 / 简历 / 休息", recommended: "适合补状态、写日记、推进简历。", description: "一间不大的房间，床、书桌、行李箱和未来挤在一起。", actions: ["rest", "organize_room", "write_diary", "modify_resume", "check_jobs"] },
+      { id: "dorm", name: "宿舍", unlock_day: 1, role: "告别 / 关系 / 喜剧缓冲", recommended: "前两天最有记忆点的地方。", description: "四年生活过的地方，空气里还有泡面、键盘和没说完的话。", actions: ["roast_roommates", "last_game", "criticize_roommate_resume", "pretend_have_plan", "pack_luggage", "look_at_old_stuff"] },
+      { id: "convenience_store", name: "便利店", unlock_day: 1, role: "赚钱 / 补给 / 夜班现实", recommended: "钱紧时最现实，但打工很占行动点。", description: "灯光永远很亮，像是专门给睡不着的人开的。", actions: ["part_time_job", "buy_cheap_food", "chat_with_clerk", "watch_night_shift_worker"] },
+      { id: "park", name: "公园", unlock_day: 1, role: "减压 / 自我认同 / 随机安慰", recommended: "压力高时来这里比较像个人。", description: "这里没有人问你职业规划，只有风和长椅。", actions: ["take_walk", "sit_on_bench", "watch_old_people_chess", "think_about_future"] },
+      { id: "subway_station", name: "地铁站", unlock_day: 3, role: "通勤 / 求职电话 / 城市压力", recommended: "开始奔波后，随机机会和压力都会来。", locked_text: "你还没开始真正奔波，地铁站暂时只是城市背景。", description: "人群像流水一样涌过去，你站在里面，感觉自己也被推着走。", actions: ["commute", "watch_crowd", "miss_train", "stand_in_corner"] },
+      { id: "cafe", name: "咖啡店", unlock_day: 3, role: "求职准备 / 灵感 / 偶遇", recommended: "能力低、需要准备面试时值得去。", locked_text: "等你开始认真改简历，这里会变得更有用。", description: "这里的人看起来都很忙，虽然你不知道他们是不是真的有事。", actions: ["modify_resume", "pretend_to_work", "overhear_interview", "order_cheapest_coffee"] },
+      { id: "train_station", name: "火车站", unlock_day: 5, role: "去留 / 家庭 / 退路", recommended: "关系低或想联系父母时，它会变得很重。", locked_text: "现在还没到认真考虑去留的时候。", description: "屏幕上滚动着很多目的地，每一个都像是另一种人生。", actions: ["check_train_schedule", "hesitate_about_home", "buy_water", "message_parents"] },
+      { id: "interview_company", name: "面试公司", unlock_day: 6, role: "高风险面试 / 学长 / 结果感", recommended: "面试准备够了再来，不然压力会很诚实。", locked_text: "你还没收到面试通知，暂时没理由去这里。", description: "前台很干净，空气里有一种让人自动坐直的味道。", actions: ["attend_interview", "wait_for_hr", "observe_front_desk", "pretend_not_nervous"] }
     ];
 
     const events = [
@@ -615,6 +722,16 @@
         relationship: 50,
         pressure: 30,
         self_identity: 40,
+        action_points: MAX_ACTION_POINTS,
+        max_action_points: MAX_ACTION_POINTS,
+        action_sequence: 0,
+        random_events_today: 0,
+        daily_action_counts: {},
+        buffs: [],
+        buffs_seen: [],
+        luck_points: 0,
+        npc_records: {},
+        total_action_points_spent: 0,
         current_location: "dorm",
         flags: {},
         action_log: [],
@@ -637,8 +754,18 @@
     }
 
     function applyEffects(effects) {
+      const beforeMood = Number(state.mood) || 0;
       for (const [key, value] of Object.entries(effects || {})) {
         state[key] = (Number(state[key]) || 0) + Number(value);
+      }
+      if ((Number(effects?.mood) || 0) > 0 && state.mood > 100) {
+        const overflow = Math.max(0, state.mood - 100);
+        state.luck_points = (Number(state.luck_points) || 0) + overflow;
+        if (overflow > 0 && beforeMood < 100) noticeText = "你的情绪已经满了，多出来的一点好状态，变成了今天的好运气。";
+        while (state.luck_points >= 10 && !hasBuff("lucky")) {
+          state.luck_points -= 10;
+          addBuff("lucky");
+        }
       }
       clampStats();
     }
@@ -664,6 +791,9 @@
         type: entry.type,
         action_id: entry.action_id || "",
         event_id: entry.event_id || "",
+        action_index: entry.action_index || 0,
+        action_cost: entry.action_cost || 0,
+        tags: [...(entry.tags || [])],
         title: entry.title,
         description: entry.description,
         effects: { ...(entry.effects || {}) }
@@ -674,6 +804,10 @@
       return (state.action_log || []).filter((entry) => ids.includes(entry.action_id)).length;
     }
 
+    function countLogsByTags(tags) {
+      return (state.action_log || []).filter((entry) => (entry.tags || []).some((tag) => tags.includes(tag))).length;
+    }
+
     function countLogsByText(words) {
       return (state.action_log || []).filter((entry) => {
         const text = `${entry.title || ""}${entry.description || ""}`;
@@ -681,18 +815,18 @@
       }).length;
     }
 
-    function advanceTime() {
-      const current = TIME_SLOTS.indexOf(state.time_slot);
-      if (current >= 0 && current < TIME_SLOTS.length - 1) {
-        state.time_slot = TIME_SLOTS[current + 1];
-        return { endedDay: false, previousDay: state.day };
-      }
+    function finishDay() {
       const previousDay = state.day;
       state.money -= 60;
       if (state.money < 500) state.pressure += 5;
       state.day += 1;
       state.time_slot = "morning";
+      state.action_points = state.max_action_points || MAX_ACTION_POINTS;
+      state.action_sequence = 0;
+      state.random_events_today = 0;
+      state.daily_action_counts = {};
       clampStats();
+      autoSave("day_end");
       return { endedDay: true, previousDay };
     }
 
@@ -718,6 +852,50 @@
       renderRoom("room");
     }
 
+    function autoSave(reason = "auto") {
+      try {
+        state.last_auto_save = Date.now();
+        state.last_auto_save_reason = reason;
+        localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+        showAutoSaveToast();
+      } catch (error) {
+        noticeText = "自动保存失败，浏览器可能限制了本地存储。";
+      }
+    }
+
+    function showAutoSaveToast() {
+      const old = document.querySelector(".auto-save");
+      if (old) old.remove();
+      const toast = el("div", "auto-save", "已自动保存");
+      document.body.append(toast);
+      window.setTimeout(() => toast.remove(), 1400);
+    }
+
+    function hasBuff(id) {
+      return (state.buffs || []).includes(id);
+    }
+
+    function addBuff(id) {
+      state.buffs = state.buffs || [];
+      state.buffs_seen = state.buffs_seen || [];
+      if (!state.buffs.includes(id)) state.buffs.push(id);
+      if (!state.buffs_seen.includes(id)) state.buffs_seen.push(id);
+    }
+
+    function removeBuff(id) {
+      state.buffs = (state.buffs || []).filter((buff) => buff !== id);
+    }
+
+    function meetNpc(id) {
+      if (!id) return "";
+      state.npc_records = state.npc_records || {};
+      const record = state.npc_records[id] || { met: false, intimacy: 0, events_seen: [] };
+      record.met = true;
+      record.intimacy = (Number(record.intimacy) || 0) + 1;
+      state.npc_records[id] = record;
+      return `\n你认识了${npcNames[id] || id}。亲密度 +1。`;
+    }
+
     function loadGame() {
       const raw = localStorage.getItem(SAVE_KEY);
       if (!raw) {
@@ -734,6 +912,16 @@
       state.start_evaluation = state.start_evaluation || "这份存档来自毕业档案系统上线之前，但你依然得继续往前。";
       state.reroll_used = Number(state.reroll_used) || 0;
       state.triggered_thresholds = state.triggered_thresholds || [];
+      state.max_action_points = Number(state.max_action_points) || MAX_ACTION_POINTS;
+      state.action_points = Number.isFinite(Number(state.action_points)) ? Number(state.action_points) : state.max_action_points;
+      state.action_sequence = Number(state.action_sequence) || 0;
+      state.random_events_today = Number(state.random_events_today) || 0;
+      state.daily_action_counts = state.daily_action_counts || {};
+      state.buffs = state.buffs || [];
+      state.buffs_seen = state.buffs_seen || [];
+      state.luck_points = Number(state.luck_points) || 0;
+      state.npc_records = state.npc_records || {};
+      state.total_action_points_spent = Number(state.total_action_points_spent) || 0;
       if (state.current_location === "rental_room") state.current_location = "room";
       if (state.current_location === "coffee_shop") state.current_location = "cafe";
       state.day_start_stats = state.day_start_stats || snapshotStats(state);
@@ -844,6 +1032,7 @@
       clampStats();
       draftProfile = null;
       noticeText = "你的毕业档案已生成。你不算准备好了，但毕业不会等你准备好。";
+      autoSave("start_profile");
       showFeedback({
         title: "你的毕业档案已生成",
         description: "你不算准备好了。\n但毕业不会等你准备好。\n\n第 1 天：毕业宿舍最后一晚。",
@@ -974,8 +1163,8 @@
     function renderSidebar(activeView) {
       const sidebar = el("aside", "sidebar");
       const top = el("div", "topline");
-      top.append(el("h3", "", `第 ${state.day} 天  ${TIME_LABELS[state.time_slot]}`), el("span", "place", `当前位置：${locationName(state.current_location)}`));
-      sidebar.append(top, divider(), renderStats(), divider());
+      top.append(el("h3", "", `第 ${state.day} 天`), el("span", "place", `当前位置：${locationName(state.current_location)}`));
+      sidebar.append(top, renderStatusStrip(), divider(), renderStats(), divider());
 
       const nav = el("div", "nav-grid");
       nav.append(
@@ -989,12 +1178,19 @@
       const system = el("div", "system-grid");
       system.append(
         button("完整记录", () => renderRoom("log")),
+        button("结束今天", endDayManually),
         button("存档", saveGame),
         button("读档", loadGame),
         button("主菜单", renderMenu)
       );
       sidebar.append(system);
       return sidebar;
+    }
+
+    function endDayManually() {
+      if (processing) return;
+      const result = finishDay();
+      renderDaySummary(result.previousDay);
     }
 
     function divider() {
@@ -1021,6 +1217,17 @@
       return wrap;
     }
 
+    function renderStatusStrip() {
+      const wrap = el("div", "status-strip");
+      const buffs = (state.buffs || []).map((id) => BUFF_LABELS[id] || id).join("、") || "无";
+      wrap.append(
+        el("strong", "", `剩余行动点：${state.action_points} / ${state.max_action_points || MAX_ACTION_POINTS}`),
+        el("span", "", `当前状态：${buffs}`),
+        el("span", "muted", `幸运值：${state.luck_points || 0}`)
+      );
+      return wrap;
+    }
+
     function renderRoom(activeView) {
       if (state.day > 7) {
         renderEnding();
@@ -1040,7 +1247,7 @@
         el("h2", "", current.name),
         el("p", "room-text", current.description),
         el("p", "notice", noticeText),
-        el("p", "hint", "切换地点不消耗时段。执行当前地点的行动后，时间会推进。")
+        el("p", "hint", `切换地点不消耗行动点，执行行动才会消耗。今日剩余：${state.action_points} / ${state.max_action_points || MAX_ACTION_POINTS}`)
       );
       content.append(el("h3", "", "当前地点可用行动"), actionGrid());
       if (state.day <= 2 && state.current_location === "dorm") {
@@ -1059,7 +1266,7 @@
     }
 
     function renderActions(content) {
-      content.append(el("h2", "", `${currentLocation().name}行动`), el("p", "muted", `当前时段：${TIME_LABELS[state.time_slot]}。这里只显示当前位置能做的事。`), actionGrid());
+      content.append(el("h2", "", `${currentLocation().name}行动`), el("p", "muted", `今日剩余行动点：${state.action_points} / ${state.max_action_points || MAX_ACTION_POINTS}。这里只显示当前位置能做的事。`), actionGrid());
     }
 
     function actionGrid() {
@@ -1071,8 +1278,34 @@
 
     function actionCard(action) {
       const card = el("article", "card");
-      card.append(el("h3", "", action.name), el("p", "", action.description), el("div", "effects", formatEffects(action.effects)), button("执行", () => performAction(action)));
+      const meta = getActionMeta(action);
+      const used = actionUsedToday(action.id);
+      const remaining = Math.max(0, meta.daily_limit - used);
+      const cost = actionCost(action);
+      const execute = button(remaining <= 0 ? "今日已达上限" : cost > state.action_points ? "行动点不足" : "执行", () => performAction(action));
+      execute.disabled = remaining <= 0 || cost > state.action_points;
+      card.append(
+        el("h3", "", action.name),
+        el("p", "", action.description),
+        el("div", "effects", `消耗 ${cost} 点｜今日还可 ${remaining} 次\n${formatEffects(action.effects)}`),
+        execute
+      );
       return card;
+    }
+
+    function getActionMeta(action) {
+      return actionMeta[action.id] || { action_cost: 2, daily_limit: 2, category: "other", tags: [] };
+    }
+
+    function actionUsedToday(actionId) {
+      return Number((state.daily_action_counts || {})[actionId]) || 0;
+    }
+
+    function actionCost(action) {
+      const meta = getActionMeta(action);
+      let cost = meta.action_cost;
+      if (hasBuff("caffeine") && ["modify_resume", "check_jobs", "overhear_interview"].includes(action.id)) cost -= 1;
+      return Math.max(1, cost);
     }
 
     function currentLocation() {
@@ -1103,7 +1336,7 @@
     }
 
     function renderLocations(content) {
-      content.append(el("h2", "", "出门"), el("p", "muted", "换个地方，不一定能解决问题，但至少能让今天有一点变化。"));
+      content.append(el("h2", "", "出门"), el("p", "muted", "切换地点不消耗行动点，执行行动才会消耗。地点不同，能遇到的随机事件也不同。"));
       const grid = el("div", "grid");
       for (const location of locations) {
         const card = el("article", "card");
@@ -1113,7 +1346,12 @@
           switchLocation(location.id);
         });
         actionButton.disabled = locked || location.id === state.current_location;
-        card.append(el("h3", "", location.name), el("p", "", locked ? location.locked_text || location.description : location.description), actionButton);
+        card.append(
+          el("h3", "", location.name),
+          el("p", "", locked ? location.locked_text || location.description : location.description),
+          el("div", "effects", `定位：${location.role || "日常"}\n推荐：${location.recommended || "按感觉来。"}${locked ? `\n解锁：第 ${location.unlock_day} 天` : ""}`),
+          actionButton
+        );
         grid.append(card);
       }
       content.append(grid);
@@ -1135,7 +1373,7 @@
     }
 
     function renderTodayLog(content) {
-      content.append(el("h2", "", `第 ${state.day} 天记录`), el("p", "muted", "你今天确实做过一些事。哪怕其中有些事看起来像是在和人生互相试探。"));
+      content.append(el("h2", "", `第 ${state.day} 天记录`), el("p", "muted", "按行动顺序记录。出门不消耗行动点，执行行动才会留下这一笔。"));
       const logs = (state.action_log || []).filter((entry) => entry.day === state.day);
       const list = el("div", "log-list");
       if (!logs.length) {
@@ -1148,21 +1386,20 @@
 
     function renderTodayPanel() {
       const panel = el("aside", "today-panel");
-      panel.append(el("h3", "", `第 ${state.day} 天记录`));
+      panel.append(el("h3", "", `第 ${state.day} 天记录`), el("p", "muted", `行动点：${state.action_points}/${state.max_action_points || MAX_ACTION_POINTS}`));
       const today = (state.action_log || []).filter((entry) => entry.day === state.day);
-      for (const slot of TIME_SLOTS) {
-        const slotLogs = today.filter((entry) => entry.time_slot === slot);
+      const ordered = today.filter((entry) => entry.type !== "event").sort((a, b) => (a.action_index || 0) - (b.action_index || 0));
+      if (!ordered.length) {
         const item = el("div", "today-slot");
-        item.append(el("div", "log-time", TIME_LABELS[slot]));
-        if (!slotLogs.length) {
-          item.append(el("p", "muted", "暂无"));
-        } else {
-          for (const entry of slotLogs) {
-            const place = entry.location ? `${locationName(entry.location)}：` : "";
-            item.append(el("strong", "", `${place}${entry.title}`), el("p", "", entry.description));
-          }
-        }
+        item.append(el("div", "log-time", "今日行动"), el("p", "muted", "暂无"));
         panel.append(item);
+      } else {
+        for (const entry of ordered.slice(-5)) {
+          const item = el("div", "today-slot");
+          const index = entry.action_index ? `第 ${entry.action_index} 次` : entry.type === "random" ? "随机事件" : "记录";
+          item.append(el("div", "log-time", index), el("strong", "", `${locationName(entry.location)}：${entry.title}`), el("p", "", entry.description));
+          panel.append(item);
+        }
       }
       panel.append(el("div", "divider"), renderWeeklyGoals());
       return panel;
@@ -1204,7 +1441,7 @@
 
     function logItem(entry) {
       const item = el("article", "log-item");
-      const prefix = entry.type === "event" ? "剧情事件" : entry.type === "location" ? "地点事件" : TIME_LABELS[entry.time_slot] || "记录";
+      const prefix = entry.type === "event" ? "剧情事件" : entry.type === "random" ? "随机事件" : entry.type === "location" ? "地点事件" : entry.action_index ? `第 ${entry.action_index} 次行动` : "记录";
       item.append(el("div", "log-time", `${prefix}：${entry.title}`), el("p", "", entry.description), el("div", "effects", formatEffects(entry.effects)));
       return item;
     }
@@ -1246,23 +1483,142 @@
 
     function performAction(action) {
       if (!action || processing) return;
+      const meta = getActionMeta(action);
+      const used = actionUsedToday(action.id);
+      const cost = actionCost(action);
+      if (used >= meta.daily_limit) {
+        noticeText = "今天已经做过了。再做下去，人生不会因此刷新。";
+        renderRoom("actions");
+        return;
+      }
+      if (cost > state.action_points) {
+        noticeText = "行动点不够了。今天的容量已经快被用完。";
+        renderRoom("actions");
+        return;
+      }
       processing = true;
       disablePageButtons();
-      applyEffects(action.effects);
-      addLogEntry({ type: "action", action_id: action.id, title: action.name, description: action.feedback_text || action.description, effects: action.effects });
-      noticeText = `${action.name}：${formatEffects(action.effects)}`;
+      state.action_points -= cost;
+      state.time_slot = actionPointTimeSlot();
+      state.total_action_points_spent = (Number(state.total_action_points_spent) || 0) + cost;
+      state.action_sequence = (Number(state.action_sequence) || 0) + 1;
+      state.daily_action_counts = state.daily_action_counts || {};
+      state.daily_action_counts[action.id] = used + 1;
+      const outcome = resolveActionOutcome(action);
+      applyEffects(outcome.effects);
+      const randomEvent = maybeTriggerRandomEvent(action);
+      const fullDescription = [outcome.description, randomEvent?.description].filter(Boolean).join("\n\n");
+      const fullEffects = mergeEffects(outcome.effects, randomEvent?.effects || {});
+      addLogEntry({
+        type: "action",
+        action_id: action.id,
+        action_index: state.action_sequence,
+        action_cost: cost,
+        tags: meta.tags,
+        title: action.name,
+        description: fullDescription,
+        effects: fullEffects
+      });
+      noticeText = `${action.name}：消耗 ${cost} 行动点`;
+      autoSave("action");
       showFeedback({
         title: `行动完成：${action.name}`,
-        description: action.feedback_text || action.description,
-        effects: action.effects,
-        meta: `第 ${state.day} 天 ${TIME_LABELS[state.time_slot]}`,
+        description: fullDescription,
+        effects: fullEffects,
+        meta: `第 ${state.day} 天 剩余行动点 ${state.action_points}/${state.max_action_points || MAX_ACTION_POINTS}`,
         onContinue: () => {
-          const result = advanceTime();
+          const result = state.action_points <= 0 ? finishDay() : { endedDay: false, previousDay: state.day };
           processing = false;
           if (result.endedDay) renderDaySummary(result.previousDay);
           else routeNext();
         }
       });
+    }
+
+    function actionPointTimeSlot() {
+      const points = Number(state.action_points) || 0;
+      if (points > 6) return "morning";
+      if (points > 3) return "afternoon";
+      return "night";
+    }
+
+    function resolveActionOutcome(action) {
+      let effects = { ...(action.effects || {}) };
+      let description = action.feedback_text || action.description;
+      if (action.id === "rest") {
+        effects = { mood: 6, pressure: -4 };
+        description = "你休息了一会儿。时间没有回来，但你至少没继续坏下去。";
+      }
+      if (action.id === "order_cheapest_coffee") {
+        addBuff("caffeine");
+        description += "\n你获得了临时状态：咖啡因。下一次修改简历、看招聘或面试准备行动消耗 -1。";
+      }
+      if (action.id === "modify_resume" && state.current_location === "cafe" && Math.random() < .25) {
+        addBuff("inspiration");
+        description += "\n咖啡店的白噪音让你突然想清楚一句话。你获得了临时状态：灵感。";
+      }
+      if (hasBuff("inspiration") && ["modify_resume", "write_diary"].includes(action.id)) {
+        const extra = action.id === "modify_resume" ? { skill: 1 } : { self_identity: 1 };
+        effects = mergeEffects(effects, extra);
+        removeBuff("inspiration");
+        description += "\n灵感被你用掉了，这次行动额外多了一点成果。";
+      }
+      if (hasBuff("caffeine") && ["modify_resume", "check_jobs", "overhear_interview"].includes(action.id)) {
+        removeBuff("caffeine");
+      }
+      if (action.id === "attend_interview") return resolveInterviewOutcome(description);
+      return { description, effects };
+    }
+
+    function resolveInterviewOutcome(baseDescription) {
+      let outcome;
+      const roll = Math.random();
+      if (roll < .1) {
+        outcome = { description: "面试官问了一个你刚好准备过的问题。那一刻，你感觉命运终于没有全程挂机。", effects: { skill: 2, self_identity: 3 }, flag: "second_interview_chance" };
+      } else if (state.pressure >= 75 && roll < .55) {
+        outcome = { description: "你明明准备过，但一坐下来脑子就开始掉线。走出公司时，你才想起更好的回答。", effects: { mood: -3, pressure: 5, skill: 1 } };
+      } else if (state.skill >= 45 || state.self_identity >= 50) {
+        outcome = { description: "你没有答得完美，但至少没有把自己说丢。面试官点了点头，你不知道那是不是好事。", effects: { skill: 3, self_identity: 2, pressure: 2 } };
+      } else {
+        outcome = { description: "你说出了几句安全答案。它们没错，只是听起来像很多人都会说。", effects: { skill: 2, pressure: 3 } };
+      }
+      if (outcome.flag) state.flags[outcome.flag] = true;
+      return { description: `${baseDescription}\n\n${outcome.description}`, effects: mergeEffects({ skill: 1, pressure: 3 }, outcome.effects) };
+    }
+
+    function maybeTriggerRandomEvent(action) {
+      const pool = randomEvents[state.current_location] || [];
+      if (!pool.length || state.random_events_today >= RANDOM_EVENT_LIMIT) return null;
+      let chance = .2;
+      if (hasBuff("lucky")) chance += .2;
+      if (Math.random() >= chance) return null;
+      if (hasBuff("lucky")) removeBuff("lucky");
+      const event = pool[randomInt(0, pool.length - 1)];
+      state.random_events_today += 1;
+      if (event.buff) addBuff(event.buff);
+      const npcText = meetNpc(event.npc);
+      applyEffects(event.effects);
+      const description = `随机事件：${event.title}\n${event.description}${npcText}${event.buff ? `\n获得临时状态：${BUFF_LABELS[event.buff] || event.buff}。` : ""}`;
+      addLogEntry({
+        type: "random",
+        event_id: event.id,
+        action_index: state.action_sequence,
+        title: event.title,
+        description,
+        effects: event.effects,
+        tags: event.tags || []
+      });
+      return { ...event, description, effects: event.effects };
+    }
+
+    function mergeEffects(...effectsList) {
+      const merged = {};
+      for (const effects of effectsList) {
+        for (const [key, value] of Object.entries(effects || {})) {
+          merged[key] = (merged[key] || 0) + Number(value);
+        }
+      }
+      return merged;
     }
 
     function renderEvent(event) {
@@ -1288,6 +1644,7 @@
           }
           addLogEntry({ type: "event", event_id: event.id, title: `${event.title}：${choice.text}`, description: choice.result || choice.text, effects: choice.effects });
           noticeText = `${choice.text}：${formatEffects(choice.effects)}`;
+          autoSave("event");
           showFeedback({
             title: `你选择了：${choice.text}`,
             description: choice.result || choice.text,
@@ -1308,6 +1665,9 @@
     function renderDaySummary(day) {
       const logs = (state.action_log || []).filter((entry) => entry.day === day);
       const changes = statDiff(state.day_start_stats || snapshotStats(), snapshotStats());
+      const actionLogs = logs.filter((entry) => entry.type === "action");
+      const randomLogs = logs.filter((entry) => entry.type === "random");
+      const thresholdLogs = logs.filter((entry) => (state.triggered_thresholds || []).includes(entry.event_id));
       app.innerHTML = "";
       const screen = el("section", "screen event-screen");
       const box = el("article", "event-box");
@@ -1317,26 +1677,37 @@
         list.append(el("p", "", "今天像一张空白日程表，安静得有点可疑。"));
       } else {
         list.append(el("h3", "", "今天做过"));
-        for (const slot of TIME_SLOTS) {
-          const titles = logs.filter((entry) => entry.time_slot === slot).map((entry) => entry.title);
+        const ordered = actionLogs.sort((a, b) => (a.action_index || 0) - (b.action_index || 0));
+        for (const entry of ordered) {
           const item = el("div", "today-slot");
-          item.append(el("div", "log-time", TIME_LABELS[slot]), el("p", "", titles.length ? titles.join("；") : "暂无"));
+          item.append(el("div", "log-time", `第 ${entry.action_index} 次行动`), el("p", "", `${locationName(entry.location)}｜${entry.title}｜消耗 ${entry.action_cost || 0} 点`));
           list.append(item);
         }
       }
       box.append(
         list,
+        el("div", "effect-list", `今天用了 ${dayActionPointSpent(logs)} 行动点｜做了 ${actionLogs.length} 次行动｜最耗时间：${mostExpensiveAction(actionLogs)}`),
         el("div", "effect-list", `今日变化：${formatEffects(changes)}`),
-        el("p", "room-text", dailyInsightText(day, logs, changes))
+        el("p", "room-text", `${dailyInsightText(day, logs, changes)}\n\n触发随机事件：${randomLogs.map((entry) => entry.title).join("、") || "无"}\n触发阈值事件：${thresholdLogs.map((entry) => entry.title).join("、") || "无"}`)
       );
       box.append(button(state.day > 7 ? "查看结局" : "进入下一天", () => {
         state.day_start_stats = snapshotStats();
         noticeText = "";
+        autoSave("day_start");
         if (state.day > 7) renderEnding();
         else routeNext();
       }));
       screen.append(box);
       app.append(screen);
+    }
+
+    function dayActionPointSpent(logs) {
+      return logs.filter((entry) => entry.type === "action").reduce((sum, entry) => sum + (Number(entry.action_cost) || 0), 0);
+    }
+
+    function mostExpensiveAction(actionLogs) {
+      const action = [...actionLogs].sort((a, b) => (b.action_cost || 0) - (a.action_cost || 0))[0];
+      return action ? `${action.title}（${action.action_cost || 0} 点）` : "无";
     }
 
     function dailyInsightText(day, logs, changes) {
@@ -1424,6 +1795,7 @@
     }
 
     function renderEnding() {
+      autoSave("ending");
       app.innerHTML = "";
       const screen = el("section", "screen menu");
       const wrap = el("div", "ending");
@@ -1511,10 +1883,10 @@
           continue;
         }
         byDay.push(`第 ${day} 天：`);
-        for (const slot of TIME_SLOTS) {
-          const slotLogs = dayLogs.filter((entry) => entry.time_slot === slot);
-          if (!slotLogs.length) continue;
-          byDay.push(`  ${TIME_LABELS[slot]}：${slotLogs.map((entry) => `${locationName(entry.location)}-${entry.title}`).join("；")}`);
+        const ordered = dayLogs.filter((entry) => entry.type !== "event").sort((a, b) => (a.action_index || 0) - (b.action_index || 0));
+        for (const entry of ordered) {
+          const prefix = entry.type === "random" ? "随机事件" : `第 ${entry.action_index || "?"} 次`;
+          byDay.push(`  ${prefix}：${locationName(entry.location)}-${entry.title}${entry.action_cost ? `（${entry.action_cost} 点）` : ""}`);
         }
       }
       return [
@@ -1535,6 +1907,10 @@
         "触发过的阈值事件：",
         triggeredThresholdLines().join("\n"),
         "",
+        `总行动次数：${(state.action_log || []).filter((entry) => entry.type === "action").length}`,
+        `总消耗行动点：${state.total_action_points_spent || 0}`,
+        `获得过的状态：${buffSeenText()}`,
+        `认识过的 NPC：${npcSeenText()}`,
         `最终数值：${formatStats(snapshotStats())}`,
         `最大变化数值：${largestChange(changes)}`,
         `最常去地点：${mostCommon(actionsOnly.map((entry) => locationName(entry.location))) || "还没形成固定路线"}`,
@@ -1575,6 +1951,16 @@
       return STAT_ORDER.map((key) => `${STAT_LABELS[key]}${key === "money" ? `¥${stats[key]}` : stats[key]}`).join("，");
     }
 
+    function buffSeenText() {
+      return (state.buffs_seen || []).map((id) => BUFF_LABELS[id] || id).join("、") || "无";
+    }
+
+    function npcSeenText() {
+      const records = state.npc_records || {};
+      const names = Object.entries(records).filter(([, record]) => record.met).map(([id, record]) => `${npcNames[id] || id}（${record.intimacy || 0}）`);
+      return names.join("、") || "无";
+    }
+
     function renderWeekReview() {
       const logs = state.action_log || [];
       const actionsOnly = logs.filter((entry) => entry.type === "action");
@@ -1586,6 +1972,11 @@
           `最常去的地方：${mostCommon(actionsOnly.map((entry) => locationName(entry.location))) || "还没形成固定路线"}`,
           `最常做的事：${mostCommon(actionsOnly.map((entry) => entry.title)) || "还没形成习惯"}`,
           `最大的变化：${largestChange(changes)}`,
+          `总行动次数：${actionsOnly.length}`,
+          `总消耗行动点：${state.total_action_points_spent || 0}`,
+          `获得过的状态：${buffSeenText()}`,
+          `认识过的人：${npcSeenText()}`,
+          `最常触发随机事件的地点：${mostCommon(logs.filter((entry) => entry.type === "random").map((entry) => locationName(entry.location))) || "没有明显地点"}`,
           `你保住的东西：${keptThing(changes)}`,
           `系统评价：${systemEvaluation()}`
         ].join("\n"))
