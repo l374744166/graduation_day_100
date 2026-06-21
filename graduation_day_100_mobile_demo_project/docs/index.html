@@ -411,6 +411,14 @@
     const TIME_LABELS = { morning: "上午", afternoon: "下午", night: "晚上" };
     const MAX_REROLLS = 3;
 
+    const weeklyGoals = [
+      { id: "job_search", title: "投出 3 次求职相关行动", target: 3, progress: () => countLogsByActions(["check_jobs", "modify_resume", "overhear_interview"]) },
+      { id: "interview_prepare", title: "至少完成 1 次面试行动", target: 1, progress: () => countLogsByActions(["attend_interview", "wait_for_hr", "pretend_not_nervous"]) },
+      { id: "pressure_safe", title: "压力不要达到 90", target: 1, progress: () => state.pressure < 90 ? 1 : 0 },
+      { id: "money_safe", title: "金钱不要低于 500", target: 1, progress: () => state.money >= 500 ? 1 : 0 },
+      { id: "keep_contact", title: "和至少一个人保持联系", target: 1, progress: () => countLogsByActions(["chat_with_clerk", "message_parents"]) + countLogsByText(["父母", "朋友", "舍友"]) > 0 ? 1 : 0 }
+    ];
+
     const startProfiles = [
       { name: "穷但乐观", ranges: { money: [1200, 2200], mood: [60, 80], skill: [30, 50], relationship: [50, 75], pressure: [35, 60], self_identity: [40, 60] }, evaluation: "你没什么钱，但暂时还笑得出来。这可能是天赋，也可能是还没看清现实。" },
       { name: "有点能力但焦虑", ranges: { money: [2500, 4500], mood: [35, 55], skill: [50, 65], relationship: [35, 60], pressure: [60, 80], self_identity: [35, 55] }, evaluation: "你不是没有能力，只是脑子每天都在模拟失败。" },
@@ -449,6 +457,39 @@
         { text: "写得很官方", result: "你写下积极、认真、团结同学。每个词都像借来的。", effects: { pressure: 1, self_identity: -1 } },
         { text: "写一句真话", result: "你写：我还在寻找自己。它不像总结，但至少不像撒谎。", effects: { self_identity: 3, mood: 1 } },
         { text: "先空着", result: "空白也算一种回答，只是老师大概不会这么认为。", effects: { mood: 1, pressure: 2 } }
+      ] }
+    ];
+
+    const thresholdEvents = [
+      { id: "current_pressure_breakdown", title: "压力爆表前夜", description: "你发现自己已经连续刷新招聘软件十几次。每一次刷新都像在问生活：轮到我了吗？", condition: (s) => s.pressure >= 85, choices: [
+        { text: "强行关掉软件", result: "你把手机扣下去。屏幕黑了，脑子还亮着，但至少少了一个发光的焦虑源。", effects: { pressure: -5, mood: 1 } },
+        { text: "继续刷一会儿", result: "你又刷了半小时，什么都没变，只有眼睛更干了。", effects: { pressure: 3, mood: -2 } },
+        { text: "写下最怕的事", result: "你写下“找不到工作”。字很丑，但恐惧被放到纸上以后，体积小了一点。", effects: { pressure: -3, self_identity: 2 } }
+      ] },
+      { id: "current_money_warning", title: "余额警报", description: "你看了一眼余额，突然理解了为什么便利店的打折标签这么有亲和力。", condition: (s) => s.money < 500, choices: [
+        { text: "去便利店看看班次", result: "你记下了便利店招兼职的时间。生活没给你面子，但给了你一个班表。", effects: { pressure: -2, self_identity: 1 } },
+        { text: "给父母发消息", result: "你打了“最近有点紧”，又删掉，最后发成“我挺好的”。", effects: { relationship: 2, pressure: 1 } },
+        { text: "今晚少花一点", result: "你决定晚饭简单点。不是自律，是余额替你自律。", effects: { money: 20, mood: -1 } }
+      ] },
+      { id: "current_mood_low", title: "情绪低电量", description: "你不是不想努力，只是今天连打开电脑都像在搬一块石头。", condition: (s) => s.mood <= 25, choices: [
+        { text: "允许自己慢一点", result: "你没有立刻变好，但不再把自己往墙上推。", effects: { mood: 5, pressure: -2 } },
+        { text: "硬撑一下", result: "你撑住了半小时，然后开始怀疑半小时是不是也算人生长度单位。", effects: { skill: 1, mood: -2 } },
+        { text: "找人说句话", result: "你发了一句“在吗”。对方回得不快，但至少世界没有完全静音。", effects: { mood: 3, relationship: 2 } }
+      ] },
+      { id: "current_skill_ready", title: "简历终于有点东西", description: "你突然发现，自己好像真的能把一段经历讲清楚了。这很少见，值得记下来。", condition: (s) => s.skill >= 45 && s.day >= 3, choices: [
+        { text: "把项目经历再打磨一下", result: "你把含糊的句子改得具体了一点。它不像奇迹，但像一个能发出去的版本。", effects: { skill: 2, pressure: -1 } },
+        { text: "准备面试说法", result: "你对着空气练了一遍。空气没有录用你，但也没有打断你。", effects: { skill: 1, self_identity: 2 } },
+        { text: "先保存这个版本", result: "你保存文件，文件名终于没有再加“最终最终”。", effects: { mood: 2, pressure: -1 } }
+      ] },
+      { id: "current_relationship_support", title: "有人把你拉了一下", description: "朋友问你最近怎么样。你本来想说还行，结果手指停在输入框上。", condition: (s) => s.relationship >= 65 && s.day >= 4, choices: [
+        { text: "认真问他怎么准备的", result: "他发来一串经验，末尾补一句：别照抄，我也不一定对。你突然安心了一点。", effects: { skill: 2, pressure: -2 } },
+        { text: "只发个表情包", result: "表情包很轻，但对方懂了。成年人的求救有时不需要完整句子。", effects: { mood: 2, relationship: 1 } },
+        { text: "说自己有点慌", result: "他说：正常，我也慌。两个慌张的人互相证明了这不是个人故障。", effects: { mood: 3, pressure: -2 } }
+      ] },
+      { id: "current_identity_confusion", title: "自我介绍又卡住了", description: "你试着用一句话概括自己。脑子里弹出的第一句是：一个还没加载完的人。", condition: (s) => s.self_identity <= 25 && s.day >= 3, choices: [
+        { text: "写下讨厌什么", result: "你不知道自己想成为什么，但至少知道自己不想变成什么。", effects: { self_identity: 3, pressure: -1 } },
+        { text: "照模板复制一份", result: "模板很安全，也很不像你。你把它保存成了临时版本。", effects: { pressure: -1, self_identity: -1 } },
+        { text: "先承认不知道", result: "不知道也是一种状态。它不体面，但真实。", effects: { self_identity: 2, mood: 1 } }
       ] }
     ];
 
@@ -508,14 +549,14 @@
     ];
 
     const locations = [
-      { id: "room", name: "房间", description: "一间不大的房间，床、书桌、行李箱和未来挤在一起。", actions: ["rest", "organize_room", "write_diary", "modify_resume", "check_jobs"] },
-      { id: "dorm", name: "宿舍", description: "四年生活过的地方，空气里还有泡面、键盘和没说完的话。", actions: ["roast_roommates", "last_game", "criticize_roommate_resume", "pretend_have_plan", "pack_luggage", "look_at_old_stuff"] },
-      { id: "convenience_store", name: "便利店", description: "灯光永远很亮，像是专门给睡不着的人开的。", actions: ["part_time_job", "buy_cheap_food", "chat_with_clerk", "watch_night_shift_worker"] },
-      { id: "subway_station", name: "地铁站", description: "人群像流水一样涌过去，你站在里面，感觉自己也被推着走。", actions: ["commute", "watch_crowd", "miss_train", "stand_in_corner"] },
-      { id: "cafe", name: "咖啡店", description: "这里的人看起来都很忙，虽然你不知道他们是不是真的有事。", actions: ["modify_resume", "pretend_to_work", "overhear_interview", "order_cheapest_coffee"] },
-      { id: "interview_company", name: "面试公司", description: "前台很干净，空气里有一种让人自动坐直的味道。", actions: ["attend_interview", "wait_for_hr", "observe_front_desk", "pretend_not_nervous"] },
-      { id: "park", name: "公园", description: "这里没有人问你职业规划，只有风和长椅。", actions: ["take_walk", "sit_on_bench", "watch_old_people_chess", "think_about_future"] },
-      { id: "train_station", name: "火车站", description: "屏幕上滚动着很多目的地，每一个都像是另一种人生。", actions: ["check_train_schedule", "hesitate_about_home", "buy_water", "message_parents"] }
+      { id: "room", name: "房间", unlock_day: 1, description: "一间不大的房间，床、书桌、行李箱和未来挤在一起。", actions: ["rest", "organize_room", "write_diary", "modify_resume", "check_jobs"] },
+      { id: "dorm", name: "宿舍", unlock_day: 1, description: "四年生活过的地方，空气里还有泡面、键盘和没说完的话。", actions: ["roast_roommates", "last_game", "criticize_roommate_resume", "pretend_have_plan", "pack_luggage", "look_at_old_stuff"] },
+      { id: "convenience_store", name: "便利店", unlock_day: 1, description: "灯光永远很亮，像是专门给睡不着的人开的。", actions: ["part_time_job", "buy_cheap_food", "chat_with_clerk", "watch_night_shift_worker"] },
+      { id: "park", name: "公园", unlock_day: 1, description: "这里没有人问你职业规划，只有风和长椅。", actions: ["take_walk", "sit_on_bench", "watch_old_people_chess", "think_about_future"] },
+      { id: "subway_station", name: "地铁站", unlock_day: 3, locked_text: "你还没开始真正奔波，地铁站暂时只是城市背景。", description: "人群像流水一样涌过去，你站在里面，感觉自己也被推着走。", actions: ["commute", "watch_crowd", "miss_train", "stand_in_corner"] },
+      { id: "cafe", name: "咖啡店", unlock_day: 3, locked_text: "等你开始认真改简历，这里会变得更有用。", description: "这里的人看起来都很忙，虽然你不知道他们是不是真的有事。", actions: ["modify_resume", "pretend_to_work", "overhear_interview", "order_cheapest_coffee"] },
+      { id: "train_station", name: "火车站", unlock_day: 5, locked_text: "现在还没到认真考虑去留的时候。", description: "屏幕上滚动着很多目的地，每一个都像是另一种人生。", actions: ["check_train_schedule", "hesitate_about_home", "buy_water", "message_parents"] },
+      { id: "interview_company", name: "面试公司", unlock_day: 6, locked_text: "你还没收到面试通知，暂时没理由去这里。", description: "前台很干净，空气里有一种让人自动坐直的味道。", actions: ["attend_interview", "wait_for_hr", "observe_front_desk", "pretend_not_nervous"] }
     ];
 
     const events = [
@@ -580,7 +621,8 @@
         initial_stats: null,
         start_tags: [],
         reroll_used: 0,
-        start_evaluation: ""
+        start_evaluation: "",
+        triggered_thresholds: []
       };
       base.day_start_stats = snapshotStats(base);
       return base;
@@ -619,10 +661,22 @@
         time_slot: state.time_slot,
         location: entry.location || state.current_location,
         type: entry.type,
+        action_id: entry.action_id || "",
         title: entry.title,
         description: entry.description,
         effects: { ...(entry.effects || {}) }
       });
+    }
+
+    function countLogsByActions(ids) {
+      return (state.action_log || []).filter((entry) => ids.includes(entry.action_id)).length;
+    }
+
+    function countLogsByText(words) {
+      return (state.action_log || []).filter((entry) => {
+        const text = `${entry.title || ""}${entry.description || ""}`;
+        return words.some((word) => text.includes(word));
+      }).length;
     }
 
     function advanceTime() {
@@ -647,6 +701,12 @@
         return event.condition(state);
       });
       if (special) return { ...special, conditional: true };
+      const threshold = thresholdEvents.find((event) => {
+        state.triggered_thresholds = state.triggered_thresholds || [];
+        if (state.triggered_thresholds.includes(event.id)) return false;
+        return event.condition(state);
+      });
+      if (threshold) return { ...threshold, threshold: true };
       return events.find((event) => event.day === state.day && !state.flags[`event_day_${event.day}`]);
     }
 
@@ -671,6 +731,7 @@
       state.start_profile_name = state.start_profile_name || "旧版开局";
       state.start_evaluation = state.start_evaluation || "这份存档来自毕业档案系统上线之前，但你依然得继续往前。";
       state.reroll_used = Number(state.reroll_used) || 0;
+      state.triggered_thresholds = state.triggered_thresholds || [];
       if (state.current_location === "rental_room") state.current_location = "room";
       if (state.current_location === "coffee_shop") state.current_location = "cafe";
       state.day_start_stats = state.day_start_stats || snapshotStats(state);
@@ -1005,6 +1066,10 @@
       return locations.find((location) => location.id === state.current_location) || locations[0];
     }
 
+    function isLocationUnlocked(location) {
+      return state.day >= (location.unlock_day || 1);
+    }
+
     function availableActions() {
       const ids = currentLocation().actions || [];
       return ids.map((id) => actions.find((action) => action.id === id)).filter(Boolean);
@@ -1014,6 +1079,11 @@
       if (processing) return;
       const location = locations.find((item) => item.id === locationId);
       if (!location) return;
+      if (!isLocationUnlocked(location)) {
+        noticeText = location.locked_text || `第 ${location.unlock_day} 天之后再来这里比较合理。`;
+        renderRoom("locations");
+        return;
+      }
       state.current_location = location.id;
       noticeText = `你来到了${location.name}。`;
       renderRoom("room");
@@ -1024,10 +1094,13 @@
       const grid = el("div", "grid");
       for (const location of locations) {
         const card = el("article", "card");
-        card.append(el("h3", "", location.name), el("p", "", location.description), button(location.id === state.current_location ? "已在这里" : "前往", () => {
+        const locked = !isLocationUnlocked(location);
+        const actionButton = button(locked ? `第 ${location.unlock_day} 天开放` : location.id === state.current_location ? "已在这里" : "前往", () => {
           if (processing || location.id === state.current_location) return;
           switchLocation(location.id);
-        }));
+        });
+        actionButton.disabled = locked || location.id === state.current_location;
+        card.append(el("h3", "", location.name), el("p", "", locked ? location.locked_text || location.description : location.description), actionButton);
         grid.append(card);
       }
       content.append(grid);
@@ -1078,7 +1151,25 @@
         }
         panel.append(item);
       }
+      panel.append(el("div", "divider"), renderWeeklyGoals());
       return panel;
+    }
+
+    function renderWeeklyGoals() {
+      const wrap = el("div", "log-list");
+      wrap.append(el("h3", "", "第一周目标"));
+      for (const goal of weeklyGoals) {
+        const item = el("div", "today-slot");
+        const raw = Math.max(0, Number(goal.progress()) || 0);
+        const progress = Math.min(raw, goal.target);
+        const done = progress >= goal.target;
+        item.append(
+          el("div", "log-time", `${done ? "已达成" : "进行中"}：${goal.title}`),
+          el("p", done ? "effects" : "muted", goal.target === 1 ? (done ? "已经守住。" : "还没稳住。") : `${progress}/${goal.target}`)
+        );
+        wrap.append(item);
+      }
+      return wrap;
     }
 
     function logItem(entry) {
@@ -1128,7 +1219,7 @@
       processing = true;
       disablePageButtons();
       applyEffects(action.effects);
-      addLogEntry({ type: "action", title: action.name, description: action.feedback_text || action.description, effects: action.effects });
+      addLogEntry({ type: "action", action_id: action.id, title: action.name, description: action.feedback_text || action.description, effects: action.effects });
       noticeText = `${action.name}：${formatEffects(action.effects)}`;
       showFeedback({
         title: `行动完成：${action.name}`,
@@ -1156,7 +1247,10 @@
           processing = true;
           disablePageButtons();
           applyEffects(choice.effects);
-          if (event.conditional) {
+          if (event.threshold) {
+            state.triggered_thresholds = state.triggered_thresholds || [];
+            state.triggered_thresholds.push(event.id);
+          } else if (event.conditional) {
             state.flags[`conditional_${event.id}`] = true;
             state.flags[`event_day_${event.day}`] = true;
           } else {
@@ -1192,9 +1286,19 @@
       if (!logs.length) {
         list.append(el("p", "", "今天像一张空白日程表，安静得有点可疑。"));
       } else {
-        for (const entry of logs) list.append(logItem(entry));
+        list.append(el("h3", "", "今天做过"));
+        for (const slot of TIME_SLOTS) {
+          const titles = logs.filter((entry) => entry.time_slot === slot).map((entry) => entry.title);
+          const item = el("div", "today-slot");
+          item.append(el("div", "log-time", TIME_LABELS[slot]), el("p", "", titles.length ? titles.join("；") : "暂无"));
+          list.append(item);
+        }
       }
-      box.append(list, el("div", "effect-list", `今日变化：${formatEffects(changes)}`), el("p", "room-text", daySummaryText(day, logs, changes)));
+      box.append(
+        list,
+        el("div", "effect-list", `今日变化：${formatEffects(changes)}`),
+        el("p", "room-text", dailyInsightText(day, logs, changes))
+      );
       box.append(button(state.day > 7 ? "查看结局" : "进入下一天", () => {
         state.day_start_stats = snapshotStats();
         noticeText = "";
@@ -1203,6 +1307,60 @@
       }));
       screen.append(box);
       app.append(screen);
+    }
+
+    function dailyInsightText(day, logs, changes) {
+      return [
+        `今日关键词：${dayKeyword(day, logs, changes)}`,
+        `今日最有用行动：${mostUsefulAction(logs, changes)}`,
+        `今日最大代价：${biggestCost(changes)}`,
+        `明日建议：${tomorrowHint(changes)}`,
+        "",
+        daySummaryText(day, logs, changes)
+      ].join("\n");
+    }
+
+    function dayKeyword(day, logs, changes) {
+      if (day <= 2 && logs.some((entry) => entry.title.includes("舍友") || entry.title.includes("宿舍"))) return "离别喜剧";
+      if (changes.pressure >= 4) return "压力上浮";
+      if (changes.skill >= 3) return "简历打磨";
+      if (changes.relationship >= 3) return "还有联系";
+      if (changes.money < -80) return "生活费告急";
+      if (changes.mood >= 4) return "喘了一口气";
+      return "继续运行";
+    }
+
+    function mostUsefulAction(logs, changes) {
+      const action = logs.filter((entry) => entry.type === "action").sort((a, b) => usefulnessScore(b.effects) - usefulnessScore(a.effects))[0];
+      if (action) return action.title;
+      if (changes.relationship > 2) return "把话说出去";
+      if (changes.skill > 2) return "认真准备了一点";
+      return logs[0] ? logs[0].title : "今天没有明显行动";
+    }
+
+    function usefulnessScore(effects) {
+      return (effects.skill || 0) + (effects.relationship || 0) + (effects.self_identity || 0) + Math.max(0, effects.mood || 0) - Math.max(0, effects.pressure || 0);
+    }
+
+    function biggestCost(changes) {
+      const costs = [
+        { label: "钱", value: -changes.money },
+        { label: "情绪", value: -changes.mood },
+        { label: "关系", value: -changes.relationship },
+        { label: "自我认同", value: -changes.self_identity },
+        { label: "压力", value: changes.pressure }
+      ].sort((a, b) => b.value - a.value);
+      const cost = costs[0];
+      if (!cost || cost.value <= 0) return "今天没有明显代价，难得。";
+      return `${cost.label}付出最多`;
+    }
+
+    function tomorrowHint(changes) {
+      if (state.pressure >= 80 || changes.pressure >= 4) return "压力正在上升，明天最好留一次行动给喘气。";
+      if (state.money < 700) return "钱已经偏紧，便利店可能比招聘网站更现实。";
+      if (state.skill < 35 && state.day >= 3) return "能力还没被整理出来，明天适合改简历或偷听一场模拟面试。";
+      if (state.relationship < 30) return "你有点太安静了，明天可以找人说句话。";
+      return "保持现在的节奏，别急着把一周活成一场考试。";
     }
 
     function daySummaryText(day, logs, changes) {
@@ -1244,6 +1402,7 @@
         el("h2", "", report.title),
         el("p", "room-text", report.description),
         renderStartReview(),
+        renderWeekReview(),
         renderStats(),
         button("重新开始", () => {
           state = freshState();
@@ -1268,6 +1427,53 @@
         el("p", "muted", `重抽次数：${state.reroll_used || 0}`)
       );
       return box;
+    }
+
+    function renderWeekReview() {
+      const logs = state.action_log || [];
+      const actionsOnly = logs.filter((entry) => entry.type === "action");
+      const changes = statDiff(state.initial_stats || snapshotStats(), snapshotStats());
+      const box = el("div", "log-item");
+      box.append(
+        el("div", "log-time", "这一周的人格画像"),
+        el("p", "", [
+          `最常去的地方：${mostCommon(actionsOnly.map((entry) => locationName(entry.location))) || "还没形成固定路线"}`,
+          `最常做的事：${mostCommon(actionsOnly.map((entry) => entry.title)) || "还没形成习惯"}`,
+          `最大的变化：${largestChange(changes)}`,
+          `你保住的东西：${keptThing(changes)}`,
+          `系统评价：${systemEvaluation()}`
+        ].join("\n"))
+      );
+      return box;
+    }
+
+    function mostCommon(items) {
+      const counts = {};
+      for (const item of items.filter(Boolean)) counts[item] = (counts[item] || 0) + 1;
+      return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || "";
+    }
+
+    function largestChange(changes) {
+      const [key, value] = Object.entries(changes).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))[0] || [];
+      if (!key || !value) return "没有明显变化";
+      const sign = value > 0 ? "+" : "";
+      return `${STAT_LABELS[key]} ${sign}${value}`;
+    }
+
+    function keptThing(changes) {
+      if (state.relationship >= 55 || changes.relationship > 0) return "关系";
+      if (state.money >= 500) return "基本生活费";
+      if (state.mood >= 40 || changes.mood > 0) return "情绪";
+      if (state.self_identity >= 35 || changes.self_identity > 0) return "一点自我认同";
+      return "继续往前的惯性";
+    }
+
+    function systemEvaluation() {
+      if (state.pressure >= 85) return "你还没有失控，但已经很接近需要停下来喘气。";
+      if (state.skill >= 45 && state.money >= 500) return "你还没有上岸，但已经不再完全失控。";
+      if (state.relationship >= 65) return "你不是一个人走完这一周，这件事本身很重要。";
+      if (state.money < 500) return "生活费正在逼近警戒线，现实开始拥有更高优先级。";
+      return "你没有立刻变好，但每一天的选择都留下了一点痕迹。";
     }
 
     function endingReport() {
