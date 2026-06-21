@@ -410,6 +410,7 @@
     const TIME_SLOTS = ["morning", "afternoon", "night"];
     const TIME_LABELS = { morning: "上午", afternoon: "下午", night: "晚上" };
     const MAX_REROLLS = 3;
+    const DEBUG_MODE = new URLSearchParams(window.location.search).get("debug") === "1";
 
     const weeklyGoals = [
       { id: "job_search", title: "投出 3 次求职相关行动", target: 3, progress: () => countLogsByActions(["check_jobs", "modify_resume", "overhear_interview"]) },
@@ -662,6 +663,7 @@
         location: entry.location || state.current_location,
         type: entry.type,
         action_id: entry.action_id || "",
+        event_id: entry.event_id || "",
         title: entry.title,
         description: entry.description,
         effects: { ...(entry.effects || {}) }
@@ -778,6 +780,17 @@
             renderStartProfile();
           })
         );
+        if (DEBUG_MODE) {
+          const debug = el("div", "choice-grid");
+          for (const profile of startProfiles) {
+            debug.append(button(`调试开局：${profile.name}`, () => {
+              draftProfile = generateStartProfile(profile);
+              draftRerolls = 0;
+              renderStartProfile();
+            }));
+          }
+          card.append(el("p", "hint", "调试模式：直接选择一个固定开局，方便测试不同压力和资源状态。"), debug);
+        }
       } else {
         card.append(el("h2", "", `开局模板：${draftProfile.name}`), el("p", "room-text", draftProfile.evaluation));
         const stats = el("div", "profile-stats");
@@ -804,12 +817,12 @@
       app.append(screen);
     }
 
-    function generateStartProfile() {
-      const profile = startProfiles[randomInt(0, startProfiles.length - 1)];
+    function generateStartProfile(template) {
+      const profile = template || startProfiles[randomInt(0, startProfiles.length - 1)];
       const stats = {};
       for (const key of STAT_ORDER) {
         const [min, max] = profile.ranges[key];
-        stats[key] = randomInt(min, max);
+        stats[key] = template ? Math.round((min + max) / 2) : randomInt(min, max);
       }
       return {
         name: profile.name,
@@ -1169,7 +1182,24 @@
         );
         wrap.append(item);
       }
+      const warnings = criticalGoalWarnings();
+      if (warnings.length) {
+        const alert = el("div", "hint");
+        alert.append(el("strong", "", "临界提醒"), el("p", "", warnings.join("\n")));
+        wrap.append(alert);
+      }
       return wrap;
+    }
+
+    function criticalGoalWarnings() {
+      const warnings = [];
+      if (state.pressure >= 80) warnings.push("压力已经接近爆表，今天最好别再硬扛。");
+      if (state.money < 500) warnings.push("钱包进入红色预警，下一笔支出会很刺眼。");
+      if (state.mood < 30) warnings.push("情绪很低，今天可能需要喘口气。");
+      if (state.relationship < 25) warnings.push("你正在和别人慢慢断线。");
+      if (state.skill < 30 && state.day >= 3) warnings.push("简历和面试准备明显不足。");
+      if (state.self_identity < 30) warnings.push("你越来越难解释自己是谁。");
+      return warnings;
     }
 
     function logItem(entry) {
@@ -1256,7 +1286,7 @@
           } else {
             state.flags[`event_day_${event.day}`] = true;
           }
-          addLogEntry({ type: "event", title: `${event.title}：${choice.text}`, description: choice.result || choice.text, effects: choice.effects });
+          addLogEntry({ type: "event", event_id: event.id, title: `${event.title}：${choice.text}`, description: choice.result || choice.text, effects: choice.effects });
           noticeText = `${choice.text}：${formatEffects(choice.effects)}`;
           showFeedback({
             title: `你选择了：${choice.text}`,
@@ -1356,10 +1386,12 @@
     }
 
     function tomorrowHint(changes) {
-      if (state.pressure >= 80 || changes.pressure >= 4) return "压力正在上升，明天最好留一次行动给喘气。";
-      if (state.money < 700) return "钱已经偏紧，便利店可能比招聘网站更现实。";
-      if (state.skill < 35 && state.day >= 3) return "能力还没被整理出来，明天适合改简历或偷听一场模拟面试。";
-      if (state.relationship < 30) return "你有点太安静了，明天可以找人说句话。";
+      if (state.pressure >= 80 || changes.pressure >= 4) return "压力正在上升，明天也许该去【公园】走走，找一个不会问你职业规划的地方。";
+      if (state.money < 700) return "钱已经偏紧，明天去【便利店】看看打零工或便宜饭团，会比继续刷新招聘网站更现实。";
+      if (state.skill < 35 && state.day >= 3) return state.day >= 3 ? "能力还没被整理出来，明天可以去【房间】改简历；如果【咖啡店】开了，也可以偷听一场模拟面试。" : "能力还没被整理出来，明天先在【房间】把简历改成能发出去的版本。";
+      if (state.relationship < 30) return state.day >= 5 ? "你有点太安静了，明天可以去【火车站】给父母发条消息，或者在【便利店】和店员闲聊两句。" : "你有点太安静了，明天可以回【宿舍】和舍友多待一会儿，或者去【便利店】和店员闲聊两句。";
+      if (state.self_identity < 30) return "你越来越难解释自己是谁，明天可以在【房间】写日记，或者去【公园】想一想以后。";
+      if (state.day <= 6 && countLogsByActions(["attend_interview", "wait_for_hr", "pretend_not_nervous"]) < 1) return state.day >= 6 ? "面试已经离你很近了，明天可以去【面试公司】提前适应那种让人坐直的空气。" : "面试准备还没真正开始，明天可以去【咖啡店】听听别人怎么介绍自己。";
       return "保持现在的节奏，别急着把一周活成一场考试。";
     }
 
@@ -1404,6 +1436,7 @@
         renderStartReview(),
         renderWeekReview(),
         renderStats(),
+        button("复制本局记录", copyPlayLog),
         button("重新开始", () => {
           state = freshState();
           noticeText = "";
@@ -1427,6 +1460,119 @@
         el("p", "muted", `重抽次数：${state.reroll_used || 0}`)
       );
       return box;
+    }
+
+    function copyPlayLog() {
+      const text = buildPlayLog();
+      const onSuccess = () => showFeedback({
+        title: "本局记录已复制",
+        description: "可以直接发给测试的人或粘到聊天里。这里面包含开局、每天行动、目标完成、阈值事件和结局画像。",
+        effects: {},
+        meta: "测试记录",
+        onContinue: renderEnding
+      });
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(onSuccess).catch(() => showCopyFallback(text));
+      } else {
+        showCopyFallback(text);
+      }
+    }
+
+    function showCopyFallback(text) {
+      app.innerHTML = "";
+      const screen = el("section", "screen event-screen");
+      const box = el("article", "event-box");
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.textContent = text;
+      area.style.width = "100%";
+      area.style.minHeight = "260px";
+      area.style.borderRadius = "8px";
+      area.style.padding = "12px";
+      area.style.background = "#181b1b";
+      area.style.color = "var(--text)";
+      area.style.border = "1px solid var(--line)";
+      box.append(el("h2", "", "复制本局记录"), el("p", "", "当前浏览器没有直接开放剪贴板权限，可以长按或全选下面的记录复制。"), area, button("返回结局报告", renderEnding));
+      screen.append(box);
+      app.append(screen);
+      area.focus();
+      area.select();
+    }
+
+    function buildPlayLog() {
+      const logs = state.action_log || [];
+      const actionsOnly = logs.filter((entry) => entry.type === "action");
+      const changes = statDiff(state.initial_stats || snapshotStats(), snapshotStats());
+      const byDay = [];
+      for (let day = 1; day <= 7; day += 1) {
+        const dayLogs = logs.filter((entry) => entry.day === day);
+        if (!dayLogs.length) {
+          byDay.push(`第 ${day} 天：无记录`);
+          continue;
+        }
+        byDay.push(`第 ${day} 天：`);
+        for (const slot of TIME_SLOTS) {
+          const slotLogs = dayLogs.filter((entry) => entry.time_slot === slot);
+          if (!slotLogs.length) continue;
+          byDay.push(`  ${TIME_LABELS[slot]}：${slotLogs.map((entry) => `${locationName(entry.location)}-${entry.title}`).join("；")}`);
+        }
+      }
+      return [
+        "《毕业后的第100天》本局记录",
+        "",
+        `开局模板：${state.start_profile_name || "未知开局"}`,
+        `开局标签：${(state.start_tags || []).map((tag) => `【${tag.name || tag}】`).join("") || "无"}`,
+        "",
+        "每天行动：",
+        byDay.join("\n"),
+        "",
+        "地点访问次数：",
+        locationCountLines(actionsOnly).join("\n"),
+        "",
+        "目标完成情况：",
+        goalStatusLines().join("\n"),
+        "",
+        "触发过的阈值事件：",
+        triggeredThresholdLines().join("\n"),
+        "",
+        `最终数值：${formatStats(snapshotStats())}`,
+        `最大变化数值：${largestChange(changes)}`,
+        `最常去地点：${mostCommon(actionsOnly.map((entry) => locationName(entry.location))) || "还没形成固定路线"}`,
+        `最常做行动：${mostCommon(actionsOnly.map((entry) => entry.title)) || "还没形成习惯"}`,
+        `第 7 天系统评价：${systemEvaluation()}`
+      ].join("\n");
+    }
+
+    function locationCountLines(actionsOnly) {
+      const counts = {};
+      for (const entry of actionsOnly) {
+        const name = locationName(entry.location);
+        counts[name] = (counts[name] || 0) + 1;
+      }
+      const lines = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([name, count]) => `${name}：${count} 次`);
+      return lines.length ? lines : ["无地点行动记录"];
+    }
+
+    function goalStatusLines() {
+      return weeklyGoals.map((goal) => {
+        const progress = Math.min(Math.max(0, Number(goal.progress()) || 0), goal.target);
+        const done = progress >= goal.target;
+        const value = goal.target === 1 ? (done ? "完成" : "未完成") : `${progress}/${goal.target}`;
+        return `${done ? "✓" : "×"} ${goal.title}：${value}`;
+      });
+    }
+
+    function triggeredThresholdLines() {
+      const ids = state.triggered_thresholds || [];
+      if (!ids.length) return ["无"];
+      return ids.map((id) => {
+        const event = thresholdEvents.find((item) => item.id === id);
+        return event ? event.title : id;
+      });
+    }
+
+    function formatStats(stats) {
+      return STAT_ORDER.map((key) => `${STAT_LABELS[key]}${key === "money" ? `¥${stats[key]}` : stats[key]}`).join("，");
     }
 
     function renderWeekReview() {
