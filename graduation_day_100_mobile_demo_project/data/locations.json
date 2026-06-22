@@ -3,10 +3,10 @@
     "id": "room",
     "name": "房间",
     "unlock_day": 1,
-    "role": "自我整理 / 简历 / 休息",
-    "recommended": "适合补状态、写日记、推进简历。",
+    "role": "自我整理 / 简历 / 找房",
+    "recommended": "适合补状态、推进简历，也适合开始看租房信息。",
     "description": "一间不大的房间，床、书桌、行李箱和未来挤在一起。",
-    "actions": ["rest", "organize_room", "write_diary", "modify_resume", "check_jobs"]
+    "actions": ["rest", "organize_room", "write_diary", "modify_resume", "check_jobs", "send_application", "wait_for_reply", "check_rentals", "contact_landlord", "ask_shared_rent"]
   },
   {
     "id": "dorm",
@@ -16,6 +16,16 @@
     "recommended": "前两天最有记忆点的地方。",
     "description": "四年生活过的地方，空气里还有泡面、键盘和没说完的话。",
     "actions": ["roast_roommates", "last_game", "criticize_roommate_resume", "pretend_have_plan", "pack_luggage", "look_at_old_stuff"]
+  },
+  {
+    "id": "temporary_room",
+    "name": "临时房间",
+    "unlock_day": 3,
+    "role": "缓冲 / 求职 / 找房",
+    "recommended": "第 3 天后你不再住宿舍，这里是和下一步之间的缓冲区。",
+    "locked_text": "你还没真正搬离宿舍，暂时用不上这个临时落脚点。",
+    "description": "这里不是家，只是你和下一步之间的缓冲区。行李箱靠在墙边，像一个还没做完的决定。",
+    "actions": ["rest", "organize_room", "write_diary", "modify_resume", "check_jobs", "send_application", "wait_for_reply", "check_rentals", "contact_landlord", "ask_shared_rent"]
   },
   {
     "id": "convenience_store",
@@ -40,20 +50,20 @@
     "name": "地铁站",
     "unlock_day": 3,
     "role": "通勤 / 求职电话 / 城市压力",
-    "recommended": "开始奔波后，随机机会和压力都会来。",
+    "recommended": "开始奔波后，随机机会和压力都会来，也适合估算通勤。",
     "locked_text": "你还没开始真正奔波，地铁站暂时只是城市背景。",
     "description": "人群像流水一样涌过去，你站在里面，感觉自己也被推着走。",
-    "actions": ["commute", "watch_crowd", "miss_train", "stand_in_corner"]
+    "actions": ["commute", "watch_crowd", "miss_train", "stand_in_corner", "estimate_commute"]
   },
   {
     "id": "cafe",
     "name": "咖啡店",
     "unlock_day": 3,
     "role": "求职准备 / 灵感 / 偶遇",
-    "recommended": "能力低、需要准备面试时值得去。",
+    "recommended": "能力低、需要准备面试或联系房东时值得去。",
     "locked_text": "等你开始认真改简历，这里会变得更有用。",
     "description": "这里的人看起来都很忙，虽然你不知道他们是不是真的有事。",
-    "actions": ["modify_resume", "pretend_to_work", "overhear_interview", "order_cheapest_coffee"]
+    "actions": ["modify_resume", "send_application", "wait_for_reply", "check_rentals", "contact_landlord", "pretend_to_work", "overhear_interview", "order_cheapest_coffee"]
   },
   {
     "id": "train_station",
