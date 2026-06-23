@@ -700,9 +700,7 @@
       { id: "temporary_room", name: "临时房间", unlock_day: 3, role: "缓冲 / 求职 / 找房", recommended: "第 3 天后你不再住宿舍，这里是和下一步之间的缓冲区。", locked_text: "你还没真正搬离宿舍，暂时用不上这个临时落脚点。", description: "这里不是家，只是你和下一步之间的缓冲区。行李箱靠在墙边，像一个还没做完的决定。", actions: ["rest", "organize_room", "write_diary", "modify_resume", "browse_jobs", "send_application", "wait_for_reply", "check_rentals", "contact_landlord", "ask_shared_rent", "prepare_interview", "view_rental"] },
       { id: "convenience_store", name: "便利店", unlock_day: 1, role: "赚钱 / 补给 / 夜班现实", recommended: "钱紧时最现实，但打工很占行动点。", description: "灯光永远很亮，像是专门给睡不着的人开的。", actions: ["part_time_job", "buy_cheap_food", "chat_with_clerk", "watch_night_shift_worker"] },
       { id: "park", name: "公园", unlock_day: 1, role: "减压 / 自我认同 / 随机安慰", recommended: "压力高时来这里比较像个人。", description: "这里没有人问你职业规划，只有风和长椅。", actions: ["take_walk", "sit_on_bench", "watch_old_people_chess", "think_about_future"] },
-      { id: "subway_station", name: "地铁站", unlock_day: 3, role: "通勤 / 求职电话 / 城市压力", recommended: "开始奔波后，随机机会和压力都会来，也适合估算通勤。", locked_text: "你还没开始真正奔波，地铁站暂时只是城市背景。", description: "人群像流水一样涌过去，你站在里面，感觉自己也被推着走。", actions: ["commute", "watch_crowd", "miss_train", "stand_in_corner", "estimate_commute"] },
       { id: "cafe", name: "咖啡店", unlock_day: 3, role: "求职准备 / 灵感 / 偶遇", recommended: "能力低、需要准备面试或联系房东时值得去。", locked_text: "等你开始认真改简历，这里会变得更有用。", description: "这里的人看起来都很忙，虽然你不知道他们是不是真的有事。", actions: ["modify_resume", "browse_jobs", "send_application", "wait_for_reply", "check_rentals", "contact_landlord", "prepare_interview", "pretend_to_work", "overhear_interview", "order_cheapest_coffee"] },
-      { id: "train_station", name: "火车站", unlock_day: 5, role: "去留 / 家庭 / 退路", recommended: "关系低或想联系父母时，它会变得很重。", locked_text: "现在还没到认真考虑去留的时候。", description: "屏幕上滚动着很多目的地，每一个都像是另一种人生。", actions: ["check_train_schedule", "hesitate_about_home", "buy_water", "message_parents"] },
       { id: "interview_company", name: "面试公司", unlock_day: 6, role: "高风险面试 / 学长 / 结果感", recommended: "面试准备够了再来，不然压力会很诚实。", locked_text: "你还没收到面试通知，暂时没理由去这里。", description: "前台很干净，空气里有一种让人自动坐直的味道。", actions: ["attend_interview", "wait_for_hr", "observe_front_desk", "pretend_not_nervous"] }
     ];
 
@@ -716,31 +714,6 @@
         { text: "住一周便宜短租", result: "你订了一个便宜短租。照片里窗很大，现实里窗很努力。至少今晚不用拖着箱子流浪。", effects: { money: -260, pressure: -2, self_identity: 1 }, onChoose: () => setTemporaryPlace("cheap_short_rent") },
         { text: "先借住阿哲那边", result: "阿哲说可以挤几天，但床垫和地板你得自己选。你笑了一下，至少还有人愿意给你留一块地。", effects: { money: -80, relationship: 4, pressure: 1 }, onChoose: () => setTemporaryPlace("borrow_roommate") },
         { text: "咬牙住两晚快捷酒店", result: "酒店房间很小，但门锁声让你安心。代价是余额明显变薄，像未来又瘦了一圈。", effects: { money: -420, pressure: 2, mood: 2 }, onChoose: () => setTemporaryPlace("budget_hotel") }
-      ] },
-      { day: 3, title: "第一次投简历", description: "你打开电脑，盯着简历文件看了很久。光标闪烁，像是在催你快点开始。", choices: [
-        { text: "认真修改简历", result: "你把每一句都改得更像成年人说的话。代价是你差点认不出自己。", effects: { skill: 3, pressure: 2 } },
-        { text: "海投 30 家", result: "你像撒传单一样投出简历。邮箱安静得像一间没人租的房。", effects: { pressure: 4, mood: -3 } },
-        { text: "先拖一天", result: "你告诉自己这是战略性休整。手机告诉你，今天的屏幕使用时间又赢了。", effects: { mood: 2, pressure: 5 } }
-      ] },
-      { day: 4, title: "朋友拿到 offer", description: "朋友发来消息：我拿到 offer 了。你盯着屏幕，打了几个字又删掉。", choices: [
-        { text: "真心祝福", result: "你回：“牛啊，等你发工资请饭。”他回：“可以，但你得先活到我发工资那天。”", effects: { relationship: 4, self_identity: 2 } },
-        { text: "装作开心", result: "你发了三个感叹号。每个感叹号都比你本人更有精神。", effects: { pressure: 3, mood: -2 } },
-        { text: "不回复", result: "你把手机扣在桌上。过了一会儿，又偷偷翻回来确认他没有追问。", effects: { relationship: -3, mood: -1 } }
-      ] },
-      { day: 5, title: "父母电话", description: "晚上，父母打来电话。电话那头问：工作找得怎么样了？", choices: [
-        { text: "说一切顺利", result: "你说挺好的。电话那头放心了一半，你把另一半压力留给了自己。", effects: { pressure: 5, relationship: -1 } },
-        { text: "坦白自己迷茫", result: "你说还没想清楚。电话那头沉默了一下，说：那就先吃好饭。", effects: { mood: 3, relationship: 4, pressure: -2 } },
-        { text: "敷衍几句挂掉", result: "你说信号不好。挂掉后，房间里的信号突然好得过分。", effects: { mood: -3, relationship: -4 } }
-      ] },
-      { day: 6, title: "第一次面试", description: "你坐在会议室里，对面的人问：你对自己的职业规划是什么？", choices: [
-        { text: "诚实回答", result: "你说自己还在摸索。HR 点了点头，你不知道那是理解，还是已经在心里翻页。", effects: { self_identity: 4, skill: 1 } },
-        { text: "尽力包装自己", result: "你把“会百度”包装成“具备独立问题解决能力”。说完你都想给自己鼓掌。", effects: { pressure: 3, skill: 2 } },
-        { text: "表现得很紧张", result: "你拿水杯的手比简历还诚实。至少他们看出了你很重视这次机会。", effects: { mood: -3, pressure: 2 } }
-      ] },
-      { day: 7, title: "第一周结束", description: "毕业后的第一周结束了。你没有想象中那么快上岸，但也没有真的停下来。", choices: [
-        { text: "写下这一周的感受", result: "你写下：我还没有变好，但我已经比昨天更知道自己在怕什么。", effects: { self_identity: 3, mood: 2 } },
-        { text: "继续投简历", result: "你又投了几份。动作已经熟练了，心跳还是没有。", effects: { skill: 2, pressure: 2 } },
-        { text: "早点睡觉", result: "你关掉屏幕。未来没有立刻清晰，但天花板至少不再发光。", effects: { mood: 5, pressure: -3 } }
       ] }
     ];
 
@@ -841,7 +814,7 @@
       for (const key of ["mood", "skill", "relationship", "pressure", "self_identity"]) {
         state[key] = Math.max(0, Math.min(100, Number(state[key]) || 0));
       }
-      state.money = Math.max(0, Number(state.money) || 0);
+      state.money = Math.max(-1000, Number(state.money) || 0);
     }
 
     function applyEffects(effects) {
@@ -912,12 +885,20 @@
 
     function finishDay() {
       const previousDay = state.day;
+      if (previousDay === 2 && temporaryPlaceMissing()) {
+        noticeText = "你还没有确定今晚住在哪里。先完成退宿和临时落脚点选择，才能进入第 3 天。";
+        return { endedDay: false, previousDay, blockedHousing: true };
+      }
       applyDailyProgressHooks(previousDay);
       state.money -= 60;
       if (state.money < 500) state.pressure += 5;
+      if (state.money < 0) {
+        state.pressure += 3;
+        noticeText = "你的钱已经低于 0，进入欠款状态。系统会允许继续试玩，但压力会额外上升。";
+      }
       state.day += 1;
       state.time_slot = "morning";
-      if (state.day >= 3 && state.current_location === "dorm") state.current_location = "temporary_room";
+      if (state.day >= 3 && ["dorm", "room", "subway_station", "train_station"].includes(state.current_location)) state.current_location = "temporary_room";
       state.action_points = state.max_action_points || MAX_ACTION_POINTS;
       state.action_sequence = 0;
       state.random_events_today = 0;
@@ -927,20 +908,31 @@
       return { endedDay: true, previousDay };
     }
 
+    function temporaryPlaceMissing() {
+      return (state.housing_progress?.temporary_place || "none") === "none";
+    }
+
+    function forceTemporaryPlaceEvent() {
+      const event = events.find((item) => item.day === 2);
+      return { ...event, title: "你还没有确定今晚住在哪里", description: "不能把行李拖进第 3 天。先选一个临时落脚点，哪怕它不完美。", forced_housing: true };
+    }
+
 
 
     function applyDailyProgressHooks(day) {
       state.job_progress = { ...freshJobProgress(), ...(state.job_progress || {}) };
       state.housing_progress = { ...freshHousingProgress(), ...(state.housing_progress || {}) };
-      if (day >= 2 && state.housing_progress.temporary_place === "none") {
-        setTemporaryPlace("cheap_short_rent");
-      }
       if (day >= 4 && state.job_progress.applications_sent >= 1 && !state.flags[`job_feedback_day_${day}`]) {
         resolveJobReply(true);
         state.flags[`job_feedback_day_${day}`] = true;
       }
       if (day >= 7 && state.job_progress.interviews_done > 0 && state.job_progress.final_result === "none") {
         settleFinalJobResult();
+      }
+      if (day >= 7 && state.job_progress.interviews_done <= 0 && state.job_progress.final_result === "none") {
+        state.job_progress.final_result = "no_progress";
+        state.job_progress.result_text = state.job_progress.applications_sent > 0 ? "这一周还没有拿到面试。至少你已经知道，下一周要更早准备和投递。" : "这一周求职没有真正启动。系统没有惩罚你，只是诚实记录了停滞。";
+        state.job_progress.history.push(`第 7 天求职结果：${state.job_progress.result_text}`);
       }
       updateJobStage();
       updateHousingStage();
@@ -963,6 +955,12 @@
     }
 
     function nextEvent() {
+      if (state.day === 2 && temporaryPlaceMissing() && state.flags.event_day_2) {
+        return forceTemporaryPlaceEvent();
+      }
+      if (state.day === 6 && (state.job_progress?.interview_invites || 0) < 1 && !state.flags.day6_no_interview) {
+        return noInterviewDay6Event();
+      }
       if (state.day === 7 && (state.housing_progress?.final_choice || "none") === "none" && !state.flags.housing_day7_decision) {
         return housingDecisionEvent();
       }
@@ -985,6 +983,32 @@
     }
 
 
+
+
+
+    function noInterviewDay6Event() {
+      return {
+        id: "day6_no_interview",
+        no_interview: true,
+        title: "第 6 天：没有响起的电话",
+        description: "今天本来像是该发生点什么的日子。但没有面试邀请，面试公司也不会凭空给你开门。",
+        choices: [
+          { text: "继续整理简历和岗位", result: "你把今天从“面试日”改成了“补课日”。不体面，但有用。", effects: { skill: 2, pressure: 1, self_identity: 1 }, onChoose: () => {
+            state.flags.day6_no_interview = true;
+            state.job_progress = { ...freshJobProgress(), ...(state.job_progress || {}) };
+            state.job_progress.job_leads += 1;
+            state.job_progress.history.push("第 6 天没有面试，改为继续找岗位。");
+            updateJobStage();
+          } },
+          { text: "去便利店多打一会儿工", result: "你承认今天先需要现金。收银机的滴声比邮箱通知更具体。", effects: { money: 120, mood: -2, pressure: -1 }, onChoose: () => {
+            state.flags.day6_no_interview = true;
+          } },
+          { text: "去公园缓一口气", result: "你没有面试，也没有假装自己不失落。风吹过来的时候，你把手机先收了起来。", effects: { mood: 3, pressure: -3 }, onChoose: () => {
+            state.flags.day6_no_interview = true;
+          } }
+        ]
+      };
+    }
 
     function housingDecisionEvent() {
       const housing = state.housing_progress = { ...freshHousingProgress(), ...(state.housing_progress || {}) };
@@ -1138,6 +1162,7 @@
       if (job.final_result === "second_round") job.stage = "second_round";
       else if (job.final_result === "trial_offer") job.stage = "trial_offer";
       else if (job.final_result === "rejected") job.stage = "rejected";
+      else if (job.final_result === "no_progress") job.stage = "no_progress";
       else if (job.interviews_done > 0) job.stage = "interview_completed";
       else if (job.interview_preparation > 0) job.stage = "interview_preparing";
       else if (job.interview_invites > 0) job.stage = "interview_invited";
@@ -1242,7 +1267,7 @@
       state.total_action_points_spent = Number(state.total_action_points_spent) || 0;
       if (state.current_location === "rental_room") state.current_location = "room";
       if (state.current_location === "coffee_shop") state.current_location = "cafe";
-      if (state.day >= 3 && state.current_location === "dorm") state.current_location = "temporary_room";
+      if (state.day >= 3 && ["dorm", "room", "subway_station", "train_station"].includes(state.current_location)) state.current_location = "temporary_room";
       updateJobStage();
       updateHousingStage();
       state.day_start_stats = state.day_start_stats || snapshotStats(state);
@@ -1273,7 +1298,7 @@
     }
 
     function routeNext() {
-      if (state.day >= 3 && state.current_location === "dorm") state.current_location = "temporary_room";
+      if (state.day >= 3 && ["dorm", "room", "subway_station", "train_station"].includes(state.current_location)) state.current_location = "temporary_room";
       if (state.day > 7) renderEnding();
       else {
         const event = nextEvent();
@@ -1556,6 +1581,10 @@
         if (!ok) return;
       }
       const result = finishDay();
+      if (result.blockedHousing) {
+        renderEvent(forceTemporaryPlaceEvent());
+        return;
+      }
       renderDaySummary(result.previousDay);
     }
 
@@ -1591,12 +1620,14 @@
         el("span", "", `求职：${jobStageText()}｜投递 ${state.job_progress?.applications_sent || 0}｜面试 ${state.job_progress?.interviews_done || 0}`),
         el("span", "", `住处：${housingStageText()}｜线索 ${state.housing_progress?.housing_leads || 0}`),
         el("span", "", `当前状态：${buffs}`),
+        el("span", state.money < 0 ? "hint" : "muted", state.money < 0 ? `欠款状态：最低到 ¥-1000，压力会额外上升` : `金钱规则：可欠款至 ¥-1000`),
         el("span", "muted", `自动保存开启`)
       );
       return wrap;
     }
 
     function renderRoom(activeView) {
+      normalizeCurrentLocation();
       if (state.day > 7) {
         renderEnding();
         return;
@@ -1702,7 +1733,13 @@
       return "";
     }
 
+    function normalizeCurrentLocation() {
+      if (state.day >= 3 && ["dorm", "room", "subway_station", "train_station"].includes(state.current_location)) state.current_location = "temporary_room";
+      if (!locations.some((location) => location.id === state.current_location)) state.current_location = homeLocationId();
+    }
+
     function currentLocation() {
+      normalizeCurrentLocation();
       return locations.find((location) => location.id === state.current_location) || locations[0];
     }
 
@@ -1711,8 +1748,7 @@
     }
 
     function isLocationUnlocked(location) {
-      if (location.id === "dorm" && state.day >= 3) return false;
-      if (location.id === "subway_station" || location.id === "train_station") return false;
+      if ((location.id === "dorm" || location.id === "room") && state.day >= 3) return false;
       if (location.id === "interview_company") return state.day === 6 && (state.job_progress?.interview_invites || 0) >= 1 && (state.job_progress?.interviews_done || 0) < 1;
       return state.day >= (location.unlock_day || 1);
     }
@@ -1745,10 +1781,9 @@
       content.append(el("h2", "", "出门"), el("p", "muted", "切换地点不消耗行动点，执行行动才会消耗。地点不同，能遇到的随机事件也不同。"));
       const grid = el("div", "grid");
       for (const location of locations) {
-        if (location.id === "subway_station" || location.id === "train_station") continue;
         const card = el("article", "card");
         const locked = !isLocationUnlocked(location);
-        const lockedLabel = location.id === "dorm" && state.day >= 3 ? "已搬离" : location.id === "interview_company" ? "等待邀请" : (location.id === "subway_station" || location.id === "train_station") ? "条件触发" : `第 ${location.unlock_day} 天开放`;
+        const lockedLabel = (location.id === "dorm" || location.id === "room") && state.day >= 3 ? "已搬离" : location.id === "interview_company" ? "等待邀请" : `第 ${location.unlock_day} 天开放`;
         const lockedDescription = location.id === "dorm" && state.day >= 3 ? "你已经搬离宿舍了。那张床还在，但不再属于你。" : location.locked_text || location.description;
         const actionButton = button(locked ? lockedLabel : location.id === state.current_location ? "已在这里" : "前往", () => {
           if (processing || location.id === state.current_location) return;
@@ -2015,7 +2050,8 @@
         onContinue: () => {
           const result = state.action_points <= 0 ? finishDay() : { endedDay: false, previousDay: state.day };
           processing = false;
-          if (result.endedDay) renderDaySummary(result.previousDay);
+          if (result.blockedHousing) renderEvent(forceTemporaryPlaceEvent());
+          else if (result.endedDay) renderDaySummary(result.previousDay);
           else routeNext();
         }
       });
@@ -2257,6 +2293,10 @@
             state.triggered_thresholds.push(event.id);
           } else if (event.post_interview) {
             state.flags.post_interview_result = true;
+          } else if (event.no_interview) {
+            state.flags.day6_no_interview = true;
+          } else if (event.forced_housing) {
+            state.flags.event_day_2 = true;
           } else if (event.conditional) {
             state.flags[`conditional_${event.id}`] = true;
             state.flags[`event_day_${event.day}`] = true;
@@ -2382,7 +2422,7 @@
       if (state.pressure >= 80 || changes.pressure >= 4) return "压力正在上升，明天也许该去【公园】走走，找一个不会问你职业规划的地方。";
       if (state.money < 700) return "钱已经偏紧，明天去【便利店】看看打零工或便宜饭团，会比继续刷新招聘网站更现实。";
       if (state.skill < 35 && state.day >= 3) return state.day >= 3 ? "能力还没被整理出来，明天可以去【房间】改简历；如果【咖啡店】开了，也可以偷听一场模拟面试。" : "能力还没被整理出来，明天先在【房间】把简历改成能发出去的版本。";
-      if (state.relationship < 30) return state.day >= 5 ? "你有点太安静了，明天可以去【火车站】给父母发条消息，或者在【便利店】和店员闲聊两句。" : "你有点太安静了，明天可以回【宿舍】和舍友多待一会儿，或者去【便利店】和店员闲聊两句。";
+      if (state.relationship < 30) return state.day >= 5 ? "你有点太安静了，明天可以在【临时房间】给父母发条消息，或者去【便利店】和店员闲聊两句。" : "你有点太安静了，明天可以回【宿舍】和舍友多待一会儿，或者去【便利店】和店员闲聊两句。";
       if (state.self_identity < 30) return "你越来越难解释自己是谁，明天可以在【房间】写日记，或者去【公园】想一想以后。";
       if (state.day <= 6 && countLogsByActions(["attend_interview", "wait_for_hr", "pretend_not_nervous"]) < 1) return state.day >= 6 ? "面试已经离你很近了，明天可以去【面试公司】提前适应那种让人坐直的空气。" : "面试准备还没真正开始，明天可以去【咖啡店】听听别人怎么介绍自己。";
       return "保持现在的节奏，别急着把一周活成一场考试。";
