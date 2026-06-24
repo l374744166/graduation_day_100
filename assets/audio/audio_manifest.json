@@ -1,0 +1,30 @@
+{
+  "main_menu": {
+    "file": "bgm_main_menu.mp3",
+    "source": "1The Day After the Graduation.wav"
+  },
+  "dorm": {
+    "file": "bgm_dorm.mp3",
+    "source": "2Last Night in the Dorm.wav"
+  },
+  "temporary_room": {
+    "file": "bgm_temporary_room.mp3",
+    "source": "3Unopened Suitcase.wav"
+  },
+  "city_daily": {
+    "file": "bgm_city_daily.mp3",
+    "source": "4Coffee Shop Resume.wav"
+  },
+  "interview": {
+    "file": "bgm_interview.mp3",
+    "source": "5Interview Tension.wav"
+  },
+  "day7_ending": {
+    "file": "bgm_day7_ending.mp3",
+    "source": "6After the Graduation.wav"
+  },
+  "daily_summary": {
+    "file": "bgm_daily_summary.mp3",
+    "source": "7End of the Day.wav"
+  }
+}
