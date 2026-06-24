@@ -1698,15 +1698,15 @@
       const backdrop = el("div", "modal-backdrop");
       const modal = el("section", "modal wide");
       modal.append(
-        el("h2", "", "v0.5.2 更新内容"),
-        el("p", "room-text", "- 修复地点开放和旧剧情冲突。\n- 第 2 天必须真正确定临时住处。\n- 修复没有面试邀请也可能触发面试的问题。\n- 明确欠款规则，余额可以暂时低于 0。\n- 新增 7 首原创背景音乐。\n- 电脑现在可以查看求职、住房、联系人和消息。\n- 优化主界面布局和手机版测试体验。")
+        el("h2", "", "v0.5.2｜声音响起来以后"),
+        el("p", "room-text", "这次没有增加更多天数，而是重新整理了已经存在的第一周。\n\n- 修复宿舍、面试和旧剧情之间的冲突。\n- 现在第 2 天必须真正决定今晚住在哪里。\n- 电脑可以统一查看求职、住房、联系人和消息。\n- 主界面减少了长期铺开的信息。\n- 接入 7 首原创背景音乐。\n- 增加音乐开关与音量设置。\n- 修复欠款和自动保存相关问题。\n\n这仍然是测试版本。\n如果某一天不知道该做什么，或者某段音乐和场景不搭，请直接告诉开发者。")
       );
       modal.append(button("知道了", () => {
         localStorage.setItem(VERSION_SEEN_KEY, APP_VERSION);
         backdrop.remove();
       }));
       modal.append(button("查看完整更新记录", () => {
-        modal.querySelector("p").textContent = "v0.5.2 是稳定性热修版本：统一地点数据源到 docs/data/locations.json；关闭旧版第 3-7 天固定剧情；明确欠款最低为 ¥-1000；第 2 天不允许跳过临时住处；电脑整合为求职、住房、联系人、邮件与消息信息中心；新增 7 首 BGM 与音乐设置。";
+        modal.querySelector("p").textContent = "完整更新记录：统一地点数据源到 docs/data/locations.json；关闭旧版第 3-7 天固定剧情；明确欠款最低为 ¥-1000；第 2 天不允许跳过临时住处；电脑整合为求职、住房、联系人、邮件与消息信息中心；新增 7 首 BGM、音乐开关与音量设置。";
       }));
       if (!auto) modal.append(button("关闭", () => backdrop.remove()));
       backdrop.append(modal);
