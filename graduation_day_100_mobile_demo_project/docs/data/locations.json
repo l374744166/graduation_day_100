@@ -1,0 +1,62 @@
+[
+  {
+    "id": "dorm",
+    "name": "宿舍",
+    "unlock_day": 1,
+    "lock_after_day": 2,
+    "role": "告别 / 整理 / 关系",
+    "recommended": "第 1-2 天正常开放；第 3 天后只能回忆，不能普通行动。",
+    "locked_text": "你已经退宿了。\n那张床还在那里，但不再属于你。",
+    "description": "四年生活过的地方，空气里还有泡面、键盘和没说完的话。",
+    "actions": ["rest", "organize_room", "write_diary", "modify_resume", "check_jobs", "roast_roommates", "last_game", "criticize_roommate_resume", "pretend_have_plan", "pack_luggage", "look_at_old_stuff", "ask_shared_rent"]
+  },
+  {
+    "id": "temporary_room",
+    "name": "临时房间",
+    "unlock_day": 3,
+    "role": "缓冲 / 求职 / 找房",
+    "recommended": "第 2 天确定临时住处后开放；第 3 天后默认生活地点。找房从这里开始。",
+    "locked_text": "你还没有确定临时住处。先完成第 2 天的退宿选择。",
+    "description": "这里不是家，只是你和下一步之间的缓冲区。行李箱靠在墙边，像一个还没做完的决定。",
+    "actions": ["rest", "organize_room", "write_diary", "modify_resume", "browse_jobs", "send_application", "wait_for_reply", "check_rentals", "contact_landlord", "ask_shared_rent", "prepare_interview", "view_rental"]
+  },
+  {
+    "id": "convenience_store",
+    "name": "便利店",
+    "unlock_day": 1,
+    "role": "赚钱 / 补给 / 夜班现实",
+    "recommended": "钱紧时最现实，但打工很占行动点。",
+    "description": "灯光永远很亮，像是专门给睡不着的人开的。",
+    "actions": ["part_time_job", "buy_cheap_food", "chat_with_clerk", "watch_night_shift_worker"]
+  },
+  {
+    "id": "cafe",
+    "name": "咖啡店",
+    "unlock_day": 3,
+    "role": "求职准备 / 信息中心 / 城市日常",
+    "recommended": "可以打开电脑处理求职和住房信息，也适合修改简历。",
+    "locked_text": "等你开始认真处理简历和找房，这里会变得更有用。",
+    "description": "这里的人看起来都很忙，虽然你不知道他们是不是真的有事。",
+    "actions": ["modify_resume", "browse_jobs", "send_application", "wait_for_reply", "check_rentals", "contact_landlord", "prepare_interview", "pretend_to_work", "overhear_interview", "order_cheapest_coffee"]
+  },
+  {
+    "id": "park",
+    "name": "公园",
+    "unlock_day": 1,
+    "role": "减压 / 自我认同 / 缓冲",
+    "recommended": "压力高时来这里比较像个人。",
+    "description": "这里没有人问你职业规划，只有风和长椅。",
+    "actions": ["take_walk", "sit_on_bench", "watch_old_people_chess", "think_about_future"]
+  },
+  {
+    "id": "interview_company",
+    "name": "面试公司",
+    "unlock_day": 6,
+    "requires": "interview_invite",
+    "role": "正式面试 / 高风险反馈",
+    "recommended": "只有收到面试邀请后开放。",
+    "locked_text": "你还没有收到面试邀请，暂时没有理由去这里。",
+    "description": "前台很干净，空气里有一种让人自动坐直的味道。",
+    "actions": ["attend_interview", "wait_for_hr", "observe_front_desk", "pretend_not_nervous"]
+  }
+]
