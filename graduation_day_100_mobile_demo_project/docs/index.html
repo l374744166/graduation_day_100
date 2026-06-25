@@ -258,6 +258,7 @@
       width: min(560px, 100%);
       max-height: min(86vh, 760px);
       overflow: auto;
+      position: relative;
       display: grid;
       gap: 13px;
       padding: 18px;
@@ -275,6 +276,14 @@
     .compact-records { max-height: 260px; overflow: auto; }
     .sound-hint { position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 25; padding: 8px 12px; border-radius: 999px; background: rgba(0,0,0,.62); border: 1px solid rgba(255,255,255,.16); color: var(--accent); font-size: 13px; }
     .money-negative { color: var(--bad); }
+    .action-card.compact .effects { color: #f3c66f; }
+    .action-card.compact p { color: #d6dfdc; }
+    .scene-options { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    .location-action-panel .room-text { font-size: 14px; line-height: 1.55; }
+    .location-action-panel h2 { font-size: 24px; }
+    .today-panel .stats { margin-bottom: 4px; }
+    .today-panel .stat { grid-template-columns: 72px 1fr auto; }
+
 
     .modal p, .log-item p, .summary-list p {
       color: #d7e0de;
@@ -423,12 +432,120 @@
 
     .ending .content { min-height: auto; }
 
-    @media (min-width: 780px) {
-      .screen { padding: 28px; }
-      .game { grid-template-columns: 292px 1fr; }
-      .play-area { grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); }
+    .pc-topbar { display: none; }
+    .pc-only { display: none; }
+    .mobile-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+
+    @media (min-width: 1000px) {
+      body { overflow: hidden; }
+      .screen:not(.menu):not(.event-screen) {
+        height: 100vh;
+        height: 100dvh;
+        padding: 16px 20px 18px;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        gap: 14px;
+      }
+      .pc-topbar {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) repeat(6, auto);
+        gap: 12px;
+        align-items: center;
+        max-width: 1440px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 10px 14px;
+        border: 1px solid rgba(255, 255, 255, .07);
+        border-radius: 10px;
+        background: rgba(34, 39, 39, .94);
+        box-shadow: 0 14px 36px rgba(0,0,0,.22);
+      }
+      .pc-topbar button { width: auto; min-height: 34px; padding: 0 12px; }
+      .pc-title { font-weight: 800; color: var(--accent); }
+      .pc-pill { color: #d7e0de; font-size: 14px; white-space: nowrap; }
+      .game {
+        max-width: 1440px;
+        width: 100%;
+        min-height: 0;
+        grid-template-columns: minmax(270px, 28%) minmax(380px, 44%) minmax(270px, 28%);
+        gap: 14px;
+      }
+      .play-area { display: contents; }
+      .sidebar, .content, .today-panel {
+        min-height: 0;
+        max-height: calc(100vh - 92px);
+        overflow: auto;
+        padding: 16px;
+      }
+      .sidebar { grid-column: 1; }
+      .content { grid-column: 2; align-content: start; }
+      .today-panel { grid-column: 3; }
+      .mobile-tabs { display: none; }
+      .pc-only { display: initial; }
+      .sidebar > .topline, .sidebar > .status-strip, .sidebar > .stats { display: none; }
+      .nav-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .system-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .nav-grid button, .system-grid button { min-height: 34px; font-size: 13px; }
+      .grid { grid-template-columns: 1fr; gap: 8px; }
+      .card { padding: 10px; gap: 6px; }
+      .card p { min-height: 0; font-size: 13px; line-height: 1.45; }
+      .card h3 { font-size: 16px; }
+      .card button { min-height: 34px; }
+      .effects { font-size: 13px; }
+      .content h2 { font-size: 26px; }
+      .content .hint, .content .notice { font-size: 15px; }
+      .modal.computer-modal {
+        width: min(1180px, 76vw);
+        height: 75vh;
+        max-height: 75vh;
+        overflow: hidden;
+        padding: 0;
+      }
+      .computer-shell {
+        display: grid;
+        grid-template-columns: 210px minmax(0, 1fr);
+        min-height: 0;
+        height: 100%;
+      }
+      .computer-tabs {
+        display: grid;
+        align-content: start;
+        gap: 10px;
+        padding: 18px;
+        border-right: 1px solid var(--line);
+        background: #181b1b;
+      }
+      .computer-tabs button { width: 100%; justify-content: start; }
+      .computer-tabs button.active { background: var(--button-on); }
+      .computer-body {
+        overflow: auto;
+        padding: 20px;
+        display: grid;
+        gap: 14px;
+        align-content: start;
+      }
+      .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .computer-close { position: absolute; top: 14px; right: 14px; width: auto; min-height: 34px; padding: 0 12px; }
+    }
+
+    @media (min-width: 900px) and (max-width: 999px) {
+      .screen { padding: 20px; }
+      .game { grid-template-columns: 270px 1fr; max-width: 980px; }
+      .play-area { grid-template-columns: minmax(0, 1fr); }
+      .today-panel { grid-column: 1 / -1; }
       .nav-grid, .system-grid { grid-template-columns: 1fr; }
-      .content, .sidebar { padding: 18px; }
+    }
+
+    @media (max-width: 899px) {
+      .screen { padding: 12px; }
+      .game, .play-area { grid-template-columns: 1fr; }
+      .content, .sidebar, .today-panel { padding: 14px; }
+      .today-panel .stats, .today-panel .log-list { max-height: 260px; overflow: auto; }
+      .modal.computer-modal { width: min(96vw, 760px); max-height: 88vh; }
+      .computer-shell { display: grid; gap: 12px; }
+      .computer-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+      .computer-tabs button { width: auto; min-width: 82px; }
+      .computer-body { display: grid; gap: 12px; }
     }
   </style>
 </head>
@@ -438,7 +555,7 @@
   <script>
     "use strict";
 
-    const APP_VERSION = "0.5.2";
+    const APP_VERSION = "0.5.3";
     const SAVE_KEY = "graduation_day_100_save_v2";
     const SAVE_VERSION = 5;
     const VERSION_SEEN_KEY = "graduation_day_100_last_seen_version";
@@ -1673,7 +1790,7 @@
       const inner = el("div", "menu-inner");
       inner.append(
         el("h1", "", "毕业后的第100天"),
-        el("p", "subtitle", `v${APP_VERSION} | 7 天 Demo | 手机网页试玩版`),
+        el("p", "subtitle", `v${APP_VERSION} | PC 优先网页原型`),
         button("新游戏", () => {
           state = freshState();
           noticeText = "";
@@ -1698,8 +1815,8 @@
       const backdrop = el("div", "modal-backdrop");
       const modal = el("section", "modal wide");
       modal.append(
-        el("h2", "", "v0.5.2｜声音响起来以后"),
-        el("p", "room-text", "这次没有增加更多天数，而是重新整理了已经存在的第一周。\n\n- 修复宿舍、面试和旧剧情之间的冲突。\n- 现在第 2 天必须真正决定今晚住在哪里。\n- 电脑可以统一查看求职、住房、联系人和消息。\n- 主界面减少了长期铺开的信息。\n- 接入 7 首原创背景音乐。\n- 增加音乐开关与音量设置。\n- 修复欠款和自动保存相关问题。\n\n这仍然是测试版本。\n如果某一天不知道该做什么，或者某段音乐和场景不搭，请直接告诉开发者。")
+        el("h2", "", "v0.5.3｜电脑端先动起来"),
+        el("p", "room-text", "这次不增加新玩法，重点把电脑端整理成真正的三栏游戏界面。\n\n- 修复宿舍、面试和旧剧情之间的冲突。\n- 现在第 2 天必须真正决定今晚住在哪里。\n- 电脑可以统一查看求职、住房、联系人和消息。\n- 主界面减少了长期铺开的信息。\n- 接入 7 首原创背景音乐。\n- 增加音乐开关与音量设置。\n- 修复欠款和自动保存相关问题。\n\n这仍然是测试版本。\n如果某一天不知道该做什么，或者某段音乐和场景不搭，请直接告诉开发者。")
       );
       modal.append(button("知道了", () => {
         localStorage.setItem(VERSION_SEEN_KEY, APP_VERSION);
@@ -1716,6 +1833,7 @@
     function renderShell(activeView) {
       app.innerHTML = "";
       const screen = el("section", "screen");
+      screen.append(renderTopbar());
       const game = el("div", "game");
       const sidebar = renderSidebar(activeView);
       const playArea = el("div", "play-area");
@@ -1727,11 +1845,27 @@
       return content;
     }
 
+    function renderTopbar() {
+      const bar = el("header", "pc-topbar");
+      const moneyText = state.money < 0 ? `欠款 ¥${Math.abs(state.money)}` : `¥${state.money}`;
+      bar.append(
+        el("div", "pc-title", `毕业后的第100天 v${APP_VERSION}`),
+        el("span", "pc-pill", `第 ${state.day} 天`),
+        el("span", "pc-pill", `行动点 ${state.action_points}/${state.max_action_points || MAX_ACTION_POINTS}`),
+        el("span", state.money < 0 ? "pc-pill money-negative" : "pc-pill", moneyText),
+        button(AudioManager.enabled ? "🔊" : "🔇", () => { AudioManager.setEnabled(!AudioManager.enabled); renderRoom("room"); }),
+        button("设置", openSettingsModal),
+        button("结束今天", endDayManually)
+      );
+      return bar;
+    }
+
     function renderSidebar(activeView) {
       const sidebar = el("aside", "sidebar");
       const top = el("div", "topline");
       top.append(el("h3", "", `第 ${state.day} 天`), el("span", "place", `当前位置：${locationName(state.current_location)}`));
-      sidebar.append(top, renderStatusStrip(), divider(), renderStats(), divider());
+      sidebar.append(top, renderStatusStrip(), divider());
+      sidebar.append(renderLocationActionPanel(activeView), divider());
 
       const nav = el("div", "nav-grid");
       nav.append(
@@ -1754,6 +1888,21 @@
       );
       sidebar.append(system);
       return sidebar;
+    }
+
+    function renderLocationActionPanel(activeView) {
+      const current = currentLocation();
+      const wrap = el("div", "log-list location-action-panel");
+      wrap.append(
+        el("h2", "", current.name),
+        el("p", "room-text", current.description),
+        el("div", "effects", `定位：${current.role || "日常"}
+推荐：${current.recommended || "按感觉来。"}`),
+        el("h3", "", "当前可执行行动"),
+        actionGrid({ limit: activeView === "actions" ? 99 : 5, compact: true })
+      );
+      if (canOpenComputer()) wrap.append(button(`打开电脑${unreadMessages().length ? `（${unreadMessages().length}）` : ""}`, openComputerModal));
+      return wrap;
     }
 
     function endDayManually() {
@@ -1825,17 +1974,17 @@
 
     function renderRoomHome(content) {
       const current = currentLocation();
+      const obj = currentObjective();
       content.append(
-        el("h2", "", current.name),
-        el("p", "room-text", current.description),
-        el("p", "notice", noticeText),
-        el("p", "hint", `切换地点不消耗行动点，执行行动才会消耗。今日剩余：${state.action_points} / ${state.max_action_points || MAX_ACTION_POINTS}`)
+        renderCurrentObjective(),
+        el("h3", "", "下一步建议"),
+        el("p", "hint", obj.description),
+        el("h3", "", "当前剧情 / 反馈"),
+        el("p", "notice", noticeText || `你现在在【${current.name}】。左侧可以直接执行当前地点行动，右侧可以查看状态和最近记录。`)
       );
-      if (canOpenComputer()) content.append(button(`打开电脑${unreadMessages().length ? `（${unreadMessages().length} 条未读）` : ""}`, openComputerModal));
-      content.append(el("h3", "", "当前地点可用行动"), actionGrid());
       if (state.day <= 2 && state.current_location === "dorm") {
         content.append(el("h3", "", "宿舍里还能点点什么"));
-        const grid = el("div", "grid");
+        const grid = el("div", "grid scene-options");
         for (const event of dormEvents) {
           if (!state.flags[`dorm_${event.id}`]) {
             const card = el("article", "card");
@@ -1849,18 +1998,21 @@
     }
 
     function renderActions(content) {
-      content.append(el("h2", "", `${currentLocation().name}行动`), el("p", "muted", `今日剩余行动点：${state.action_points} / ${state.max_action_points || MAX_ACTION_POINTS}。这里只显示当前位置能做的事。`), actionGrid());
+      content.append(el("h2", "", `${currentLocation().name}行动`), el("p", "muted", `今日剩余行动点：${state.action_points} / ${state.max_action_points || MAX_ACTION_POINTS}。PC 左栏只显示前 5 个主行动，这里可查看全部。`), actionGrid({ limit: 99 }));
     }
 
-    function actionGrid() {
-      const grid = el("div", "grid");
-      for (const action of availableActions()) grid.append(actionCard(action));
+    function actionGrid(options = {}) {
+      const { limit = 99, compact = false } = options;
+      const grid = el("div", compact ? "grid action-grid compact-actions" : "grid action-grid");
+      const all = availableActions();
+      for (const action of all.slice(0, limit)) grid.append(actionCard(action, compact));
+      if (all.length > limit) grid.append(button(`更多行动（${all.length - limit}）`, () => renderRoom("actions")));
       if (!grid.childElementCount) grid.append(el("p", "muted", "这里暂时没有可执行行动。"));
       return grid;
     }
 
-    function actionCard(action) {
-      const card = el("article", "card");
+    function actionCard(action, compact = false) {
+      const card = el("article", compact ? "card action-card compact" : "card action-card");
       const meta = getActionMeta(action);
       const used = actionUsedToday(action.id);
       const remaining = Math.max(0, meta.daily_limit - used);
@@ -1868,13 +2020,29 @@
       const unavailableReason = actionUnavailableReason(action, cost, remaining);
       const execute = button(unavailableReason ? "暂不可用" : "执行", () => performAction(action));
       execute.disabled = Boolean(unavailableReason);
+      const mainline = actionMainlineText(action);
       card.append(
         el("h3", "", action.name),
-        el("p", "", action.description),
-        el("div", "effects", `消耗 ${cost} 点｜今日还可 ${remaining} 次\n${unavailableReason ? `原因：${unavailableReason}\n` : ""}${formatEffects(action.effects)}`),
+        el("p", "", compact ? mainline : action.description),
+        el("div", "effects", `消耗 ${cost} 点｜今日剩余 ${remaining} 次
+${mainline}｜${formatEffects(action.effects)}${unavailableReason ? `
+原因：${unavailableReason}` : ""}`),
         execute
       );
       return card;
+    }
+
+
+
+    function actionMainlineText(action) {
+      const tags = getActionMeta(action).tags || [];
+      if (tags.includes("application") || tags.includes("job_search") || tags.includes("resume_prepare") || tags.includes("interview_prepare")) return "推进求职";
+      if (tags.includes("housing")) return "推进住房";
+      if (tags.includes("social_contact") || tags.includes("family_contact")) return "维持关系";
+      if (tags.includes("rest")) return "恢复状态";
+      if (tags.includes("identity")) return "整理自己";
+      if (tags.includes("money")) return "补充现金";
+      return "日常行动";
     }
 
     function getActionMeta(action) {
@@ -1999,12 +2167,15 @@
         return;
       }
       const backdrop = el("div", "modal-backdrop");
-      const modal = el("section", "modal wide");
-      const tabs = el("div", "tab-row");
-      const body = el("div", "log-list");
+      const modal = el("section", "modal computer-modal");
+      const shell = el("div", "computer-shell");
+      const tabs = el("div", "computer-tabs");
+      const body = el("div", "computer-body");
+      const close = button("关闭", () => { backdrop.remove(); renderRoom("room"); }, "computer-close");
       const setTab = (nextTab) => {
         body.innerHTML = "";
         for (const btn of tabs.querySelectorAll("button")) btn.classList.toggle("active", btn.dataset.tab === nextTab);
+        body.append(el("h2", "", computerTabTitle(nextTab)));
         if (nextTab === "job") renderComputerJob(body, backdrop);
         if (nextTab === "housing") renderComputerHousing(body, backdrop);
         if (nextTab === "contacts") renderComputerContacts(body);
@@ -2013,16 +2184,24 @@
           markMessagesRead();
         }
       };
-      const tabDefs = [["job", "求职"], ["housing", "住房"], ["contacts", "联系人"], ["messages", `邮件与消息${unreadMessages().length ? `（${unreadMessages().length}）` : ""}`]];
+      const tabDefs = [["job", "求职"], ["housing", "住房"], ["contacts", "联系人"], ["messages", `消息${unreadMessages().length ? ` ● ${unreadMessages().length}` : ""}`]];
+      tabs.append(el("h2", "", "电脑"), el("p", "muted", "信息中心"));
       for (const [id, label] of tabDefs) {
         const btn = button(label, () => setTab(id));
         btn.dataset.tab = id;
         tabs.append(btn);
       }
-      modal.append(el("h2", "", "电脑信息中心"), tabs, body, button("关闭", () => { backdrop.remove(); renderRoom("room"); }));
+      shell.append(tabs, body);
+      modal.append(close, shell);
       backdrop.append(modal);
       document.body.append(backdrop);
       setTab(tab);
+    }
+
+
+
+    function computerTabTitle(tab) {
+      return ({ job: "求职", housing: "住房", contacts: "联系人", messages: "邮件与消息" })[tab] || "电脑";
     }
 
     function computerActionButton(actionId, backdrop) {
@@ -2030,7 +2209,7 @@
       if (!action) return el("span", "muted", "行动缺失");
       const cost = actionCost(action);
       const reason = actionUnavailableReason(action, cost, Math.max(0, getActionMeta(action).daily_limit - actionUsedToday(action.id)));
-      const btn = button(reason ? `${action.name}（暂不可用）` : `${action.name}｜消耗 ${cost}`, () => {
+      const btn = button(reason ? `${action.name}（暂不可用）` : `${action.name}｜消耗 ${cost} 点`, () => {
         backdrop.remove();
         performAction(action);
       });
@@ -2161,7 +2340,8 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
 
     function renderTodayPanel() {
       const panel = el("aside", "today-panel");
-      panel.append(el("h3", "", `第 ${state.day} 天记录`), el("p", "muted", `行动点：${state.action_points}/${state.max_action_points || MAX_ACTION_POINTS}`), renderCurrentObjective());
+      panel.append(el("h3", "", "状态摘要"), renderStats(), renderStatusSummary());
+      panel.append(el("div", "divider"), el("h3", "", "今日记录"), el("p", "muted", "只显示最近 3 条，完整记录点下方按钮。"));
       const today = (state.action_log || []).filter((entry) => entry.day === state.day);
       const ordered = today.filter((entry) => entry.type !== "event").sort((a, b) => (a.action_index || 0) - (b.action_index || 0));
       if (!ordered.length) {
@@ -2172,11 +2352,11 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         for (const entry of ordered.slice(-3)) {
           const item = el("div", "today-slot");
           const index = entry.action_index ? `第 ${entry.action_index} 次` : entry.type === "random" ? "随机事件" : "记录";
-          item.append(el("div", "log-time", index), el("strong", "", `${locationName(entry.location)}：${entry.title}`), el("p", "", entry.description));
+          item.append(el("div", "log-time", index), el("strong", "", `${locationName(entry.location)}：${entry.title}`));
           panel.append(item);
         }
       }
-      panel.append(button("查看全部记录", openFullLogModal), button("查看阶段目标", openGoalsModal), renderStatusSummary());
+      panel.append(button("查看全部记录", openFullLogModal), button("查看阶段目标", openGoalsModal));
       return panel;
     }
 
@@ -2189,11 +2369,10 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       const met = Object.values(normalizeContacts(state.contacts)).filter((contact) => contact.met);
       const recent = met.slice(-1)[0];
       wrap.append(
-        el("div", "divider"),
-        el("h3", "", "状态摘要"),
         el("div", "today-slot", `求职：${jobStageText()}｜投递 ${state.job_progress?.applications_sent || 0}｜邀请 ${state.job_progress?.interview_invites || 0}`),
         el("div", "today-slot", `住房：${housingStageText()}｜线索 ${state.housing_progress?.housing_leads || 0}`),
-        el("div", "today-slot", `已认识 ${met.length} 人${recent ? `｜最近联系：${recent.name}` : ""}`),
+        el("div", "today-slot", `联系人：已认识 ${met.length} 人${recent ? `｜最近：${recent.name}` : ""}`),
+        el("div", unreadMessages().length ? "today-slot hint" : "today-slot", `未读消息：${unreadMessages().length}`),
         button("打开电脑查看", openComputerModal)
       );
       return wrap;
