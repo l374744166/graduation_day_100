@@ -1,0 +1,51 @@
+[
+  {
+    "id": "accompanied_but_afraid_to_fail",
+    "name": "有人陪你，但你不敢失败",
+    "enabled": true,
+    "allowed_gender_modes": ["male", "female", "neutral"],
+    "summary": "恋人是你的安全网，但也是你不敢掉下去的原因。",
+    "core_conflict": "因为被爱着，反而更害怕让对方失望，压力成了不敢说出口的负担。",
+    "stat_ranges": {
+      "money": [1200, 2200],
+      "mood": [48, 62],
+      "skill": [42, 56],
+      "relationship": [70, 82],
+      "pressure": [62, 78],
+      "self_identity": [38, 52]
+    },
+    "start_risk": "压力持续累积时，你更容易选择隐瞒，而不是求助。",
+    "start_advantage": "林夏会给你提供情绪支撑，有时也会带来实际帮助。",
+    "exclusive_contacts": ["lin_xia"]
+  },
+  {
+    "id": "unseen_wants_to_prove_self",
+    "name": "从没被看见，想证明自己",
+    "enabled": false,
+    "placeholder": true
+  },
+  {
+    "id": "female_engineering_repeatedly_proving",
+    "name": "工科女生，正在被反复证明",
+    "enabled": false,
+    "placeholder": true
+  },
+  {
+    "id": "repeated_failures_still_trying",
+    "name": "一直失利，但还没放弃",
+    "enabled": false,
+    "placeholder": true
+  },
+  {
+    "id": "ordinary_and_hard_to_introduce",
+    "name": "普通到不知道怎么介绍自己",
+    "enabled": false,
+    "placeholder": true
+  },
+  {
+    "id": "family_wants_stability_but_wants_to_stay",
+    "name": "家庭催稳定，但你还想留下",
+    "enabled": false,
+    "placeholder": true
+  }
+]

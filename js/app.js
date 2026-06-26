@@ -2,9 +2,9 @@
    结构拆分后，后续建议继续拆 state/ui/events/actions。 */
 "use strict";
 
-    const APP_VERSION = "0.5.6";
+    const APP_VERSION = "0.6.0";
     const SAVE_KEY = "graduation_day_100_save_v2";
-    const SAVE_VERSION = 5;
+    const SAVE_VERSION = 6;
     const VERSION_SEEN_KEY = "graduation_day_100_last_seen_version";
     const AUDIO_SETTINGS_KEY = "graduation_day_100_audio_settings";
     const AUDIO_VERSION = "052";
@@ -109,7 +109,8 @@
       roommate_azhe: { name: "阿哲", role: "大学舍友", personality: "嘴贱但靠谱", description: "你的大学舍友，嘴上说人生无所谓，实际连你没吃晚饭都能看出来。", benefit: "情绪支持、合租线索、宿舍喜剧。" },
       clerk_aming: { name: "阿明", role: "便利店夜班店员", personality: "现实、松弛", description: "也是刚毕业，暂时在便利店干着。他说先活着，再谈理想。", benefit: "兼职机会、生活现实感。" },
       senior_zhou: { name: "周学长", role: "同校毕业生", personality: "有点职场味，但还没完全变成大人", description: "毕业两年，已经会说一些职场套话，但还记得自己刚毕业时有多慌。", benefit: "简历建议、面试特殊选项。" },
-      landlord_luo: { name: "罗姐", role: "房东", personality: "热情但现实", description: "说房子很温馨，但你总觉得她对“温馨”这个词有自己的理解。", benefit: "租房线索、住房选择。" }
+      landlord_luo: { name: "罗姐", role: "房东", personality: "热情但现实", description: "说房子很温馨，但你总觉得她对“温馨”这个词有自己的理解。", benefit: "租房线索、住房选择。" },
+      lin_xia: { name: "林夏", role: "恋人", personality: "温柔但敏锐", description: "语气温柔但敏锐，能察觉你的情绪，但不会强行追问。有时会因为太体贴，让你更愧疚。", benefit: "压力、坦白与隐瞒、自我认同。" }
     };
 
     const startProfiles = [
@@ -373,8 +374,32 @@
     let state = freshState();
     let draftProfile = null;
     let draftRerolls = 0;
+    let draftGenderMode = "neutral";
+    let draftPlayerName = "许迟";
 
     let audioManifest = {};
+    let lifeScenarios = [];
+    const fallbackLifeScenarios = [
+      {
+        id: "accompanied_but_afraid_to_fail",
+        name: "有人陪你，但你不敢失败",
+        enabled: true,
+        allowed_gender_modes: ["male", "female", "neutral"],
+        summary: "恋人是你的安全网，但也是你不敢掉下去的原因。",
+        core_conflict: "因为被爱着，反而更害怕让对方失望，压力成了不敢说出口的负担。",
+        stat_ranges: {
+          money: [1200, 2200],
+          mood: [48, 62],
+          skill: [42, 56],
+          relationship: [70, 82],
+          pressure: [62, 78],
+          self_identity: [38, 52]
+        },
+        start_risk: "压力持续累积时，你更容易选择隐瞒，而不是求助。",
+        start_advantage: "林夏会给你提供情绪支撑，有时也会带来实际帮助。",
+        exclusive_contacts: ["lin_xia"]
+      }
+    ];
 
     const AudioManager = {
       enabled: true,
@@ -532,6 +557,8 @@
         buffs_seen: [],
         luck_points: 0,
         npc_records: {},
+        player_name: "许迟",
+        life_profile: freshLifeProfile(),
         contacts: freshContacts(),
         job_progress: freshJobProgress(),
         housing_progress: freshHousingProgress(),
@@ -555,6 +582,34 @@
       return base;
     }
 
+    function freshLifeProfile() {
+      return {
+        gender_mode: "neutral",
+        resolved_gender: "neutral",
+        life_scenario_id: "",
+        life_scenario_name: "",
+        scenario_summary: "",
+        core_conflict: "",
+        start_risk: "",
+        start_advantage: "",
+        exclusive_contacts: [],
+        scenario_flags: {
+          linxia_truth_count: 0,
+          linxia_hide_count: 0,
+          linxia_silent_count: 0,
+          linxia_care_received: false,
+          linxia_interview_advice: false,
+          linxia_relationship_turning_point: false,
+          linxia_event_1_seen: false,
+          linxia_event_2_seen: false,
+          linxia_event_3_seen: false
+        },
+        scenario_events_seen: [],
+        scenario_special_options_used: [],
+        scenario_achievements: []
+      };
+    }
+
     function freshContacts() {
       const contacts = {};
       for (const [id, template] of Object.entries(contactTemplates)) {
@@ -563,6 +618,8 @@
       contacts.roommate_azhe.met = true;
       contacts.roommate_azhe.intimacy = 1;
       contacts.roommate_azhe.last_interaction = "他从第 1 天开始就坐在你的宿舍里，负责嘴欠和兜底。";
+      contacts.lin_xia.met = false;
+      contacts.lin_xia.intimacy = 0;
       return contacts;
     }
 
@@ -768,6 +825,8 @@
       if (state.day === 7 && state.flags.interview_completed && !state.flags.post_interview_result) {
         return postInterviewEvent();
       }
+      const scenarioEvent = nextScenarioEvent();
+      if (scenarioEvent) return scenarioEvent;
       const special = conditionalEvents.find((event) => {
         if (event.day !== state.day || state.flags[`conditional_${event.id}`]) return false;
         if (event.time_slot && event.time_slot !== state.time_slot) return false;
@@ -807,6 +866,151 @@
           { text: "去公园缓一口气", result: "你没有面试，也没有假装自己不失落。风吹过来的时候，你把手机先收了起来。", effects: { mood: 3, pressure: -3 }, onChoose: () => {
             state.flags.day6_no_interview = true;
           } }
+        ]
+      };
+    }
+
+    function nextScenarioEvent() {
+      if (!isLinxiaScenario()) return null;
+      const flags = scenarioFlags();
+      const job = state.job_progress || freshJobProgress();
+      if (state.day === 2 && !temporaryPlaceMissing() && !flags.linxia_event_1_seen) {
+        return linxiaEvent1();
+      }
+      const hadJobFriction = job.hr_replies > 0 || job.applications_sent > 0 || state.flags.interview_completed || state.pressure >= 70;
+      if (state.day === 4 && !flags.linxia_event_2_seen && hadJobFriction) {
+        return linxiaEvent2();
+      }
+      const day6Trigger = state.flags.interview_completed || state.flags.day6_no_interview || job.final_result === "no_progress" || ((job.interview_invites || 0) < 1 && state.pressure >= 75);
+      if (state.day === 6 && !flags.linxia_event_3_seen && day6Trigger) {
+        return linxiaEvent3();
+      }
+      return null;
+    }
+
+    function setScenarioFlag(key, value = true) {
+      const flags = scenarioFlags();
+      flags[key] = value;
+      return flags;
+    }
+
+    function bumpScenarioFlag(key, amount = 1) {
+      const flags = scenarioFlags();
+      flags[key] = (Number(flags[key]) || 0) + amount;
+      if (key === "linxia_truth_count" && flags[key] >= 1) addScenarioAchievement("said_one_true_sentence");
+      return flags;
+    }
+
+    function updateLinxiaContact(amount = 1, lastInteraction = "") {
+      if (!isLinxiaScenario()) return;
+      state.contacts = normalizeContacts(state.contacts);
+      const contact = state.contacts.lin_xia;
+      if (!contact) return;
+      contact.met = true;
+      contact.intimacy = Math.max(2, Number(contact.intimacy) || 0) + amount;
+      contact.benefit_unlocked = true;
+      if (lastInteraction) contact.last_interaction = lastInteraction;
+      contact.events_seen = contact.events_seen || [];
+      const seen = state.life_profile?.scenario_events_seen || [];
+      for (const id of seen) if (!contact.events_seen.includes(id)) contact.events_seen.push(id);
+    }
+
+    function scenarioChoice(flagsPatch = {}, contactText = "") {
+      return () => {
+        for (const [key, value] of Object.entries(flagsPatch)) {
+          if (typeof value === "number") bumpScenarioFlag(key, value);
+          else setScenarioFlag(key, value);
+        }
+        updateLinxiaContact(1, contactText);
+      };
+    }
+
+    function linxiaEvent1() {
+      return {
+        id: "linxia_voice_after_temporary_room",
+        day: 2,
+        scenario_event: true,
+        title: "林夏发来一条语音",
+        description: "你正在拆纸箱，手机亮了。林夏发来语音，背景音是她在煮东西。\n“你那边安顿好了没？我煮了粥，你要不要过来吃？还是我给你送过去？”\n你看着满地狼藉，不知道该不该让她看到这些。",
+        choices: [
+          {
+            text: "我自己过去吧。",
+            result: "林夏开门时围着围裙，袖口沾了水渍。她把粥盛好，没问你找工作的事，只是说“鸡蛋炒得有点碎”。你吃着饭，发现她偷偷在粥里卧了个荷包蛋。什么都没说，但你知道她在。",
+            effects: { mood: 4, relationship: 4, pressure: -4 },
+            onChoose: scenarioChoice({ linxia_truth_count: 1, linxia_care_received: true, linxia_event_1_seen: true }, "第 2 天，她给你留了一碗卧着荷包蛋的粥。")
+          },
+          {
+            text: "今天太乱了，明天吧。",
+            result: "林夏顿了一下，说：“好，那你自己记得吃饭。”挂了语音，房间突然很安静。你知道她是怕打扰你，但你更希望她刚才坚持一下。你没说出口的话又多了一句。",
+            effects: { mood: -3, pressure: 4, self_identity: -2 },
+            onChoose: scenarioChoice({ linxia_hide_count: 1, linxia_event_1_seen: true }, "第 2 天，你说今天太乱了，明天吧。她没有追问。")
+          },
+          {
+            text: "不用了，我随便吃点。",
+            result: "林夏没再坚持，只回了一个“好”。半小时后，你收到一条消息：“冰箱里放了三明治，早上我放的，记得吃。”你打开那个小冰箱，里面真的有一个保鲜盒，旁边还塞了一盒牛奶。",
+            effects: { mood: 2, relationship: 2, money: 20 },
+            onChoose: scenarioChoice({ linxia_hide_count: 1, linxia_care_received: true, linxia_event_1_seen: true }, "第 2 天，她把三明治和牛奶放进了冰箱。")
+          }
+        ]
+      };
+    }
+
+    function linxiaEvent2() {
+      return {
+        id: "linxia_asks_how_today_was",
+        day: 4,
+        scenario_event: true,
+        title: "林夏问“今天怎么样”",
+        description: "林夏约你在便利店门口见面。她拎着两瓶饮料，递给你一瓶，随口问：“今天怎么样？”\n你握着那瓶冰的柠檬茶，手指有点凉。\n你在想，“还可以”这三个字，算不算撒谎。",
+        choices: [
+          {
+            text: "还行，就那样。",
+            result: "林夏看了你两秒，没追问，只是把吸管插好递过来。“嗯。”她说。你们并排坐在便利店门口的台阶上，喝完了各自的饮料。她的沉默里没有催促，但你感觉到了那句话没说出来的重量。",
+            effects: { pressure: 4, mood: -2 },
+            onChoose: scenarioChoice({ linxia_hide_count: 1, linxia_event_2_seen: true }, "第 4 天，你在便利店门口说“还行，就那样”。")
+          },
+          {
+            text: "不太好，没什么进展。",
+            result: "林夏把脑袋靠在你肩上，头发有洗衣液的香味。“没进展就没进展呗，又不是高考查分。”她没说“你肯定行”，也没说“没关系”，就只是靠着你。你忽然觉得好像真的没那么糟。",
+            effects: { mood: 6, pressure: -6, relationship: 4, self_identity: 2 },
+            onChoose: scenarioChoice({ linxia_truth_count: 1, linxia_event_2_seen: true }, "第 4 天，你承认今天不太好。她没有替你打分。")
+          },
+          {
+            text: "沉默。",
+            result: "你没说话。林夏侧过头看你，然后从口袋里掏出一颗水果糖，塞进你手里。“楼下便利店找零给的，给你。”糖纸有点皱了，被你攥在掌心里。你们就这么坐着，直到路灯亮起来。",
+            effects: { mood: 3, pressure: -2, relationship: 3 },
+            onChoose: scenarioChoice({ linxia_silent_count: 1, linxia_care_received: true, linxia_event_2_seen: true }, "第 4 天，你没说话。她把一颗皱糖塞进你手里。")
+          }
+        ]
+      };
+    }
+
+    function linxiaEvent3() {
+      return {
+        id: "linxia_you_do_not_need_to_prove",
+        day: 6,
+        scenario_event: true,
+        title: "林夏说“你不用证明给我看”",
+        description: "林夏坐在你旁边，突然说：“你最近压力很大吧。”\n不是疑问句。\n你刚想否认，她又说：“你不需要证明给我看什么。我又不是你导师。”\n她低头玩自己的衣角，声音轻下去：\n“我在，又不是在打分。”",
+        choices: [
+          {
+            text: "我知道。谢谢你。",
+            result: "林夏笑了笑，没再说什么。她站起身去烧水，背对着你的时候，肩膀松了下来。水壶开始响，蒸汽模糊了厨房的小窗户。你忽然意识到，她也在紧张——怕自己帮了倒忙。",
+            effects: { relationship: 5, self_identity: 3, pressure: -5 },
+            onChoose: scenarioChoice({ linxia_truth_count: 1, linxia_relationship_turning_point: true, linxia_event_3_seen: true }, "第 6 天，她说你不用证明给她看。你说了谢谢。")
+          },
+          {
+            text: "可我不想让你失望。",
+            result: "林夏转过身，认真看着你。“你什么时候见过我对你失望？”她回忆了几秒，“你把泡面煮糊那次不算。”你忍不住笑了一声，鼻子却有点酸。她走过来，轻轻碰了碰你的手指。",
+            effects: { mood: 6, self_identity: 5, pressure: -6, relationship: 5 },
+            onChoose: scenarioChoice({ linxia_truth_count: 1, linxia_relationship_turning_point: true, linxia_event_3_seen: true }, "第 6 天，你说不想让她失望。她认真看着你。")
+          },
+          {
+            text: "我也不知道该怎么办。",
+            result: "“那就不知道呗。”林夏递给你一杯水。杯子是你们一起在跳蚤市场买的，杯壁上有一道细细的裂纹。“不知道的时候，就先喝水，吃饭，睡觉。明天再不知道。”她的语气像在说一个很简单的道理。",
+            effects: { mood: 4, pressure: -4, self_identity: 3 },
+            onChoose: scenarioChoice({ linxia_silent_count: 1, linxia_relationship_turning_point: true, linxia_event_3_seen: true }, "第 6 天，你说不知道该怎么办。她递给你一杯水。")
+          }
         ]
       };
     }
@@ -955,6 +1159,11 @@
       for (const [id, value] of Object.entries(existing || {})) {
         if (contacts[id]) contacts[id] = { ...contacts[id], ...value, id };
       }
+      const life = state?.life_profile ? normalizeLifeProfile(state.life_profile) : freshLifeProfile();
+      if (!life.exclusive_contacts.includes("lin_xia")) {
+        contacts.lin_xia.met = false;
+        contacts.lin_xia.intimacy = 0;
+      }
       return contacts;
     }
 
@@ -1064,6 +1273,8 @@
       state.buffs_seen = state.buffs_seen || [];
       state.luck_points = GAME_CONFIG.enable_luck_system ? (Number(state.luck_points) || 0) : 0;
       state.npc_records = state.npc_records || {};
+      state.player_name = sanitizePlayerName(state.player_name || "许迟");
+      state.life_profile = normalizeLifeProfile(state.life_profile);
       state.contacts = normalizeContacts(state.contacts);
       state.job_progress = { ...freshJobProgress(), ...(state.job_progress || {}) };
       state.housing_progress = { ...freshHousingProgress(), ...(state.housing_progress || {}) };
@@ -1089,14 +1300,13 @@
       const inner = el("div", "menu-inner");
       inner.append(
         el("h1", "", "检测到旧版试玩存档"),
-        el("p", "room-text", "v0.5.2 重做了地点、求职、住房和音乐系统，旧存档无法完整兼容。\n建议从第 0 天重新开始。"),
+        el("p", "room-text", "检测到旧版试玩存档。\nv0.6.0 重做了第 0 天毕业档案和人生处境系统，旧存档无法完整兼容。\n建议从第 0 天重新开始。"),
         button("导出旧版记录", () => showCopyFallback(JSON.stringify(oldState, null, 2))),
-        button("开始 v0.5.2 新游戏", () => {
+        button("开始 v0.6.0 新游戏", () => {
           state = freshState();
           localStorage.removeItem(SAVE_KEY);
-          draftProfile = null;
-          draftRerolls = 0;
-          renderStartProfile();
+          resetDraftLife();
+          renderLifePerspective();
         }),
         button("返回主菜单", renderMenu)
       );
@@ -1128,58 +1338,146 @@
       return node;
     }
 
-    function renderStartProfile() {
+    function resetDraftLife() {
+      draftProfile = null;
+      draftRerolls = 0;
+      draftGenderMode = "neutral";
+      draftPlayerName = "许迟";
+    }
+
+    function renderLifePerspective() {
       AudioManager.playForContext("profile");
       app.innerHTML = "";
       const screen = el("section", "screen menu");
       const wrap = el("div", "profile");
-      wrap.append(el("h1", "", "毕业后的第100天"), el("p", "subtitle", "第 0 天：毕业档案"));
-
+      wrap.append(el("h1", "", "毕业后的第100天"), el("p", "subtitle", "第 0 天：选择人生视角"));
       const card = el("section", "profile-card");
-      if (!draftProfile) {
-        card.append(
-          el("h2", "", "毕业档案生成中"),
-          el("p", "room-text", "你不能决定自己从哪里开始，但可以决定怎么走下去。\n\n先抽一份毕业后的起点。满意也好，不满意也好，毕业不会等你准备好。"),
-          button("生成我的毕业档案", () => {
-            draftProfile = generateStartProfile();
-            renderStartProfile();
-          })
-        );
-        if (DEBUG_MODE) {
-          const debug = el("div", "choice-grid");
-          for (const profile of startProfiles) {
-            debug.append(button(`调试开局：${profile.name}`, () => {
-              draftProfile = generateStartProfile(profile);
-              draftRerolls = 0;
-              renderStartProfile();
-            }));
-          }
-          card.append(el("p", "hint", "调试模式：直接选择一个固定开局，方便测试不同压力和资源状态。"), debug);
-        }
-      } else {
-        card.append(el("h2", "", `开局模板：${draftProfile.name}`), el("p", "room-text", draftProfile.evaluation));
-        const stats = el("div", "profile-stats");
-        for (const key of STAT_ORDER) {
-          const item = el("div", "profile-stat");
-          const value = key === "money" ? `¥${draftProfile.stats[key]}` : String(draftProfile.stats[key]);
-          item.append(el("span", "muted", STAT_LABELS[key]), el("strong", "", value), el("p", "", statStatusText(key, draftProfile.stats[key])));
-          stats.append(item);
-        }
-        const tags = el("div", "tags");
-        for (const tag of draftProfile.tags) tags.append(el("span", "tag", `【${tag.name}】`));
-        const rerollText = draftRerolls >= MAX_REROLLS ? "重抽次数已用完。差不多得了，人生不是刷初始号。" : `剩余重抽次数：${MAX_REROLLS - draftRerolls}`;
-        const rerollButton = button("不服，再抽一次", () => {
-          if (draftRerolls >= MAX_REROLLS) return;
-          draftRerolls += 1;
-          draftProfile = generateStartProfile();
-          renderStartProfile();
-        });
-        rerollButton.disabled = draftRerolls >= MAX_REROLLS;
-        card.append(stats, el("h3", "", "你的开局标签"), tags, el("p", "hint", `系统评价：${draftProfile.evaluation}`), el("p", "notice", rerollText), rerollButton, button("就这样活下去", acceptStartProfile));
+      card.append(el("h2", "", "这一次，你想从哪里看毕业后的生活？"), el("p", "room-text", "v0.6.0 Alpha 只完整开放一条处境线：有人陪你，但你不敢失败。其他处境先预留，不写临时烂剧情。"));
+      const grid = el("div", "grid");
+      for (const option of genderModeOptions) {
+        const item = el("article", "card");
+        item.append(el("h3", "", option.title), el("p", "", option.description), button("选择", () => {
+          draftGenderMode = option.id;
+          renderNameInput();
+        }));
+        grid.append(item);
       }
+      card.append(grid);
       wrap.append(card, button("返回主菜单", renderMenu));
       screen.append(wrap);
       app.append(screen);
+    }
+
+    function renderNameInput() {
+      AudioManager.playForContext("profile");
+      app.innerHTML = "";
+      const screen = el("section", "screen menu");
+      const wrap = el("div", "profile");
+      wrap.append(el("h1", "", "给这次人生起个名字"), el("p", "subtitle", `人生视角：${genderModeText(draftGenderMode)}`));
+      const card = el("section", "profile-card");
+      card.append(
+        el("h2", "", "你叫什么？"),
+        el("p", "room-text", "给这次人生起个名字。你可以叫自己本名，也可以叫一个更像能扛住毕业的人。\n\n留空默认：许迟")
+      );
+      const input = document.createElement("input");
+      input.className = "name-input";
+      input.placeholder = "许迟";
+      input.value = draftPlayerName || "";
+      input.maxLength = 16;
+      card.append(input, button("生成毕业处境", () => {
+        draftPlayerName = sanitizePlayerName(input.value);
+        draftProfile = generateLifeProfile();
+        draftRerolls = 0;
+        renderStartProfile();
+      }));
+      wrap.append(card, button("返回选择人生视角", renderLifePerspective));
+      screen.append(wrap);
+      app.append(screen);
+      input.focus();
+      input.select();
+    }
+
+    function renderStartProfile() {
+      AudioManager.playForContext("profile");
+      if (!draftProfile) {
+        draftProfile = generateLifeProfile();
+        draftRerolls = 0;
+      }
+      app.innerHTML = "";
+      const screen = el("section", "screen menu");
+      const wrap = el("div", "profile");
+      wrap.append(el("h1", "", "毕业后的第100天"), el("p", "subtitle", "第 0 天：毕业处境档案"));
+
+      const card = el("section", "profile-card");
+      const scenario = draftProfile.scenario;
+      card.append(
+        el("h2", "", `毕业处境：${scenario.name}`),
+        el("p", "room-text", `这不是你选择的完美人生。\n这只是你这一次的起点。\n\n玩家名字：${draftProfile.player_name}\n人生视角：${genderModeText(draftProfile.gender_mode)}\n\n一句话简介：${scenario.summary}\n核心矛盾：${scenario.core_conflict}`)
+      );
+      const stats = el("div", "profile-stats");
+      for (const key of STAT_ORDER) {
+        const item = el("div", "profile-stat");
+        const value = key === "money" ? `¥${draftProfile.stats[key]}` : String(draftProfile.stats[key]);
+        item.append(el("span", "muted", STAT_LABELS[key]), el("strong", "", value), el("p", "", statStatusText(key, draftProfile.stats[key])));
+        stats.append(item);
+      }
+      const tags = el("div", "tags");
+      for (const tag of draftProfile.tags) tags.append(el("span", "tag", `【${tag.name}】`));
+      const contacts = (scenario.exclusive_contacts || []).map((id) => contactTemplates[id]?.name || id).join("、") || "无";
+      const rerollText = draftRerolls >= MAX_REROLLS ? "重抽次数已用完。差不多得了，人生不是刷初始号。" : `剩余重抽次数：${MAX_REROLLS - draftRerolls}`;
+      const rerollButton = button("不服，再抽一次", () => {
+        if (draftRerolls >= MAX_REROLLS) return;
+        draftRerolls += 1;
+        draftProfile = generateLifeProfile(scenarioById(scenario.id));
+        renderStartProfile();
+      });
+      rerollButton.disabled = draftRerolls >= MAX_REROLLS;
+      card.append(
+        stats,
+        el("h3", "", "你的开局标签"), tags,
+        el("p", "hint", `本周风险：${scenario.start_risk}\n本周优势：${scenario.start_advantage}\n专属联系人：${contacts}`),
+        el("p", "notice", rerollText),
+        rerollButton,
+        button("就这样活下去", acceptStartProfile)
+      );
+      wrap.append(card, button("返回姓名输入", renderNameInput));
+      screen.append(wrap);
+      app.append(screen);
+    }
+
+    function generateLifeProfile(scenario) {
+      const enabled = enabledLifeScenarios(draftGenderMode);
+      const source = (lifeScenarios && lifeScenarios.length) ? lifeScenarios : fallbackLifeScenarios;
+      const picked = scenario || enabled[randomInt(0, Math.max(0, enabled.length - 1))] || source.find((item) => item.enabled);
+      if (!picked) throw new Error("No enabled life scenario");
+      const stats = {};
+      for (const key of STAT_ORDER) {
+        const [min, max] = picked.stat_ranges[key];
+        stats[key] = randomInt(min, max);
+      }
+      const resolved = resolveGender(draftGenderMode);
+      return {
+        name: picked.name,
+        stats,
+        tags: generateStartTags(stats),
+        evaluation: picked.summary,
+        scenario: picked,
+        player_name: sanitizePlayerName(draftPlayerName),
+        gender_mode: draftGenderMode,
+        resolved_gender: resolved,
+        life_profile: {
+          ...freshLifeProfile(),
+          gender_mode: draftGenderMode,
+          resolved_gender: resolved,
+          life_scenario_id: picked.id,
+          life_scenario_name: picked.name,
+          scenario_summary: picked.summary,
+          core_conflict: picked.core_conflict,
+          start_risk: picked.start_risk,
+          start_advantage: picked.start_advantage,
+          exclusive_contacts: [...(picked.exclusive_contacts || [])]
+        }
+      };
     }
 
     function generateStartProfile(template) {
@@ -1201,20 +1499,28 @@
       if (!draftProfile) return;
       state = { ...freshState(), ...draftProfile.stats };
       state.initial_stats = { ...draftProfile.stats };
+      state.player_name = draftProfile.player_name;
+      state.life_profile = normalizeLifeProfile(draftProfile.life_profile);
       state.start_profile_name = draftProfile.name;
       state.start_tags = draftProfile.tags;
-      state.start_risk = startRiskText(state);
-      state.start_advantage = startAdvantageText(state);
+      state.start_risk = state.life_profile.start_risk || startRiskText(state);
+      state.start_advantage = state.life_profile.start_advantage || startAdvantageText(state);
       state.reroll_used = draftRerolls;
       state.start_evaluation = draftProfile.evaluation;
+      state.contacts = normalizeContacts(state.contacts);
+      if (state.life_profile.exclusive_contacts.includes("lin_xia")) {
+        state.contacts.lin_xia.met = true;
+        state.contacts.lin_xia.intimacy = 2;
+        state.contacts.lin_xia.last_interaction = "她从第 0 天就站在你的生活里，不催你成功，也看得出你在紧张。";
+      }
       state.day_start_stats = snapshotStats(state);
       clampStats();
       draftProfile = null;
-      noticeText = "你的毕业档案已生成。你不算准备好了，但毕业不会等你准备好。";
+      noticeText = "你的毕业处境档案已生成。你不算准备好了，但毕业不会等你准备好。";
       autoSave("start_profile");
       showFeedback({
-        title: "你的毕业档案已生成",
-        description: `你不算准备好了。\n但毕业不会等你准备好。\n\n本周风险：${state.start_risk}\n本周优势：${state.start_advantage}\n\n第 1 天：毕业宿舍最后一晚。`,
+        title: "你的毕业处境档案已生成",
+        description: `${state.player_name}，你不算准备好了。\n但毕业不会等你准备好。\n\n毕业处境：${state.life_profile.life_scenario_name}\n核心矛盾：${state.life_profile.core_conflict}\n\n本周风险：${state.start_risk}\n本周优势：${state.start_advantage}\n\n第 1 天：毕业宿舍最后一晚。`,
         effects: {},
         meta: `开局：${state.start_profile_name}`,
         onContinue: () => {
@@ -1247,7 +1553,7 @@
         title: "阿哲首次登场",
         text: `你推开门，阿哲坐在行李箱上，像坐在一段即将过期的人生上。
 
-他说：“你终于回来了，我还以为你被毕业典礼感动到原地就业了。”
+他说：“{player_name}，你终于回来了，我还以为你被毕业典礼感动到原地就业了。”
 
 他低头看了一眼泡面，又看了一眼你：“毕业证拿到了？很好，现在来决定更重要的事：红烧牛肉味到底算不算公共财产。”`
       },
@@ -1300,11 +1606,15 @@
       app.innerHTML = "";
       const screen = el("section", "screen event-screen");
       const box = el("article", "event-box");
-      box.append(el("h2", "", page.title), el("p", "room-text", page.text));
+      box.append(el("h2", "", page.title), el("p", "room-text", storyTextForPage(page)));
       box.append(button(index >= introStoryPages.length - 1 ? "进入第 1 天" : "继续", () => renderIntroStory(index + 1)));
       if (index < introStoryPages.length - 1) box.append(button("跳过引导", skipIntroStory));
       screen.append(box);
       app.append(screen);
+    }
+
+    function storyTextForPage(page) {
+      return String(page?.text || "").replaceAll("{player_name}", state.player_name || "许迟");
     }
 
     function markAllTutorialSeen() {
@@ -1332,6 +1642,79 @@
       if (s.money >= 4000) return "较多存款能让你在住房选择上少一点慌。";
       if (s.mood >= 65) return "较好的情绪让你更能承受求职和搬家的消耗。";
       return "你没有明显优势，但也没有完全失去调整方向的空间。";
+    }
+
+    const genderModeOptions = [
+      { id: "male", title: "男生人生", description: "体验一种毕业后的男性处境。你可能会遇到关于责任、自尊、经济压力和不敢示弱的故事。" },
+      { id: "female", title: "女生人生", description: "体验一种毕业后的女性处境。你可能会遇到关于安全感、家庭期待、职场审视和自我证明的故事。" },
+      { id: "random", title: "随机", description: "把这次人生交给系统。" },
+      { id: "neutral", title: "不强调性别", description: "不以性别作为主要叙事变量，更多关注普通毕业后的处境。" }
+    ];
+
+    function sanitizePlayerName(input) {
+      let name = String(input || "").replace(/<[^>]*>/g, "").replace(/[<>"\'`\\]/g, "").trim();
+      if (!name) return "许迟";
+      const hasCjk = /[一-鿿]/.test(name);
+      const max = hasCjk ? 8 : 16;
+      const min = hasCjk ? 2 : 2;
+      name = [...name].slice(0, max).join("");
+      if ([...name].length < min) return "许迟";
+      return name;
+    }
+
+    function genderModeText(mode) {
+      return ({ male: "男生人生", female: "女生人生", random: "随机", neutral: "不强调性别" })[mode] || "不强调性别";
+    }
+
+    function resolveGender(mode) {
+      if (mode === "male" || mode === "female" || mode === "neutral") return mode;
+      return Math.random() < .5 ? "male" : "female";
+    }
+
+    function enabledLifeScenarios(mode = draftGenderMode) {
+      const source = (lifeScenarios && lifeScenarios.length) ? lifeScenarios : fallbackLifeScenarios;
+      if (mode === "random") return source.filter((item) => item.enabled);
+      return source.filter((item) => item.enabled && (item.allowed_gender_modes || []).includes(mode));
+    }
+
+    function scenarioById(id) {
+      const source = (lifeScenarios && lifeScenarios.length) ? lifeScenarios : fallbackLifeScenarios;
+      return source.find((item) => item.id === id) || null;
+    }
+
+    function isLinxiaScenario() {
+      return state.life_profile?.life_scenario_id === "accompanied_but_afraid_to_fail";
+    }
+
+    function scenarioFlags() {
+      state.life_profile = normalizeLifeProfile(state.life_profile);
+      return state.life_profile.scenario_flags;
+    }
+
+    function markScenarioEvent(id) {
+      state.life_profile = normalizeLifeProfile(state.life_profile);
+      if (!state.life_profile.scenario_events_seen.includes(id)) state.life_profile.scenario_events_seen.push(id);
+    }
+
+    function addScenarioSpecialOption(id) {
+      state.life_profile = normalizeLifeProfile(state.life_profile);
+      if (!state.life_profile.scenario_special_options_used.includes(id)) state.life_profile.scenario_special_options_used.push(id);
+    }
+
+    function addScenarioAchievement(id) {
+      state.life_profile = normalizeLifeProfile(state.life_profile);
+      if (!state.life_profile.scenario_achievements.includes(id)) state.life_profile.scenario_achievements.push(id);
+    }
+
+    function normalizeLifeProfile(existing = {}) {
+      const base = freshLifeProfile();
+      const merged = { ...base, ...(existing || {}) };
+      merged.scenario_flags = { ...base.scenario_flags, ...(existing?.scenario_flags || {}) };
+      merged.exclusive_contacts = [...(merged.exclusive_contacts || [])];
+      merged.scenario_events_seen = [...(merged.scenario_events_seen || [])];
+      merged.scenario_special_options_used = [...(merged.scenario_special_options_used || [])];
+      merged.scenario_achievements = [...(merged.scenario_achievements || [])];
+      return merged;
     }
 
     function randomInt(min, max) {
@@ -1427,9 +1810,8 @@
         button("新游戏", () => {
           state = freshState();
           noticeText = "";
-          draftProfile = null;
-          draftRerolls = 0;
-          renderStartProfile();
+          resetDraftLife();
+          renderLifePerspective();
         }),
         button("继续游戏", loadGame),
         button("版本公告", () => showVersionAnnouncement(false)),
@@ -1448,15 +1830,15 @@
       const backdrop = el("div", "modal-backdrop");
       const modal = el("section", "modal wide update-modal");
       modal.append(
-        el("h2", "", "v0.5.6｜剧情密度与体验校准版"),
-        el("p", "room-text", "这次不扩展天数和系统，重点把第一周调得更像一段毕业后的生活故事。\n\n- 新增每日主题和今天重点，每天开始时出现一次。\n- 开场剧情补强毕业证、宿舍群和阿哲首次登场，支持跳过引导。\n- 四个核心联系人补充事件节点：阿哲、阿明、周学长、罗姐。\n- 修正行动变体随机控制：每天最多 3 次，连续坏结果最多 2 次。\n- 扩充求职回复、咖啡店、联系人等变体的剧情收益和 flags。\n- 第 7 天报告加入坏结果信息收益和本周画像。\n- 复制本局记录加入测试统计字段，方便判断行动点、地点和坏结果频率。\n\n这仍然是测试版本。\n如果某一天开始无聊、某个坏结果太频繁，或者第 7 天报告不像这一局，请直接告诉开发者。")
+        el("h2", "", "v0.6.0｜毕业处境系统 Alpha"),
+        el("p", "room-text", "这次不扩展天数，不做 30 天或 100 天，先把第 0 天改成真正的“人生处境”入口。\n\n- 新游戏会先选择人生视角、输入玩家名字，再生成毕业处境。\n- 完整接入第一条处境：【有人陪你，但你不敢失败】。\n- 新增专属联系人林夏，她不是攻略对象，而是压力、坦白与隐瞒的镜子。\n- 第 2 / 4 / 6 天加入林夏专属事件，并记录坦白、隐瞒、沉默 flags。\n- 面试中会根据关系和坦白情况触发林夏的特殊帮助。\n- 第 7 天报告新增“毕业处境总结”，会按林夏线分支收束。\n- 复制本局记录加入 life_profile、player_name 和林夏线测试字段。\n\n这仍然是 Alpha 测试版本。\n如果你感觉某个林夏事件太早、太晚，或者第 7 天不像你玩出来的，请直接告诉开发者。")
       );
       modal.append(button("知道了", () => {
         localStorage.setItem(VERSION_SEEN_KEY, APP_VERSION);
         backdrop.remove();
       }));
       modal.append(button("查看完整更新记录", () => {
-        modal.querySelector("p").textContent = "完整更新记录：v0.5.6 保留 v0.5.5 视觉主题；新增每日主题、开场跳过、联系人事件节点、行动变体配置修正、第 7 天报告意外统计和复制本局记录测试字段；不扩展天数、地点或新系统。";
+        modal.querySelector("p").textContent = "完整更新记录：v0.6.0 将第 0 天改为人生视角 + 玩家名字 + 毕业处境生成；新增 docs/data/life_scenarios.json；启用处境“有人陪你，但你不敢失败”；预留五条 disabled 处境；接入林夏联系人、三个一次性事件、面试特殊帮助、第 7 天处境报告分支与复制记录字段。未新增天数、地图、恋爱/约会系统、背包或职业树。";
       }));
       if (!auto) modal.append(button("关闭", () => backdrop.remove()));
       backdrop.append(modal);
@@ -1540,6 +1922,11 @@
 
     function endDayManually() {
       if (processing) return;
+      const scenarioFollowup = nextScenarioEvent();
+      if (scenarioFollowup) {
+        renderEvent(scenarioFollowup);
+        return;
+      }
       if ((Number(state.action_points) || 0) >= 4) {
         const ok = window.confirm("今天还剩不少行动点。现在结束今天，会错过一些推进机会。确定要结束吗？");
         if (!ok) return;
@@ -1953,6 +2340,15 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       if (housing.landlord_contacted) messages.push({ id: "landlord_reply", title: "房东回复", text: "罗姐回复了你的租房咨询，可以继续看房或比较选项。" });
       if (housing.shared_rent_asked) messages.push({ id: "shared_rent", title: "合租消息", text: "阿哲说可以一起看看合租，但大家都穷得很坦诚。" });
       if (countLogsByActions(["part_time_job"]) > 0 || state.money < 500) messages.push({ id: "store_shift", title: "便利店排班机会", text: "便利店还有临时班次。它不浪漫，但能让余额动一下。" });
+      if (isLinxiaScenario() && state.contacts?.lin_xia?.met) {
+        const flags = scenarioFlags();
+        const text = flags.linxia_relationship_turning_point
+          ? "林夏说她在，不是在给你打分。"
+          : flags.linxia_care_received
+            ? "林夏没有催你成功，只是提醒你记得吃饭。"
+            : `${state.player_name || "许迟"}，林夏还在等你回一条真实一点的消息。`;
+        messages.push({ id: "lin_xia_message", title: "林夏的消息", text });
+      }
       const read = new Set(state.read_messages || []);
       return messages.map((msg) => ({ ...msg, unread: !read.has(msg.id) }));
     }
@@ -2205,8 +2601,13 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         effects: fullEffects,
         meta: `第 ${state.day} 天 剩余行动点 ${state.action_points}/${state.max_action_points || MAX_ACTION_POINTS}`,
         onContinue: () => {
-          const result = state.action_points <= 0 ? finishDay() : { endedDay: false, previousDay: state.day };
           processing = false;
+          const scenarioFollowup = nextScenarioEvent();
+          if (scenarioFollowup) {
+            renderEvent(scenarioFollowup);
+            return;
+          }
+          const result = state.action_points <= 0 ? finishDay() : { endedDay: false, previousDay: state.day };
           if (result.blockedHousing) renderEvent(forceTemporaryPlaceEvent());
           else if (result.endedDay) renderDaySummary(result.previousDay);
           else routeNext();
@@ -2475,15 +2876,27 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         score += 1;
         lines.push("额外帮助：周学长之前提醒过你别只说态度，要说例子。这句话在会议室里救了你一次。");
       }
+      const flags = isLinxiaScenario() ? scenarioFlags() : {};
+      const canUseLinxiaQuestion = isLinxiaScenario() && (flags.linxia_interview_advice || state.relationship >= 72 || (Number(flags.linxia_truth_count) || 0) >= 1);
+      let linxiaEffects = {};
+      if (canUseLinxiaQuestion) {
+        score += 2;
+        flags.linxia_interview_advice = true;
+        addScenarioSpecialOption("linxia_interview_real_question");
+        lines.push("特殊回答：你想起林夏说：“问一个你真的想知道的。”你没有表演完美，而是问了一个真正关心的实际问题。面试官的表情变了——不是满意，是认真。走出门时，你给林夏发了条消息：“问了。”她秒回：“酷。”");
+        linxiaEffects = { skill: 2, pressure: -3, relationship: 3 };
+        updateLinxiaContact(1, "第 6 天面试时，你想起她说：问一个你真的想知道的。");
+      }
       if (state.pressure >= 85) score -= 1;
-      job.interview_score = Math.max(0, Math.min(8, score));
-      job.history.push(`第 ${state.day} 天面试得分 ${job.interview_score}/8`);
-      const effects = job.interview_score >= 6
+      job.interview_score = Math.max(0, Math.min(10, score));
+      job.history.push(`第 ${state.day} 天面试得分 ${job.interview_score}/10`);
+      const baseEffects = job.interview_score >= 6
         ? { skill: 3, self_identity: 3, pressure: 1 }
         : job.interview_score >= 4
           ? { skill: 2, self_identity: 1, pressure: 3 }
           : { skill: 1, mood: -3, pressure: 5 };
-      return { description: `${baseDescription}\n\n${lines.join("\n")}\n\n面试评分：${job.interview_score}/8。第 7 天会给出明确后续。`, effects };
+      const effects = mergeEffects(baseEffects, linxiaEffects);
+      return { description: `${baseDescription}\n\n${lines.join("\n")}\n\n面试评分：${job.interview_score}/10。第 7 天会给出明确后续。`, effects };
     }
 
     function maybeTriggerRandomEvent(action) {
@@ -2592,6 +3005,14 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
           if (event.threshold) {
             state.triggered_thresholds = state.triggered_thresholds || [];
             state.triggered_thresholds.push(event.id);
+          } else if (event.scenario_event) {
+            markScenarioEvent(event.id);
+            updateLinxiaContact(0);
+            if (event.id === "linxia_voice_after_temporary_room") addScenarioAchievement("being_loved_can_still_feel_scary");
+            if (event.id === "linxia_you_do_not_need_to_prove") {
+              addScenarioAchievement("she_is_not_the_judge");
+              if (scenarioFlags().linxia_relationship_turning_point) addScenarioAchievement("no_need_to_prove_to_me");
+            }
           } else if (event.post_interview) {
             state.flags.post_interview_result = true;
           } else if (event.no_interview) {
@@ -2604,7 +3025,14 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
           } else {
             state.flags[`event_day_${event.day}`] = true;
           }
-          addLogEntry({ type: "event", event_id: event.id, title: `${event.title}：${choice.text}`, description: choice.result || choice.text, effects: choice.effects });
+          addLogEntry({
+            type: event.scenario_event ? "contact_event" : "event",
+            event_id: event.id,
+            title: `${event.title}：${choice.text}`,
+            description: choice.result || choice.text,
+            effects: choice.effects,
+            tags: event.scenario_event ? ["scenario_event", "contact_event", "lin_xia"] : []
+          });
           noticeText = `${choice.text}：${formatEffects(choice.effects)}`;
           autoSave("event");
           showFeedback({
@@ -2614,7 +3042,9 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
             meta: `第 ${state.day} 天 剧情事件`,
             onContinue: () => {
               processing = false;
-              renderRoom("room");
+              const followup = event.scenario_event ? null : nextScenarioEvent();
+              if (followup) renderEvent(followup);
+              else renderRoom("room");
             }
           });
         }));
@@ -2701,7 +3131,7 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         el("div", "effect-list", `今天用了 ${dayActionPointSpent(logs)} 行动点｜做了 ${actionLogs.length} 次行动｜最耗时间：${mostExpensiveAction(actionLogs)}`),
         el("div", "effect-list", `求职状态：${jobSummaryText()}\n找房状态：${housingSummaryText()}`),
         el("div", "effect-list", `今日变化：${formatEffects(changes)}`),
-        el("div", "effect-list", `今日意外：${todaySurpriseText(variantLogs)}`),
+        el("div", "effect-list", `今日意外：${todaySurpriseText(variantLogs, logs)}`),
         el("p", "room-text", `${dailyInsightText(day, logs, changes)}\n\n触发地点插曲：${randomLogs.map((entry) => entry.title).join("、") || "无"}\n触发阈值事件：${thresholdLogs.map((entry) => entry.title).join("、") || "无"}`)
       );
       box.append(button(state.day > 7 ? "查看结局" : "进入下一天", () => {
@@ -2716,10 +3146,21 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
     }
 
 
-    function todaySurpriseText(variantLogs) {
+    function todaySurpriseText(variantLogs, dayLogs = []) {
+      const scenarioText = todayScenarioSurpriseText(dayLogs);
+      if (scenarioText) return scenarioText;
       const logs = (variantLogs || []).filter(Boolean);
       if (!logs.length) return "今天没有发生什么大事。很多日子就是这样，平静得让人怀疑自己有没有在前进。";
       return logs.slice(0, 2).map((entry) => `${entry.variant_title || entry.title}（${variantTypeText(entry.variant_type)}）`).join("；");
+    }
+
+    function todayScenarioSurpriseText(dayLogs = []) {
+      const linxia = (dayLogs || []).find((entry) => entry.event_id && String(entry.event_id).startsWith("linxia_"));
+      if (!linxia) return "";
+      const text = `${linxia.title || ""}${linxia.description || ""}`;
+      if (text.includes("还行") || text.includes("太乱") || text.includes("随便吃点")) return "你今天又说了一次“还行”。它听起来轻，但放在心里很重。";
+      if (text.includes("不太好") || text.includes("自己过去") || text.includes("谢谢") || text.includes("不想让你失望")) return "你今天说了一句真话。事情没有马上变好，但你没有继续一个人扛。";
+      return "林夏今天出现了。她没有解决你的问题，但她让问题不再只属于你一个人。";
     }
 
     function variantTypeText(type) {
@@ -2832,15 +3273,15 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         el("h2", "", report.title),
         el("p", "room-text", report.description),
         renderStartReview(),
+        renderScenarioReview(),
         renderWeekReview(),
         renderStats(),
         button("复制本局记录", copyPlayLog),
         button("重新开始", () => {
           state = freshState();
           noticeText = "";
-          draftProfile = null;
-          draftRerolls = 0;
-          renderStartProfile();
+          resetDraftLife();
+          renderLifePerspective();
         })
       );
       wrap.append(content);
@@ -2852,12 +3293,37 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       const box = el("div", "log-item");
       const names = (state.start_tags || []).map((tag) => `【${tag.name || tag}】`).join("");
       const profile = state.start_profile_name || "未知开局";
+      const life = normalizeLifeProfile(state.life_profile);
       box.append(
         el("div", "log-time", `你的开局：${profile}`),
-        el("p", "", names ? `你带着${names}的开局，走过了毕业后的第一周。` : "你从一个没有被记录的旧开局，走过了毕业后的第一周。"),
-        el("p", "muted", `重抽次数：${state.reroll_used || 0}
+        el("p", "", names ? `${state.player_name || "许迟"}带着${names}的开局，走过了毕业后的第一周。` : `${state.player_name || "许迟"}从一个没有被记录的旧开局，走过了毕业后的第一周。`),
+        el("p", "muted", `人生视角：${genderModeText(life.gender_mode)}
+毕业处境：${life.life_scenario_name || "未记录"}
+核心矛盾：${life.core_conflict || "未记录"}
+重抽次数：${state.reroll_used || 0}
 开局风险：${state.start_risk || "未记录"}
 开局优势：${state.start_advantage || "未记录"}`)
+      );
+      return box;
+    }
+
+    function renderScenarioReview() {
+      const box = el("div", "log-item");
+      const life = normalizeLifeProfile(state.life_profile);
+      box.append(el("div", "log-time", "毕业处境总结"));
+      if (life.life_scenario_id !== "accompanied_but_afraid_to_fail") {
+        box.append(el("p", "", "这局没有启用专属处境线。"));
+        return box;
+      }
+      const branch = linxiaEndingBranch();
+      box.append(
+        el("p", "", linxiaEndingText(branch)),
+        el("p", "muted", `林夏线分支：${linxiaEndingBranchLabel(branch)}
+坦白次数：${life.scenario_flags.linxia_truth_count}
+隐瞒次数：${life.scenario_flags.linxia_hide_count}
+沉默次数：${life.scenario_flags.linxia_silent_count}
+触发事件：${life.scenario_events_seen.join("、") || "无"}
+特殊选项：${life.scenario_special_options_used.join("、") || "无"}`)
       );
       return box;
     }
@@ -2982,6 +3448,8 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       const logs = state.action_log || [];
       const actionsOnly = logs.filter((entry) => entry.type === "action");
       const changes = statDiff(state.initial_stats || snapshotStats(), snapshotStats());
+      const life = normalizeLifeProfile(state.life_profile);
+      const flags = life.scenario_flags;
       const byDay = [];
       for (let day = 1; day <= 7; day += 1) {
         const dayLogs = logs.filter((entry) => entry.day === day);
@@ -2992,7 +3460,7 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         byDay.push(`第 ${day} 天：`);
         const ordered = dayLogs.filter((entry) => entry.type !== "event").sort((a, b) => (a.action_index || 0) - (b.action_index || 0));
         for (const entry of ordered) {
-          const prefix = entry.type === "random" ? "随机事件" : `第 ${entry.action_index || "?"} 次`;
+          const prefix = entry.type === "random" ? "随机事件" : entry.type === "contact_event" ? "联系人事件" : entry.type === "location" ? "地点/剧情记录" : `第 ${entry.action_index || "?"} 次`;
           byDay.push(`  ${prefix}：${locationName(entry.location)}-${entry.title}${entry.action_cost ? `（${entry.action_cost} 点）` : ""}`);
         }
       }
@@ -3003,6 +3471,24 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         `开局标签：${(state.start_tags || []).map((tag) => `【${tag.name || tag}】`).join("") || "无"}`,
         `开局风险：${state.start_risk || "未记录"}`,
         `开局优势：${state.start_advantage || "未记录"}`,
+        `player_name：${state.player_name || "许迟"}`,
+        `gender_mode：${life.gender_mode || "neutral"}`,
+        `resolved_gender：${life.resolved_gender || "neutral"}`,
+        `life_scenario_id：${life.life_scenario_id || "none"}`,
+        `life_scenario_name：${life.life_scenario_name || "未记录"}`,
+        `core_conflict：${life.core_conflict || "未记录"}`,
+        `start_risk：${life.start_risk || state.start_risk || "未记录"}`,
+        `start_advantage：${life.start_advantage || state.start_advantage || "未记录"}`,
+        `exclusive_contacts：${life.exclusive_contacts.join(", ") || "none"}`,
+        `linxia_truth_count：${flags.linxia_truth_count}`,
+        `linxia_hide_count：${flags.linxia_hide_count}`,
+        `linxia_silent_count：${flags.linxia_silent_count}`,
+        `linxia_care_received：${flags.linxia_care_received ? "true" : "false"}`,
+        `linxia_interview_advice：${flags.linxia_interview_advice ? "true" : "false"}`,
+        `linxia_relationship_turning_point：${flags.linxia_relationship_turning_point ? "true" : "false"}`,
+        `scenario_events_seen：${life.scenario_events_seen.join(", ") || "none"}`,
+        `scenario_special_options_used：${life.scenario_special_options_used.join(", ") || "none"}`,
+        `scenario_ending_branch：${linxiaEndingBranch()}`,
         "",
         "每天行动：",
         byDay.join("\n"),
@@ -3188,6 +3674,29 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       return "你没有立刻变好，但每一天的选择都留下了一点痕迹。";
     }
 
+    function linxiaEndingBranch() {
+      if (!isLinxiaScenario()) return "none";
+      const flags = scenarioFlags();
+      if ((Number(flags.linxia_truth_count) || 0) >= 2) return "truth";
+      if ((Number(flags.linxia_silent_count) || 0) >= 2) return "silent";
+      if ((Number(flags.linxia_hide_count) || 0) >= 2 && (Number(flags.linxia_truth_count) || 0) < 2) return "hide";
+      return "mixed";
+    }
+
+    function linxiaEndingBranchLabel(branch = linxiaEndingBranch()) {
+      return ({ truth: "坦白型", hide: "回避型", silent: "沉默型", mixed: "混合型", none: "无专属处境" })[branch] || "混合型";
+    }
+
+    function linxiaEndingText(branch = linxiaEndingBranch()) {
+      const map = {
+        truth: "这七天，你没有把失败藏得那么严。\n\n你收到过一碗卧着荷包蛋的粥，在便利店门口喝完一瓶柠檬茶，也终于有几次把“不太好”说出口。\n林夏没有替你解决工作，也没有替你找到住处。\n但她让你知道，问题不必只放在你一个人身上。\n\n你还是会怕让她失望。\n只是这一周之后，你开始明白：那个人不是因为你会赢，才在你身边。\n\n“被爱不需要等价交换。”",
+        hide: "这七天，你一直试着表现得没事。\n\n林夏没有拆穿你。\n她把三明治放进冰箱，把糖塞进你手里，把很多追问咽回去。\n你以为自己藏得很好，但被爱着的人，有时候也会把孤独藏得更深。\n\n你不是没有人陪。\n只是你还没学会，把狼狈也拿出来给别人看。\n\n“被爱不需要等价交换。”",
+        silent: "这七天，你说得不多。\n\n有些话到了嘴边，又被你咽回去。\n林夏没有逼你回答，只是在你沉默的时候，把糖、水、晚饭和一盏灯留在你旁边。\n\n沉默不是失败。\n但它也不是唯一的保护方式。\n如果还有下一周，也许你可以试着把其中一句话说出来。\n\n“被爱不需要等价交换。”",
+        mixed: "这七天，你有几次把话说出口，也有几次把话吞了回去。\n\n你还没有完全学会求助。\n但至少你开始知道，沉默不是唯一的保护方式。\n林夏不是你成功后的奖励，也不是失败时的裁判。\n她只是一直在那里，等你不用再把自己装得那么稳。\n\n“被爱不需要等价交换。”"
+      };
+      return map[branch] || "这局没有启用专属处境线。";
+    }
+
     function endingReport() {
       if (state.skill >= 35 && state.mood >= 40) return { title: "还没有上岸，但开始有方向", description: "你还没抵达，但已经开始走了。" };
       if (state.money < 1000) return { title: "钱开始变紧，但你还在坚持", description: "生活没有给你太多余地，但你还没有放弃。" };
@@ -3223,13 +3732,22 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
     async function loadRuntimeData() {
       renderLoading();
       try {
-        const locationResponse = await fetch("./data/locations.json?v=052");
+        const locationResponse = await fetch("./data/locations.json?v=060");
         if (!locationResponse.ok) throw new Error(`locations ${locationResponse.status}`);
         locations = await locationResponse.json();
       } catch (error) {
         console.warn("locations load failed", error);
         renderLoading("地点数据加载失败，请刷新页面或检查网络连接。");
         return false;
+      }
+      try {
+        const scenarioResponse = await fetch("./data/life_scenarios.json?v=060");
+        if (scenarioResponse.ok) lifeScenarios = await scenarioResponse.json();
+      } catch (error) {
+        console.warn("life scenarios load failed", error);
+      }
+      if (!Array.isArray(lifeScenarios) || !lifeScenarios.some((item) => item.enabled)) {
+        lifeScenarios = fallbackLifeScenarios;
       }
       try {
         const audioResponse = await fetch("./assets/audio/audio_manifest.json?v=052");
