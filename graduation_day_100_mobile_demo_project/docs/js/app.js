@@ -2,7 +2,7 @@
    v0.5.7 起从 index.html 拆分，后续建议继续拆 state/ui/events/actions。 */
 "use strict";
 
-    const APP_VERSION = "0.5.7";
+    const APP_VERSION = "0.5.6";
     const SAVE_KEY = "graduation_day_100_save_v2";
     const SAVE_VERSION = 5;
     const VERSION_SEEN_KEY = "graduation_day_100_last_seen_version";
@@ -1448,15 +1448,15 @@
       const backdrop = el("div", "modal-backdrop");
       const modal = el("section", "modal wide update-modal");
       modal.append(
-        el("h2", "", "v0.5.7｜代码结构拆分版"),
-        el("p", "room-text", "这次不改玩法，重点把巨大的单文件拆成更容易维护的项目结构。\n\n- index.html 现在只保留页面入口。\n- 样式拆到 css/app.css，后续配色和 PC/手机布局更好维护。\n- 游戏逻辑拆到 js/app.js，后续可以继续拆 state、ui、events、actions。\n- 保留 v0.5.6 的每日主题、行动变体、联系人事件和测试统计。\n- 不改天数、不改地点、不改 BGM、不改电脑信息中心。\n\n这仍然是测试版本。\n如果拆分后出现白屏、样式丢失或某个按钮没反应，请直接告诉开发者。")
+        el("h2", "", "v0.5.6｜剧情密度与体验校准版"),
+        el("p", "room-text", "这次不扩展天数和系统，重点把第一周调得更像一段毕业后的生活故事。\n\n- 新增每日主题和今天重点，每天开始时出现一次。\n- 开场剧情补强毕业证、宿舍群和阿哲首次登场，支持跳过引导。\n- 四个核心联系人补充事件节点：阿哲、阿明、周学长、罗姐。\n- 修正行动变体随机控制：每天最多 3 次，连续坏结果最多 2 次。\n- 扩充求职回复、咖啡店、联系人等变体的剧情收益和 flags。\n- 第 7 天报告加入坏结果信息收益和本周画像。\n- 复制本局记录加入测试统计字段，方便判断行动点、地点和坏结果频率。\n\n这仍然是测试版本。\n如果某一天开始无聊、某个坏结果太频繁，或者第 7 天报告不像这一局，请直接告诉开发者。")
       );
       modal.append(button("知道了", () => {
         localStorage.setItem(VERSION_SEEN_KEY, APP_VERSION);
         backdrop.remove();
       }));
       modal.append(button("查看完整更新记录", () => {
-        modal.querySelector("p").textContent = "完整更新记录：v0.5.7 进行代码结构拆分；index.html 只保留入口，样式进入 css/app.css，逻辑进入 js/app.js；保留 v0.5.6 的剧情密度、行动变体、每日主题、测试统计和 v0.5.5 视觉主题。";
+        modal.querySelector("p").textContent = "完整更新记录：v0.5.6 保留 v0.5.5 视觉主题；新增每日主题、开场跳过、联系人事件节点、行动变体配置修正、第 7 天报告意外统计和复制本局记录测试字段；不扩展天数、地点或新系统。";
       }));
       if (!auto) modal.append(button("关闭", () => backdrop.remove()));
       backdrop.append(modal);
