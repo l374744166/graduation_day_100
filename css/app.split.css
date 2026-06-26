@@ -1,5 +1,5 @@
 /* 毕业后的第100天 - 样式入口。
-   v0.5.7 起从 index.html 拆分，后续建议继续按 base/layout/components/theme 拆分。 */
+   结构拆分后，后续建议继续按 base/layout/components/theme 拆分。 */
 :root {
       color-scheme: dark;
       --bg: #151818;
