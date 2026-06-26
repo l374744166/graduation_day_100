@@ -751,12 +751,30 @@
       background: linear-gradient(90deg, var(--accent-primary), var(--accent-yellow), var(--accent-secondary), var(--accent-purple));
     }
     .update-modal h2::after {
-      content: "这次让第一周更像故事，而不只是刷数值。";
+      content: "这次让第 0 天变成处境入口，而不只是随机数值。";
       display: block;
       margin-top: 8px;
       color: var(--text-muted);
       font-size: 15px;
       font-weight: 600;
+    }
+
+    .name-input {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 14px;
+      border: 1px solid rgba(232, 216, 191, .92);
+      border-radius: 16px;
+      background: #fff;
+      color: var(--text-main);
+      font: inherit;
+      font-weight: 700;
+      box-shadow: inset 0 2px 8px rgba(99, 73, 44, .06);
+      outline: none;
+    }
+    .name-input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 4px rgba(255, 138, 91, .16);
     }
 
     .auto-save, .sound-hint {
