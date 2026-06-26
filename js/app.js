@@ -3764,7 +3764,8 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       if (!ok) return;
       AudioManager.init();
       renderMenu();
-      if (localStorage.getItem(VERSION_SEEN_KEY) !== APP_VERSION) {
+      const mobileLike = window.matchMedia("(max-width: 899px), (pointer: coarse)").matches;
+      if (!mobileLike && localStorage.getItem(VERSION_SEEN_KEY) !== APP_VERSION) {
         window.setTimeout(() => showVersionAnnouncement(true), 50);
       }
     }
