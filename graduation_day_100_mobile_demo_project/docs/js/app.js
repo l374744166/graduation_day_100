@@ -1829,14 +1829,15 @@
     function showVersionAnnouncement(auto = false) {
       const backdrop = el("div", "modal-backdrop");
       const modal = el("section", "modal wide update-modal");
-      modal.append(
-        el("h2", "", "v0.6.0｜毕业处境系统 Alpha"),
-        el("p", "room-text", "这次不扩展天数，不做 30 天或 100 天，先把第 0 天改成真正的“人生处境”入口。\n\n- 新游戏会先选择人生视角、输入玩家名字，再生成毕业处境。\n- 完整接入第一条处境：【有人陪你，但你不敢失败】。\n- 新增专属联系人林夏，她不是攻略对象，而是压力、坦白与隐瞒的镜子。\n- 第 2 / 4 / 6 天加入林夏专属事件，并记录坦白、隐瞒、沉默 flags。\n- 面试中会根据关系和坦白情况触发林夏的特殊帮助。\n- 第 7 天报告新增“毕业处境总结”，会按林夏线分支收束。\n- 复制本局记录加入 life_profile、player_name 和林夏线测试字段。\n\n这仍然是 Alpha 测试版本。\n如果你感觉某个林夏事件太早、太晚，或者第 7 天不像你玩出来的，请直接告诉开发者。")
-      );
-      modal.append(button("知道了", () => {
+      const dismissAnnouncement = () => {
         localStorage.setItem(VERSION_SEEN_KEY, APP_VERSION);
         backdrop.remove();
-      }));
+      };
+      modal.append(
+        el("h2", "", "v0.6.0｜毕业处境系统 Alpha"),
+        button(auto ? "进入游戏" : "知道了", dismissAnnouncement),
+        el("p", "room-text", "这次不扩展天数，不做 30 天或 100 天，先把第 0 天改成真正的“人生处境”入口。\n\n- 新游戏会先选择人生视角、输入玩家名字，再生成毕业处境。\n- 完整接入第一条处境：【有人陪你，但你不敢失败】。\n- 新增专属联系人林夏，她不是攻略对象，而是压力、坦白与隐瞒的镜子。\n- 第 2 / 4 / 6 天加入林夏专属事件，并记录坦白、隐瞒、沉默 flags。\n- 面试中会根据关系和坦白情况触发林夏的特殊帮助。\n- 第 7 天报告新增“毕业处境总结”，会按林夏线分支收束。\n- 复制本局记录加入 life_profile、player_name 和林夏线测试字段。\n\n这仍然是 Alpha 测试版本。\n如果你感觉某个林夏事件太早、太晚，或者第 7 天不像你玩出来的，请直接告诉开发者。")
+      );
       modal.append(button("查看完整更新记录", () => {
         modal.querySelector("p").textContent = "完整更新记录：v0.6.0 将第 0 天改为人生视角 + 玩家名字 + 毕业处境生成；新增 docs/data/life_scenarios.json；启用处境“有人陪你，但你不敢失败”；预留五条 disabled 处境；接入林夏联系人、三个一次性事件、面试特殊帮助、第 7 天处境报告分支与复制记录字段。未新增天数、地图、恋爱/约会系统、背包或职业树。";
       }));
