@@ -809,7 +809,7 @@
   <script>
     "use strict";
 
-    const APP_VERSION = "0.5.5";
+    const APP_VERSION = "0.5.6";
     const SAVE_KEY = "graduation_day_100_save_v2";
     const SAVE_VERSION = 5;
     const VERSION_SEEN_KEY = "graduation_day_100_last_seen_version";
@@ -832,12 +832,17 @@
     const GAME_CONFIG = {
       max_action_points: DEBUG_MODE && URL_PARAMS.get("ap") ? Math.max(1, Number(URL_PARAMS.get("ap")) || 8) : 8,
       enable_luck_system: false,
+      enable_action_variants: true,
       max_action_interludes_per_day: 1,
+      max_daily_action_variants: 3,
+      max_consecutive_bad_outcomes: 2,
       enable_legacy_day_events: false
     };
+    GAME_CONFIG.max_action_variants_per_day = GAME_CONFIG.max_daily_action_variants;
+    GAME_CONFIG.max_bad_variant_streak = GAME_CONFIG.max_consecutive_bad_outcomes;
     const MAX_ACTION_POINTS = GAME_CONFIG.max_action_points;
     const RANDOM_EVENT_LIMIT = GAME_CONFIG.max_action_interludes_per_day;
-    const ACTION_VARIANT_LIMIT = GAME_CONFIG.max_action_variants_per_day;
+    const ACTION_VARIANT_LIMIT = GAME_CONFIG.max_daily_action_variants;
     const BUFF_LABELS = { caffeine: "咖啡因", inspiration: "灵感" };
 
     const actionMeta = {
@@ -896,6 +901,16 @@
       { id: "pressure_safe", title: "压力不要达到 90", target: 1, progress: () => state.pressure < 90 ? 1 : 0 },
       { id: "money_safe", title: "金钱不要低于 500", target: 1, progress: () => state.money >= 500 ? 1 : 0 }
     ];
+
+    const dailyThemes = {
+      1: { theme: "最后一晚还在互损。", focus: "和舍友告别，收拾一点行李，别让这一天只剩下尴尬。" },
+      2: { theme: "行李箱开始有重量。", focus: "完成退宿，并确定今晚住在哪里。" },
+      3: { theme: "先投出去，再说完美。", focus: "修改简历，浏览岗位，投出第一份简历。" },
+      4: { theme: "等待不是空白。", focus: "查询求职反馈，同时开始寻找住处线索。" },
+      5: { theme: "机会开始变得具体。", focus: "准备面试，或者处理求职停滞；同时推进住处选择。" },
+      6: { theme: "请介绍一下你自己。", focus: "如果获得面试邀请，就去面对它。如果没有，也要面对没有机会这件事。" },
+      7: { theme: "第一周已经过去了。", focus: "处理求职结果，决定下一阶段住处，然后看看自己到底走到了哪里。" }
+    };
 
     const contactTemplates = {
       roommate_azhe: { name: "阿哲", role: "大学舍友", personality: "嘴贱但靠谱", description: "你的大学舍友，嘴上说人生无所谓，实际连你没吃晚饭都能看出来。", benefit: "情绪支持、合租线索、宿舍喜剧。" },
@@ -1018,19 +1033,20 @@
         { id: "modify_resume_common", type: "common", weight: 55, title: "简历像简历了", text: "你删掉了三句空话，又加上两句更像空话的话。至少现在看起来像一份真的简历。", effects: { skill: 1, pressure: 1 } },
         { id: "modify_resume_good_detail", type: "good", weight: 24, title: "想起一个具体细节", text: "你突然想起一个能写进项目经历的细节。它不大，但比“学习能力强”具体多了。", effects: { skill: 1, self_identity: 1 }, job_progress: { resume_quality: 1 } },
         { id: "modify_resume_bad_void", type: "bad", weight: 16, title: "越改越虚", text: "你越改越觉得自己什么都不会。简历没有变差，但你先变虚了。", effects: { pressure: 3, mood: -2 } },
-        { id: "modify_resume_senior_help", type: "contact", weight: 30, title: "周学长的改法", text: "周学长看了一眼，说：“你别只写做了什么，写清楚最后做成了什么。”", effects: { skill: 1 }, job_progress: { resume_quality: 1 }, conditions: (s) => s.contacts?.senior_zhou?.met }
+        { id: "modify_resume_senior_help", type: "contact", weight: 30, title: "周学长的改法", text: "周学长看了一眼，说：“你别只写做了什么，写清楚最后做成了什么。”", effects: { skill: 1 }, job_progress: { resume_quality: 1 }, flags: { used_senior_resume_tip: true }, conditions: (s) => s.contacts?.senior_zhou?.met }
       ],
       send_application: [
         { id: "send_application_common", type: "common", weight: 55, title: "投递成功", text: "你投出了一份简历。它进入系统，像一只不知道会不会飞回来的纸飞机。", effects: { pressure: 2, mood: -1 } },
-        { id: "send_application_closed", type: "bad", weight: 18, title: "岗位停止招聘", text: "页面刷新后显示：该岗位已停止招聘。你连被拒绝的资格都没排上。", effects: { pressure: 3, mood: -2 } },
+        { id: "send_application_closed", type: "bad", weight: 18, title: "岗位停止招聘", text: "页面刷新后显示：该岗位已停止招聘。你连被拒绝的资格都没排上。", effects: { pressure: 3, mood: -2, self_identity: 1 } },
         { id: "send_application_read", type: "good", weight: 20, title: "HR 已读", text: "投递后不久，系统显示 HR 已读。它不代表什么，但至少不是石沉大海。", effects: { pressure: -1, self_identity: 1 }, job_progress: { hr_replies: 1 } },
         { id: "send_application_invite", type: "rare", weight: 5, title: "来得太快的消息", text: "你还没来得及关掉页面，就收到一条消息：方便明天聊聊吗？", effects: { mood: 3, pressure: 2 }, job_progress: { hr_replies: 1, interview_invites: 1 }, once: true, conditions: (s) => s.day >= 4 && (s.job_progress?.resume_quality || 0) >= 1 }
       ],
       wait_for_reply: [
         { id: "job_reply_quiet", type: "common", weight: 50, title: "邮箱很安静", text: "邮箱很安静。安静得像它也在找工作。", effects: { pressure: 1 } },
-        { id: "job_reply_reject", type: "bad", weight: 18, title: "礼貌拒信", text: "你收到一封拒信。措辞很礼貌，礼貌得像没见过你这个人。", effects: { mood: -3, pressure: 2 } },
+        { id: "job_reply_reject", type: "bad", weight: 18, title: "礼貌拒信", text: "你收到一封拒信。措辞很礼貌，礼貌得像没见过你这个人。", effects: { mood: -3, pressure: 2, skill: 1 } },
         { id: "job_reply_hr", type: "good", weight: 22, title: "HR 回复", text: "HR 回了消息，说想进一步了解一下你的情况。", effects: { mood: 2, pressure: 1 }, job_progress: { hr_replies: 1 } },
-        { id: "job_reply_training_ad", type: "bad", weight: 10, title: "高薪训练营", text: "你收到一条“高薪就业训练营”的消息，越看越像让你先交钱。", effects: { pressure: 2, self_identity: 1 } }
+        { id: "job_reply_training_ad", type: "bad", weight: 10, title: "高薪训练营", text: "你收到一条“高薪就业训练营”的消息，越看越像让你先交钱。", effects: { pressure: 2, self_identity: 1 } },
+        { id: "job_reply_interview_invite", type: "rare", weight: 5, title: "初步面试邀请", text: "HR 没有寒暄太久，直接问你明天是否方便参加一次初步面试。你突然坐直了。", effects: { mood: 2, pressure: 2 }, job_progress: { hr_replies: 1, interview_invites: 1 }, once: true, conditions: (s) => s.day >= 5 && (s.job_progress?.applications_sent || 0) >= 1 }
       ],
       part_time_job: [
         { id: "part_time_common", type: "common", weight: 52, title: "余额动了一下", text: "你站了几个小时，腿很酸，但余额终于动了一下。", effects: { money: 160, mood: -3 } },
@@ -1042,13 +1058,13 @@
         { id: "coffee_common", type: "common", weight: 52, title: "最便宜的咖啡", text: "你点了一杯最便宜的咖啡，坐得像一个有安排的人。", effects: { money: -18, mood: 1 } },
         { id: "coffee_spill", type: "bad", weight: 16, title: "差点洒到简历", text: "咖啡差点洒到简历上。你抢救得很及时，但心跳明显不适合写进简历。", effects: { pressure: 2 } },
         { id: "coffee_caffeine", type: "good", weight: 22, title: "咖啡因上线", text: "咖啡因让你短暂感觉自己还能处理人生。", effects: {}, buff: "caffeine" },
-        { id: "coffee_senior", type: "contact", weight: 12, title: "隔壁桌的提醒", text: "隔壁桌有人看了你几眼，最后提醒你简历里项目结果写得不够清楚。你认识了周学长。", effects: { skill: 1 }, contact_changes: { senior_zhou: 1 }, once: true }
+        { id: "coffee_senior", type: "contact", weight: 12, title: "隔壁桌的提醒", text: "隔壁桌有人看了你几眼，最后提醒你简历里项目结果写得不够清楚。你认识了周学长。", effects: { skill: 1 }, job_progress: { resume_quality: 1 }, contact_changes: { senior_zhou: 1 }, once: true }
       ],
       pretend_to_work: [
         { id: "cafe_work_common", type: "common", weight: 54, title: "像有安排的人", text: "你坐在电脑前，表情认真得像在处理重要文件，实际上只是在给空白文档取名。", effects: { mood: 1, pressure: 1 } },
         { id: "cafe_work_bad", type: "bad", weight: 16, title: "空白文档反击", text: "你盯着空白文档太久，突然觉得它比你更有职业规划。", effects: { pressure: 2, self_identity: -1 } },
         { id: "cafe_work_good", type: "good", weight: 20, title: "短暂进入状态", text: "你突然写下几行能看的东西。它不多，但足够证明你不是完全死机。", effects: { skill: 1, self_identity: 1 } },
-        { id: "cafe_work_senior", type: "contact", weight: 12, title: "周学长搭话", text: "隔壁桌的人看出你在改简历，顺手提醒了一句项目结果要写清楚。你认识了周学长。", effects: { skill: 1 }, contact_changes: { senior_zhou: 1 }, once: true }
+        { id: "cafe_work_senior", type: "contact", weight: 12, title: "周学长搭话", text: "隔壁桌的人看出你在改简历，顺手提醒了一句项目结果要写清楚。你认识了周学长。", effects: { skill: 1 }, job_progress: { resume_quality: 1 }, contact_changes: { senior_zhou: 1 }, once: true }
       ],
       rest: [
         { id: "rest_common", type: "common", weight: 55, title: "没有继续坏下去", text: "你休息了一会儿。时间没有回来，但你至少没继续坏下去。", effects: { mood: 6, pressure: -4 } },
@@ -1122,6 +1138,10 @@
     ];
 
     const dormEvents = [
+      { id: "azhe_resume_roast", title: "阿哲点评简历", description: "阿哲看着你的简历，表情像在看一份还没熟的外卖。", choices: [
+        { text: "让他大胆说", result: "阿哲说：“你这简历最大的问题不是内容少，是它看起来比你本人更想上班。”你本来想反驳，但发现这句话居然有一点准确。", effects: { relationship: 2, mood: 2 }, onChoose: () => { state.flags.azhe_resume_roast_seen = true; meetContact("roommate_azhe", 1, "第 1 天，阿哲嘴欠地帮你看过简历。"); } },
+        { text: "抢回简历", result: "你抢回简历。阿哲举手投降：“行行行，等你上岸了再让我见识一下成熟版本。”", effects: { mood: 1, relationship: 1 } }
+      ] },
       { id: "bathroom_shadow", title: "厕所门口的阴影", description: "舍友 B 从厕所出来，神情庄重，像刚和命运谈判完。", choices: [
         { text: "问他洗手了吗", result: "他说：“真正的兄弟，不该被细菌定义。”你后退了两步。", effects: { mood: 3, relationship: 1 } },
         { text: "假装没看见", result: "他径直走过来拍了拍你的肩。你感觉自己的灵魂被污染了。", effects: { mood: -1, pressure: 1 } },
@@ -1894,6 +1914,7 @@
     function routeNext() {
       if (state.day >= 3 && ["dorm", "room", "subway_station", "train_station"].includes(state.current_location)) state.current_location = "temporary_room";
       if (state.day > 7) renderEnding();
+      else if (shouldShowDailyTheme()) renderDayTheme();
       else {
         const event = nextEvent();
         if (event) renderEvent(event);
@@ -2013,9 +2034,11 @@
     const introStoryPages = [
       {
         title: "毕业典礼结束",
-        text: `你拿着毕业证回到宿舍楼下。太阳很亮，毕业证也很亮，只有你对未来的理解还处在省电模式。
+        text: `毕业典礼结束时，操场上的音响还在放那首所有毕业季都会放的歌。
 
-手机震了一下，宿舍群跳出一条消息。`
+你站在人群后面，手里拿着毕业证。它很薄，薄得不像能证明四年。
+
+手机震了一下。`
       },
       {
         title: "宿舍群：最后一桶泡面",
@@ -2029,11 +2052,11 @@
       },
       {
         title: "阿哲首次登场",
-        text: `你推开门，阿哲正站在泡面前，表情严肃得像在主持遗产公证。
+        text: `你推开门，阿哲坐在行李箱上，像坐在一段即将过期的人生上。
 
-阿哲：“你终于回来了。毕业证拿到了？很好，现在来决定更重要的事：红烧牛肉味到底算不算公共财产。”
+他说：“你终于回来了，我还以为你被毕业典礼感动到原地就业了。”
 
-他说完看了你一眼，又补了一句：“别装轻松，你没吃晚饭我都看得出来。”`
+他低头看了一眼泡面，又看了一眼你：“毕业证拿到了？很好，现在来决定更重要的事：红烧牛肉味到底算不算公共财产。”`
       },
       {
         title: "阿哲的生活教程 1：行动点",
@@ -2086,8 +2109,20 @@
       const box = el("article", "event-box");
       box.append(el("h2", "", page.title), el("p", "room-text", page.text));
       box.append(button(index >= introStoryPages.length - 1 ? "进入第 1 天" : "继续", () => renderIntroStory(index + 1)));
+      if (index < introStoryPages.length - 1) box.append(button("跳过引导", skipIntroStory));
       screen.append(box);
       app.append(screen);
+    }
+
+    function markAllTutorialSeen() {
+      for (const flag of ["tutorial_action_points_seen", "tutorial_location_seen", "tutorial_computer_seen", "tutorial_action_variants_seen"]) state.flags[flag] = true;
+    }
+
+    function skipIntroStory() {
+      state.flags.intro_story_seen = true;
+      markAllTutorialSeen();
+      autoSave("intro_story_skipped");
+      routeNext();
     }
 
     function startRiskText(s) {
@@ -2220,15 +2255,15 @@
       const backdrop = el("div", "modal-backdrop");
       const modal = el("section", "modal wide update-modal");
       modal.append(
-        el("h2", "", "v0.5.5｜视觉配色升级"),
-        el("p", "room-text", "这次不增加玩法，重点把网页原型从灰色测试界面调成更温暖、更像独立游戏的毕业季视觉。\n\n- 整体改为暖米白、奶油黄、浅蓝绿和珊瑚橙主题。\n- 主菜单增加便签感卡片和轻几何装饰。\n- PC 主界面、卡片、按钮、弹窗改成更柔和的游戏界面风格。\n- 不同地点加入轻微主题色：宿舍、临时房间、便利店、咖啡店、公园、面试公司。\n- 数值条按金钱、情绪、能力、关系、压力、自我认同使用不同辅助色。\n- 版本公告改成更新卡片，不再像系统 alert。\n- 手机端同步新配色，但保持清晰不溢出。\n\n这仍然是测试版本。\n如果觉得某个颜色刺眼、文字不清楚，或者手机端显得太乱，请直接告诉开发者。")
+        el("h2", "", "v0.5.6｜剧情密度与体验校准版"),
+        el("p", "room-text", "这次不扩展天数和系统，重点把第一周调得更像一段毕业后的生活故事。\n\n- 新增每日主题和今天重点，每天开始时出现一次。\n- 开场剧情补强毕业证、宿舍群和阿哲首次登场，支持跳过引导。\n- 四个核心联系人补充事件节点：阿哲、阿明、周学长、罗姐。\n- 修正行动变体随机控制：每天最多 3 次，连续坏结果最多 2 次。\n- 扩充求职回复、咖啡店、联系人等变体的剧情收益和 flags。\n- 第 7 天报告加入坏结果信息收益和本周画像。\n- 复制本局记录加入测试统计字段，方便判断行动点、地点和坏结果频率。\n\n这仍然是测试版本。\n如果某一天开始无聊、某个坏结果太频繁，或者第 7 天报告不像这一局，请直接告诉开发者。")
       );
       modal.append(button("知道了", () => {
         localStorage.setItem(VERSION_SEEN_KEY, APP_VERSION);
         backdrop.remove();
       }));
       modal.append(button("查看完整更新记录", () => {
-        modal.querySelector("p").textContent = "完整更新记录：v0.5.5 完成视觉配色升级，新增暖米白背景、奶油黄卡片、珊瑚橙主按钮、浅蓝绿辅助色、紫色点缀；不同地点拥有轻微主题色；数值条按类型区分颜色；版本公告改为更新卡片；PC 和手机端同步减少灰黑后台感。";
+        modal.querySelector("p").textContent = "完整更新记录：v0.5.6 保留 v0.5.5 视觉主题；新增每日主题、开场跳过、联系人事件节点、行动变体配置修正、第 7 天报告意外统计和复制本局记录测试字段；不扩展天数、地点或新系统。";
       }));
       if (!auto) modal.append(button("关闭", () => backdrop.remove()));
       backdrop.append(modal);
@@ -2797,7 +2832,10 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
     function renderCurrentObjective() {
       const obj = currentObjective();
       const card = el("div", "today-slot main-objective");
-      card.append(el("div", "log-time", "当前主目标"), el("strong", "", obj.title), el("p", "", obj.description));
+      const theme = currentDailyTheme();
+      card.append(el("div", "log-time", `今日主题：${theme.theme}`), el("strong", "", obj.title), el("p", "", `${obj.description}
+
+今天重点：${theme.focus}`));
       return card;
     }
 
@@ -2983,6 +3021,13 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       });
     }
 
+    function addStoryLog(id, title, description) {
+      if (!id || state.flags[id]) return false;
+      state.flags[id] = true;
+      addLogEntry({ type: "contact_event", event_id: id, title, description, effects: {}, tags: ["contact_event"] });
+      return true;
+    }
+
     function updateProgressForAction(action, outcome) {
       state.job_progress = { ...freshJobProgress(), ...(state.job_progress || {}) };
       state.housing_progress = { ...freshHousingProgress(), ...(state.housing_progress || {}) };
@@ -2990,6 +3035,11 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       if (["check_jobs", "browse_jobs", "pretend_to_work"].includes(action.id)) {
         state.job_progress.job_leads += 1;
         state.job_progress.history.push(`第 ${state.day} 天获得 1 条岗位线索`);
+      }
+      if (action.id === "part_time_job" && state.day >= 5 && !state.flags.part_time_stable_shift && ((state.contacts?.clerk_aming?.met || false) || countLogsByActions(["part_time_job"]) >= 1)) {
+        state.flags.part_time_stable_shift = true;
+        meetContact("clerk_aming", 1, "第 5 天后，阿明问你要不要固定排几天班。");
+        addStoryLog("aming_stable_shift_seen", "阿明的长期排班机会", "阿明问你：“你要不要考虑固定来几天？钱不多，但至少确定。”你没有立刻答应，但知道自己至少多了一个临时收入来源。");
       }
       if (action.id === "send_application") {
         state.job_progress.applications_sent += 1;
@@ -2999,6 +3049,10 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       if (["prepare_interview", "overhear_interview", "pretend_not_nervous", "wait_for_hr"].includes(action.id)) {
         state.job_progress.interview_preparation += 1;
         state.job_progress.history.push(`第 ${state.day} 天做了 1 次面试准备`);
+        if (state.day >= 5 && state.contacts?.senior_zhou?.met && !state.flags.senior_interview_advice) {
+          state.flags.senior_interview_advice = true;
+          addStoryLog("senior_interview_advice_seen", "周学长的面试前建议", "周学长说：“面试的时候别一直说学习能力强。大家都这么说，你得说你具体解决过什么问题。”");
+        }
       }
       if (action.id === "attend_interview") {
         state.job_progress.interviews_done += 1;
@@ -3026,13 +3080,20 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       if (action.id === "ask_shared_rent") {
         state.housing_progress.shared_rent_asked = true;
         meetContact("roommate_azhe", 1, "你问过合租，大家都穷得很坦诚。");
-        if (state.relationship >= 60) state.housing_progress.housing_leads += 1;
+        if (state.relationship >= 55) {
+          state.housing_progress.housing_leads += 1;
+          state.flags.shared_rent_possible = true;
+          addStoryLog("azhe_shared_rent_seen", "阿哲的合租线索", "阿哲帮你把箱子拖到楼下，说：“以后混不下去了找我，虽然我大概率也混不下去。”这句话不太像承诺，但至少像一条线索。");
+        }
       }
       if (action.id === "view_rental") {
         state.housing_progress.viewings_done += 1;
-        const option = state.housing_progress.commute_checked ? "远一点但便宜的房间" : "一间照片没有那么可信的小房间";
+        const option = state.housing_progress.commute_checked ? "远郊便宜房" : "一间照片没有那么可信的小房间";
         if (!state.housing_progress.available_options.includes(option)) state.housing_progress.available_options.push(option);
+        if (!state.housing_progress.available_options.includes("继续短租")) state.housing_progress.available_options.push("继续短租");
+        state.flags.luo_viewing_result = true;
         state.housing_progress.history.push(`第 ${state.day} 天看过房：${option}`);
+        addStoryLog("luo_viewing_result_seen", "罗姐的看房结果", "房间确实能住。缺点是窗外正对另一栋楼，优点是你至少能关上门。你把“远郊便宜房”和“继续短租”都记进了备选。");
       }
       updateJobStage();
       updateHousingStage();
@@ -3102,6 +3163,7 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
     }
 
     function chooseActionVariant(action) {
+      if (!GAME_CONFIG.enable_action_variants) return null;
       if ((Number(state.action_variants_today) || 0) >= ACTION_VARIANT_LIMIT) return null;
       const pool = actionVariantPool(action).filter(variantAvailable);
       if (!pool.length) return null;
@@ -3139,6 +3201,7 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         }
       }
       if (variant.buff) addBuff(variant.buff);
+      if (variant.flags) Object.assign(state.flags, variant.flags);
       if (variant.once) state.flags[`variant_${variant.id}`] = true;
       if (["good", "rare", "contact"].includes(variant.type)) state.flags[`had_${variant.type}_variant`] = true;
       state.action_variants_today = (Number(state.action_variants_today) || 0) + 1;
@@ -3288,6 +3351,33 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         }
       }
       return merged;
+    }
+
+    function shouldShowDailyTheme() {
+      return Boolean(dailyThemes[state.day]) && !state.flags[`day_theme_${state.day}_seen`];
+    }
+
+    function currentDailyTheme(day = state.day) {
+      return dailyThemes[day] || { theme: "继续往前。", focus: "照顾好今天能照顾的部分。" };
+    }
+
+    function renderDayTheme() {
+      const info = currentDailyTheme();
+      state.flags[`day_theme_${state.day}_seen`] = true;
+      addLogEntry({ type: "day_theme", event_id: `day_theme_${state.day}`, title: `今日主题：${info.theme}`, description: `今天重点：${info.focus}`, effects: {} });
+      autoSave("day_theme");
+      app.innerHTML = "";
+      const screen = el("section", "screen event-screen");
+      const box = el("article", "event-box");
+      box.append(
+        el("h2", "", `第 ${state.day} 天｜今日主题`),
+        el("p", "room-text", `${info.theme}
+
+今天重点：${info.focus}`),
+        button("进入今天", routeNext)
+      );
+      screen.append(box);
+      app.append(screen);
     }
 
     function renderEvent(event) {
@@ -3616,6 +3706,85 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       area.select();
     }
 
+    function dailyActionPointLines() {
+      const max = Number(state.max_action_points || MAX_ACTION_POINTS) || 8;
+      const lines = [];
+      for (let day = 1; day <= 7; day += 1) {
+        const used = dayActionPointSpent((state.action_log || []).filter((entry) => entry.day === day));
+        const left = Math.max(0, max - used);
+        lines.push(`第 ${day} 天：使用 ${used} 点｜剩余 ${left} 点${left > 0 ? "｜可能提前结束/未用完" : ""}`);
+      }
+      return lines;
+    }
+
+    function actionClickLines() {
+      const counts = {};
+      for (const entry of (state.action_log || []).filter((item) => item.type === "action")) counts[entry.title] = (counts[entry.title] || 0) + 1;
+      const lines = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([name, count]) => `${name}：${count} 次`);
+      return lines.length ? lines : ["暂无行动点击记录"];
+    }
+
+    function variantStatsLines() {
+      const logs = variantLogsAll();
+      const count = (type) => logs.filter((entry) => entry.variant_type === type).length;
+      return [
+        `好结果：${count("good") + count("contact")} 次`,
+        `坏结果：${count("bad")} 次`,
+        `稀有结果：${count("rare")} 次`,
+        `联系人结果：${count("contact")} 次`
+      ];
+    }
+
+    function contactInteractionCount() {
+      return (state.action_log || []).filter((entry) => (entry.tags || []).includes("social_contact") || (entry.tags || []).includes("family_contact") || entry.variant_type === "contact" || entry.type === "contact_event").length;
+    }
+
+    function badOutcomeByDayLines() {
+      const counts = {};
+      for (const entry of variantLogsAll().filter((item) => item.variant_type === "bad")) counts[entry.day] = (counts[entry.day] || 0) + 1;
+      const lines = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([day, count]) => `第 ${day} 天：${count} 次坏结果`);
+      return lines.length ? lines : ["没有明显坏结果集中日"];
+    }
+
+    function earlyEndLines() {
+      const max = Number(state.max_action_points || MAX_ACTION_POINTS) || 8;
+      const lines = [];
+      for (let day = 1; day <= Math.min(7, Number(state.day) || 7); day += 1) {
+        const used = dayActionPointSpent((state.action_log || []).filter((entry) => entry.day === day));
+        const left = max - used;
+        if (left > 0) lines.push(`第 ${day} 天剩余 ${left} 点`);
+      }
+      return lines.length ? lines : ["没有明显提前结束记录"];
+    }
+
+    function dailyMainGoalLines() {
+      return [
+        `第 1 天：${(state.flags.event_day_1 || countLogsByText(["毕业宿舍最后一晚"])) ? "完成/经历宿舍告别" : "未完成宿舍告别"}`,
+        `第 2 天：${temporaryPlaceMissing() ? "未确定临时住处" : "已确定临时住处"}`,
+        `第 3 天：${(state.job_progress?.resume_quality || 0) >= 1 || countLogsByActions(["modify_resume"]) ? "已推进简历" : "简历推进不足"}`,
+        `第 4 天：${(state.job_progress?.hr_replies || 0) >= 1 || countLogsByActions(["wait_for_reply"]) ? "已查询/获得求职反馈" : "求职反馈不足"}`,
+        `第 5 天：${(state.job_progress?.interview_preparation || 0) >= 1 || (state.housing_progress?.housing_leads || 0) >= 1 ? "机会或住房有推进" : "推进不足"}`,
+        `第 6 天：${state.flags.interview_completed || state.flags.day6_no_interview ? "已面对面试/无邀请路线" : "第 6 天关键事件未完整记录"}`,
+        `第 7 天：${(state.housing_progress?.final_choice || "none") !== "none" || state.flags.housing_day7_decision ? "已处理阶段收束" : "阶段收束不足"}`
+      ];
+    }
+
+    function badInfoGainText() {
+      const item = variantLogsAll().find((entry) => entry.variant_type === "bad" && ((entry.effects?.skill || 0) > 0 || (entry.effects?.self_identity || 0) > 0));
+      if (!item) return "这周的坏结果主要是消耗，还没有留下明显的信息收益。";
+      return `第 ${item.day} 天的“${item.variant_title || item.title}”虽然糟糕，但让你多看清了一点现实：${formatEffects(item.effects)}`;
+    }
+
+    function weekPersona() {
+      const actionsOnly = (state.action_log || []).filter((entry) => entry.type === "action");
+      if (state.flags.part_time_stable_shift || countLogsByActions(["part_time_job"]) >= 2) return "先把饭钱稳住的人";
+      if ((state.job_progress?.interview_invites || 0) >= 1 || state.flags.interview_completed) return "把紧张带进面试间的人";
+      if ((state.housing_progress?.housing_leads || 0) >= 2 || state.flags.shared_rent_possible) return "拖着行李箱继续找落脚点的人";
+      if (variantCountBy("bad") >= 2) return "被现实绊了几下但还在走的人";
+      if (state.relationship >= 65) return "没有和别人彻底断线的人";
+      return actionsOnly.length >= 8 ? "认真把一周活完的人" : "还在加载中的毕业生";
+    }
+
     function buildPlayLog() {
       const logs = state.action_log || [];
       const actionsOnly = logs.filter((entry) => entry.type === "action");
@@ -3671,6 +3840,7 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         `最大变化数值：${largestChange(changes)}`,
         `最常去地点：${mostCommon(actionsOnly.map((entry) => locationName(entry.location))) || "还没形成固定路线"}`,
         `最常做行动：${mostCommon(actionsOnly.map((entry) => entry.title)) || "还没形成习惯"}`,
+        `第 7 天最终画像：${weekPersona()}`,
         `第 7 天系统评价：${systemEvaluation()}`
       ].join("\n");
     }
@@ -3782,6 +3952,8 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
           `触发过的坏结果：${variantCountBy("bad")} 次`,
           `最有影响的一次意外：${mostImpactfulVariant()}`,
           `提供过帮助的联系人：${contactHelpText()}`,
+          `坏结果带来的信息收益：${badInfoGainText()}`,
+          `这一周你最像：${weekPersona()}`,
           `求职结果：${jobSummaryText()}`,
           `住处状态：${housingSummaryText()}`,
           `欠款记录：${state.had_debt ? `曾经欠款，最低余额 ¥${state.min_money_seen ?? state.money}` : "没有欠款"}`,
