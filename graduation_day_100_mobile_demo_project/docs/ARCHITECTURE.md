@@ -8,7 +8,7 @@
 docs/
   index.html              # 页面入口，只负责加载 CSS 和 JS
   css/
-    app.v057.css          # 视觉主题、PC/手机布局、卡片、按钮、弹窗样式
+    app.split.css          # 视觉主题、PC/手机布局、卡片、按钮、弹窗样式
   js/
     app.js                # 游戏逻辑入口：状态、事件、行动、UI 渲染、存档
   data/
@@ -21,7 +21,7 @@ docs/
 当前游戏仍是一个纯静态 GitHub Pages 原型，没有构建工具。为了降低发布风险，本次先做“入口拆分”：
 
 - `index.html` 保持很小，避免每次改代码都卡。
-- `css/app.v057.css` 单独维护视觉主题和响应式布局。
+- `css/app.split.css` 单独维护视觉主题和响应式布局。
 - `js/app.js` 单独维护游戏逻辑。
 - 不引入打包器，不影响 GitHub Pages 直接发布。
 

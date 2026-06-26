@@ -1,5 +1,5 @@
 /* 毕业后的第100天 - 游戏逻辑入口。
-   v0.5.7 起从 index.html 拆分，后续建议继续拆 state/ui/events/actions。 */
+   结构拆分后，后续建议继续拆 state/ui/events/actions。 */
 "use strict";
 
     const APP_VERSION = "0.5.6";
