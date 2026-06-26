@@ -742,7 +742,11 @@
 
     .modal-backdrop { background: rgba(47, 42, 37, .34); backdrop-filter: blur(6px); }
     .modal { border-radius: 22px; background: #fff; box-shadow: 0 26px 80px rgba(99, 73, 44, .24); }
-    .update-modal { overflow: hidden; }
+    .update-modal {
+      overflow: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
     .update-modal::before {
       content: "";
       display: block;
@@ -809,6 +813,13 @@
     @media (max-width: 899px) {
       html, body { font-size: 15px; }
       .menu-inner { padding: 20px; border-radius: 22px; }
+      .modal-backdrop {
+        align-items: start;
+        padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+      }
+      .modal {
+        max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+      }
       .card, .sidebar, .content, .today-panel, .event-box, .modal { border-radius: 16px; }
       .nav-grid button, .system-grid button { min-height: 42px; }
     }
