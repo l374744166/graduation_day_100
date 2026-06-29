@@ -19,26 +19,65 @@
     "exclusive_contacts": ["lin_xia"]
   },
   {
-    "id": "unseen_wants_to_prove_self",
-    "name": "从没被看见，想证明自己",
-    "enabled": false,
-    "placeholder": true
-  },
-  {
     "id": "female_engineering_repeatedly_proving",
     "name": "工科女生，正在被反复证明",
-    "enabled": false,
-    "placeholder": true
+    "enabled": true,
+    "allowed_gender_modes": ["female"],
+    "summary": "你不是没有能力，但有些场合总会让你多回答几道和能力无关的题。",
+    "core_conflict": "你不是来证明女生也可以，你只是本来就可以。可有些人总想先确认你是不是“能扛住”。",
+    "stat_ranges": {
+      "money": [1500, 3200],
+      "mood": [45, 62],
+      "skill": [52, 68],
+      "relationship": [38, 60],
+      "pressure": [62, 82],
+      "self_identity": [45, 62]
+    },
+    "start_risk": "求职和面试中可能遇到额外的怀疑，你的压力会更容易因为“被审视”而上升。",
+    "start_advantage": "你确实做过东西。只要把经历讲具体，能力会成为你最稳定的支撑。",
+    "exclusive_contacts": []
   },
   {
     "id": "repeated_failures_still_trying",
     "name": "一直失利，但还没放弃",
-    "enabled": false,
-    "placeholder": true
+    "enabled": true,
+    "allowed_gender_modes": ["male", "female", "neutral"],
+    "summary": "你不是没有努力，只是这段时间什么都没有轮到你。",
+    "core_conflict": "考研失败、秋招失败、比赛失败。你明明做过很多事，却很难向别人解释为什么结果还是这样。",
+    "stat_ranges": {
+      "money": [1000, 2600],
+      "mood": [28, 48],
+      "skill": [42, 60],
+      "relationship": [40, 62],
+      "pressure": [68, 88],
+      "self_identity": [25, 45]
+    },
+    "start_risk": "你容易把一次新的失败理解成“又证明了我不行”，压力和情绪波动会更明显。",
+    "start_advantage": "你不是空白开局。过去的失败里有经验，只是你还没把它们整理成能继续走的东西。",
+    "exclusive_contacts": []
   },
   {
     "id": "ordinary_and_hard_to_introduce",
     "name": "普通到不知道怎么介绍自己",
+    "enabled": true,
+    "allowed_gender_modes": ["male", "female", "neutral"],
+    "summary": "你没有特别惨，也没有特别顺。你的人生普通到不知道该怎么讲给别人听。",
+    "core_conflict": "你不是没有活过，只是不知道哪些普通经历值得被写进简历、说进面试、放进人生里。",
+    "stat_ranges": {
+      "money": [1800, 3600],
+      "mood": [45, 62],
+      "skill": [38, 55],
+      "relationship": [42, 62],
+      "pressure": [42, 65],
+      "self_identity": [35, 52]
+    },
+    "start_risk": "因为没有明显优势，你容易觉得自己“没什么可说的”，从而在简历和面试里不断变得模糊。",
+    "start_advantage": "你没有极端崩盘，也没有被某一个失败定义。普通让你慢，但也让你还能调整。",
+    "exclusive_contacts": []
+  },
+  {
+    "id": "unseen_wants_to_prove_self",
+    "name": "从没被看见，想证明自己",
     "enabled": false,
     "placeholder": true
   },
