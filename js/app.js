@@ -2,7 +2,7 @@
    结构拆分后，后续建议继续拆 state/ui/events/actions。 */
 "use strict";
 
-    const APP_VERSION = "0.6.1";
+    const APP_VERSION = "0.6.1a";
     const SAVE_KEY = "graduation_day_100_save_v2";
     const SAVE_VERSION = 6;
     const VERSION_SEEN_KEY = "graduation_day_100_last_seen_version";
@@ -22,6 +22,7 @@
     const MAX_REROLLS = 3;
     const URL_PARAMS = new URLSearchParams(window.location.search);
     const DEBUG_MODE = URL_PARAMS.get("debug") === "1";
+    const DEBUG_FORCED_SCENARIO_ID = DEBUG_MODE ? (URL_PARAMS.get("scenario") || "") : "";
     const GAME_CONFIG = {
       max_action_points: DEBUG_MODE && URL_PARAMS.get("ap") ? Math.max(1, Number(URL_PARAMS.get("ap")) || 8) : 8,
       enable_luck_system: false,
@@ -785,7 +786,8 @@
         },
         scenario_events_seen: [],
         scenario_special_options_used: [],
-        scenario_achievements: []
+        scenario_achievements: [],
+        debug_forced_scenario: false
       };
     }
 
@@ -1842,12 +1844,19 @@
       app.append(screen);
     }
 
+    function debugForcedScenario() {
+      if (!DEBUG_MODE || !DEBUG_FORCED_SCENARIO_ID) return null;
+      const forced = scenarioById(DEBUG_FORCED_SCENARIO_ID);
+      return forced && forced.enabled ? forced : null;
+    }
+
     function generateLifeProfile(scenario) {
       const resolved = resolveGender(draftGenderMode);
       const scenarioMode = draftGenderMode === "random" ? resolved : draftGenderMode;
       const enabled = enabledLifeScenarios(scenarioMode);
       const source = (lifeScenarios && lifeScenarios.length) ? lifeScenarios : fallbackLifeScenarios;
-      const picked = scenario || enabled[randomInt(0, Math.max(0, enabled.length - 1))] || source.find((item) => item.enabled);
+      const forcedScenario = scenario ? null : debugForcedScenario();
+      const picked = scenario || forcedScenario || enabled[randomInt(0, Math.max(0, enabled.length - 1))] || source.find((item) => item.enabled);
       if (!picked) throw new Error("No enabled life scenario");
       const stats = {};
       for (const key of STAT_ORDER) {
@@ -1873,7 +1882,8 @@
           core_conflict: picked.core_conflict,
           start_risk: picked.start_risk,
           start_advantage: picked.start_advantage,
-          exclusive_contacts: [...(picked.exclusive_contacts || [])]
+          exclusive_contacts: [...(picked.exclusive_contacts || [])],
+          debug_forced_scenario: Boolean(forcedScenario)
         }
       };
     }
@@ -2232,21 +2242,22 @@
         backdrop.remove();
       };
       modal.append(
-        el("h2", "", "v0.6.1｜多处境剧情补全测试版"),
+        el("h2", "", "v0.6.1a｜测试便利热修"),
         button(auto ? "进入游戏" : "知道了", dismissAnnouncement),
-        el("p", "room-text", `这次不增加新玩法，只补全第 0 天毕业处境系统。
+        el("p", "room-text", `这次不增加新玩法，只给测试人员加一个 debug 指定毕业处境入口。
 
 - 新开放三条处境：【工科女生，正在被反复证明】、【一直失利，但还没放弃】、【普通到不知道怎么介绍自己】。
 - 保留并继续支持【有人陪你，但你不敢失败】与林夏线，“被爱不需要等价交换”不会被改掉。
 - 每条新处境都有专属初始数值、风险、优势、2 个一次性事件、面试特殊回答和第 7 天总结分支。
 - 随机人生视角会先确定性别，再按性别筛选可用处境，女性限定处境不会乱进男性视角。
-- 复制本局记录现在会输出 scenario_flags 和 scenario_ending_branch，方便测试复盘。
+- 当 URL 带有 ?debug=1&scenario=处境ID 时，第 0 天会优先生成指定处境。
+- 复制本局记录会标记 debug_forced_scenario=true，方便区分正式随机局和测试局。
 
 这仍然是测试版本。
 如果某条处境太少触发、太像说教，或者第 7 天不像这局玩出来的，请直接告诉开发者。`)
       );
       modal.append(button("查看完整更新记录", () => {
-        modal.querySelector("p").textContent = "完整更新记录：v0.6.1 基于 v0.6.0 扩充毕业处境，不增加天数、地图、恋爱、背包或职业树。新增三条 enabled 处境及对应 flags、剧情事件、面试特殊回答、成就标记和第 7 天报告；保留林夏线原有文案与分支；随机视角改为先解析性别再筛选处境；复制本局记录加入完整 scenario_flags 与通用 scenario_ending_branch。";
+        modal.querySelector("p").textContent = "完整更新记录：v0.6.1a 只新增测试便利入口：debug=1 时可用 scenario 参数强制第 0 天生成指定 enabled 处境；无效或缺失参数继续正常随机；正式入口不显示；复制本局记录增加 debug_forced_scenario 字段。不新增玩法、不改天数、不影响三次重抽。";
       }));
       if (!auto) modal.append(button("关闭", () => backdrop.remove()));
       backdrop.append(modal);
@@ -3927,6 +3938,7 @@ scenario_ending_branch：${branch}
         `resolved_gender：${life.resolved_gender || "neutral"}`,
         `life_scenario_id：${life.life_scenario_id || "none"}`,
         `life_scenario_name：${life.life_scenario_name || "未记录"}`,
+        `debug_forced_scenario：${life.debug_forced_scenario ? "true" : "false"}`,
         `core_conflict：${life.core_conflict || "未记录"}`,
         `start_risk：${life.start_risk || state.start_risk || "未记录"}`,
         `start_advantage：${life.start_advantage || state.start_advantage || "未记录"}`,
@@ -4279,7 +4291,7 @@ scenario_ending_branch：${branch}
     async function loadRuntimeData() {
       renderLoading();
       try {
-        const locationResponse = await fetch("./data/locations.json?v=062");
+        const locationResponse = await fetch("./data/locations.json?v=061a");
         if (!locationResponse.ok) throw new Error(`locations ${locationResponse.status}`);
         locations = await locationResponse.json();
       } catch (error) {
@@ -4288,7 +4300,7 @@ scenario_ending_branch：${branch}
         return false;
       }
       try {
-        const scenarioResponse = await fetch("./data/life_scenarios.json?v=062");
+        const scenarioResponse = await fetch("./data/life_scenarios.json?v=061a");
         if (scenarioResponse.ok) lifeScenarios = await scenarioResponse.json();
       } catch (error) {
         console.warn("life scenarios load failed", error);
