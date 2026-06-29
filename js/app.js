@@ -2,7 +2,7 @@
    结构拆分后，后续建议继续拆 state/ui/events/actions。 */
 "use strict";
 
-    const APP_VERSION = "0.6.1a";
+    const APP_VERSION = "0.6.2";
     const SAVE_KEY = "graduation_day_100_save_v2";
     const SAVE_VERSION = 6;
     const VERSION_SEEN_KEY = "graduation_day_100_last_seen_version";
@@ -107,11 +107,68 @@
     };
 
     const contactTemplates = {
-      roommate_azhe: { name: "阿哲", role: "大学舍友", personality: "嘴贱但靠谱", description: "你的大学舍友，嘴上说人生无所谓，实际连你没吃晚饭都能看出来。", benefit: "情绪支持、合租线索、宿舍喜剧。" },
+      current_roommate: { name: "阿远", role: "大学室友", personality: "一起迷茫", description: "这局人生的默认室友，会随着人生视角变化。", benefit: "情绪支持、合租线索、宿舍告别。" },
+      roommate_azhe: { name: "阿哲", role: "大学室友", personality: "嘴贱但靠谱", description: "嘴上说人生无所谓，实际连你没吃晚饭都能看出来。", benefit: "情绪支持、合租线索、宿舍喜剧。" },
+      roommate_xiaoman: { name: "小满", role: "大学室友", personality: "嘴毒但细心", description: "表面嫌弃你，实际会替你记得很多现实细节。", benefit: "安全感提醒、合租线索、宿舍告别。" },
+      roommate_ayuan: { name: "阿远", role: "大学室友", personality: "一起迷茫", description: "普通同学，一起迷茫，吐槽轻一点，更偏普通毕业生视角。", benefit: "情绪支持、合租线索、普通毕业生视角。" },
       clerk_aming: { name: "阿明", role: "便利店夜班店员", personality: "现实、松弛", description: "也是刚毕业，暂时在便利店干着。他说先活着，再谈理想。", benefit: "兼职机会、生活现实感。" },
       senior_zhou: { name: "周学长", role: "同校毕业生", personality: "有点职场味，但还没完全变成大人", description: "毕业两年，已经会说一些职场套话，但还记得自己刚毕业时有多慌。", benefit: "简历建议、面试特殊选项。" },
       landlord_luo: { name: "罗姐", role: "房东", personality: "热情但现实", description: "说房子很温馨，但你总觉得她对“温馨”这个词有自己的理解。", benefit: "租房线索、住房选择。" },
       lin_xia: { name: "林夏", role: "恋人", personality: "温柔但敏锐", description: "语气温柔但敏锐，能察觉你的情绪，但不会强行追问。有时会因为太体贴，让你更愧疚。", benefit: "压力、坦白与隐瞒、自我认同。" }
+    };
+
+    const lifePerspectivePresets = {
+      male: {
+        mode: "male",
+        label: "男生人生",
+        roommate_id: "roommate_azhe",
+        roommate_name: "阿哲",
+        roommate_style: "嘴贱但靠谱，死鸭子嘴硬，用互损代替关心。",
+        family_pressure_style: "男孩子总要早点稳定。你以后得自己撑起来。",
+        housing_concern_style: "住房压力更偏向钱、押金、自尊，以及不想麻烦别人。",
+        perspective_hint: "这次人生会更关注自尊、责任、经济压力和不敢示弱。",
+        opening_dialogue: "{player_name}，你终于回来了。我还以为你被毕业典礼感动到原地就业了。",
+        resume_roast: "你这简历最大的问题不是内容少，是它看起来比你本人更想上班。",
+        checkout_dialogue: "以后混不下去了找我，虽然我大概率也混不下去。",
+        day2_fragment: "你拖着行李箱下楼，阿哲伸手帮你拽了一把。\n他嘴上说：“你这箱子比你未来还沉。”\n但你发现他把最重的那一边留给了自己。",
+        housing_fragment: "你盯着房租和押金，第一反应不是贵，而是又要不要开口借钱。",
+        family_fragment: "电话那头绕来绕去，最后还是落到一句：男孩子总要早点稳定。你嘴上说“我知道”，心里却更想先喘口气。",
+        ending_perspective_fragment: "这一周，你不是没有想过求助。\n只是很多时候，话到了嘴边，都会变成一句“还行”。\n你以为撑住就是不让别人看见，其实撑住也可以包括承认自己有点累。"
+      },
+      female: {
+        mode: "female",
+        label: "女生人生",
+        roommate_id: "roommate_xiaoman",
+        roommate_name: "小满",
+        roommate_style: "嘴毒但细心，表面嫌弃你，实际会替你记得很多现实细节。",
+        family_pressure_style: "一个人在外面注意安全。实在不行回来找个稳定点的。",
+        housing_concern_style: "住房压力更偏向安全感、夜路、门锁、合租对象和离地铁距离。",
+        perspective_hint: "这次人生会更关注安全感、家庭期待、职场审视和自我证明。",
+        opening_dialogue: "{player_name}，你终于回来了。我还以为你在毕业典礼上完成了人生顿悟，直接投胎进大厂了。",
+        resume_roast: "你这个简历很干净，干净到像刚被消毒过，什么内容都没留下。",
+        checkout_dialogue: "租房别只看便宜，晚上回去的路也算房租的一部分。",
+        day2_fragment: "你拖着行李箱站在宿舍楼下，小满低头看了眼你订的临时住处。\n她说：“便宜可以，偏僻不行。你别用勇敢抵房租。”\n你本来想反驳，最后只是把地址又看了一遍。",
+        housing_fragment: "这间房便宜，但从地铁站走回去要十几分钟。你把这十几分钟放进脑子里算了一遍，发现它比房租更难决定。",
+        family_fragment: "家里问得不重，只是反复提醒你一个人在外面注意安全。你知道那是关心，也知道它有时会把选择变窄。",
+        ending_perspective_fragment: "这一周，你不只是在找工作和住处。\n你也在判断哪些担心是真的，哪些只是别人替你写好的边界。\n你没有把每个问题都回答得漂亮，但你开始知道，自己的选择不需要先获得所有人的放心。"
+      },
+      neutral: {
+        mode: "neutral",
+        label: "不强调性别",
+        roommate_id: "roommate_ayuan",
+        roommate_name: "阿远",
+        roommate_style: "普通同学，一起迷茫，吐槽轻一点，更偏普通毕业生视角。",
+        family_pressure_style: "工作找得怎么样？钱还够不够？不行就先回来歇歇。",
+        housing_concern_style: "住房压力更偏向普通毕业生的不确定。",
+        perspective_hint: "这次人生更关注普通毕业后的通用处境。",
+        opening_dialogue: "{player_name}，毕业这个东西挺神奇的。学校说你自由了，房东说你该交钱了。",
+        resume_roast: "你这简历不能说不好，只能说它还在等待自己的人生主题。",
+        checkout_dialogue: "那张床还在，但不归你了。听起来挺像毕业本身。",
+        day2_fragment: "你拖着行李箱走出宿舍楼，轮子卡在门口那道缝里。\n阿远说：“你看，连行李箱都觉得毕业太突然了。”\n你笑了一下，没笑太久。",
+        housing_fragment: "房子不只是睡觉的地方，也是你承认自己真的离开学校的证据。",
+        family_fragment: "家里问你工作找得怎么样、钱还够不够。问题都很普通，但每一个都能落到现实里。",
+        ending_perspective_fragment: "这一周，你没有被某个标签定义。\n你只是把毕业后那些具体的小事，一件件摆到面前：住哪，投哪，见谁，怎么继续。\n这已经足够真实。"
+      }
     };
 
     const startProfiles = [
@@ -333,9 +390,9 @@
     ];
 
     const dormEvents = [
-      { id: "azhe_resume_roast", title: "阿哲点评简历", description: "阿哲看着你的简历，表情像在看一份还没熟的外卖。", choices: [
-        { text: "让他大胆说", result: "阿哲说：“你这简历最大的问题不是内容少，是它看起来比你本人更想上班。”你本来想反驳，但发现这句话居然有一点准确。", effects: { relationship: 2, mood: 2 }, onChoose: () => { state.flags.azhe_resume_roast_seen = true; meetContact("roommate_azhe", 1, "第 1 天，阿哲嘴欠地帮你看过简历。"); } },
-        { text: "抢回简历", result: "你抢回简历。阿哲举手投降：“行行行，等你上岸了再让我见识一下成熟版本。”", effects: { mood: 1, relationship: 1 } }
+      { id: "azhe_resume_roast", title: "室友点评简历", description: "室友看着你的简历，表情像在看一份还没熟的外卖。", choices: [
+        { text: "让室友大胆说", result: "室友给出了很难反驳的简历点评。", effects: { relationship: 2, mood: 2 }, onChoose: () => {} },
+        { text: "抢回简历", result: "你抢回简历。室友举手投降。", effects: { mood: 1, relationship: 1 } }
       ] },
       { id: "bathroom_shadow", title: "厕所门口的阴影", description: "舍友 B 从厕所出来，神情庄重，像刚和命运谈判完。", choices: [
         { text: "问他洗手了吗", result: "他说：“真正的兄弟，不该被细菌定义。”你后退了两步。", effects: { mood: 3, relationship: 1 } },
@@ -364,7 +421,7 @@
       ] },
       { day: 2, title: "退宿和临时落脚点", description: "你拖着行李站在宿舍楼下。现在最现实的问题不是梦想，而是今晚睡哪。", choices: [
         { text: "住一周便宜短租", result: "你订了一个便宜短租。照片里窗很大，现实里窗很努力。至少今晚不用拖着箱子流浪。", effects: { money: -260, pressure: -2, self_identity: 1 }, onChoose: () => setTemporaryPlace("cheap_short_rent") },
-        { text: "先借住阿哲那边", result: "阿哲说可以挤几天，但床垫和地板你得自己选。你笑了一下，至少还有人愿意给你留一块地。", effects: { money: -80, relationship: 4, pressure: 1 }, onChoose: () => setTemporaryPlace("borrow_roommate") },
+        { text: "先借住室友那边", result: "室友说可以挤几天。你笑了一下，至少还有人愿意给你留一块地。", effects: { money: -80, relationship: 4, pressure: 1 }, onChoose: () => setTemporaryPlace("borrow_roommate") },
         { text: "咬牙住两晚快捷酒店", result: "酒店房间很小，但门锁声让你安心。代价是余额明显变薄，像未来又瘦了一圈。", effects: { money: -420, pressure: 2, mood: 2 }, onChoose: () => setTemporaryPlace("budget_hotel") }
       ] }
     ];
@@ -717,6 +774,7 @@
         npc_records: {},
         player_name: "许迟",
         life_profile: freshLifeProfile(),
+        life_perspective: freshLifePerspective("neutral"),
         contacts: freshContacts(),
         job_progress: freshJobProgress(),
         housing_progress: freshHousingProgress(),
@@ -738,6 +796,62 @@
       };
       base.day_start_stats = snapshotStats(base);
       return base;
+    }
+
+    function perspectiveModeFromGender(mode = "neutral") {
+      return ["male", "female", "neutral"].includes(mode) ? mode : "neutral";
+    }
+
+    function freshLifePerspective(mode = "neutral") {
+      const preset = lifePerspectivePresets[perspectiveModeFromGender(mode)] || lifePerspectivePresets.neutral;
+      return { ...preset };
+    }
+
+    function normalizeLifePerspective(existing = {}, lifeProfile = null) {
+      const mode = perspectiveModeFromGender(existing?.mode || lifeProfile?.resolved_gender || lifeProfile?.gender_mode || "neutral");
+      const base = freshLifePerspective(mode);
+      const merged = { ...base, ...(existing || {}) };
+      const preset = lifePerspectivePresets[perspectiveModeFromGender(merged.mode)] || lifePerspectivePresets.neutral;
+      return { ...preset, ...merged };
+    }
+
+    function currentLifePerspective() {
+      state.life_profile = normalizeLifeProfile(state.life_profile);
+      state.life_perspective = normalizeLifePerspective(state.life_perspective, state.life_profile);
+      return state.life_perspective;
+    }
+
+    function getCurrentRoommate() {
+      const perspective = currentLifePerspective();
+      return {
+        id: "current_roommate",
+        actual_id: perspective.roommate_id,
+        name: perspective.roommate_name,
+        role: "大学室友",
+        personality: perspective.roommate_style,
+        description: perspective.roommate_style,
+        benefit: "情绪支持、合租线索、宿舍告别。",
+        opening_dialogue: perspective.opening_dialogue,
+        resume_roast: perspective.resume_roast,
+        checkout_dialogue: perspective.checkout_dialogue
+      };
+    }
+
+    function roommateName() {
+      return getCurrentRoommate().name;
+    }
+
+    function roommateContactId() {
+      return "current_roommate";
+    }
+
+    function fillPerspectiveText(text = "") {
+      const roommate = getCurrentRoommate();
+      return String(text)
+        .replaceAll("{player_name}", state.player_name || "许迟")
+        .replaceAll("{roommate_name}", roommate.name)
+        .replaceAll("{resume_roast}", roommate.resume_roast)
+        .replaceAll("{checkout_dialogue}", roommate.checkout_dialogue);
     }
 
     function freshLifeProfile() {
@@ -796,9 +910,9 @@
       for (const [id, template] of Object.entries(contactTemplates)) {
         contacts[id] = { id, ...template, met: false, intimacy: 0, last_interaction: "", benefit_unlocked: false, events_seen: [] };
       }
-      contacts.roommate_azhe.met = true;
-      contacts.roommate_azhe.intimacy = 1;
-      contacts.roommate_azhe.last_interaction = "他从第 1 天开始就坐在你的宿舍里，负责嘴欠和兜底。";
+      contacts.current_roommate.met = true;
+      contacts.current_roommate.intimacy = 1;
+      contacts.current_roommate.last_interaction = "这位室友从第 1 天开始就坐在你的宿舍里，负责见证毕业。";
       contacts.lin_xia.met = false;
       contacts.lin_xia.intimacy = 0;
       return contacts;
@@ -951,9 +1065,41 @@
       return (state.housing_progress?.temporary_place || "none") === "none";
     }
 
+    function perspectiveMainEvent(event) {
+      if (!event) return event;
+      const perspective = currentLifePerspective();
+      const roommate = getCurrentRoommate();
+      if (event.day === 1) {
+        return {
+          ...event,
+          description: `宿舍的灯最后一次亮着。行李箱摊在地上，外卖盒堆在桌边。${roommate.name}看见你进门，先抬了抬下巴：\n“${fillPerspectiveText(roommate.opening_dialogue)}”\n\n四个人表面都在收拾东西，实际上谁也没认真收拾。`,
+          choices: event.choices.map((choice) => ({ ...choice, result: choice.result.replaceAll("舍友", roommate.name) }))
+        };
+      }
+      if (event.day === 2) {
+        return {
+          ...event,
+          description: `${perspective.day2_fragment}\n\n现在最现实的问题不是梦想，而是今晚睡哪。`,
+          choices: event.choices.map((choice) => {
+            if (choice.text.includes("借住")) {
+              return {
+                ...choice,
+                text: `先借住${roommate.name}那边`,
+                result: `${roommate.name}说可以挤几天。${roommate.checkout_dialogue}\n你笑了一下，至少还有人愿意给你留一块地。`
+              };
+            }
+            return choice;
+          })
+        };
+      }
+      return event;
+    }
+
     function forceTemporaryPlaceEvent() {
-      const event = events.find((item) => item.day === 2);
-      return { ...event, title: "你还没有确定今晚住在哪里", description: "不能把行李拖进第 3 天。先选一个临时落脚点，哪怕它不完美。", forced_housing: true };
+      const event = perspectiveMainEvent(events.find((item) => item.day === 2));
+      return { ...event, title: "你还没有确定今晚住在哪里", description: `${currentLifePerspective().day2_fragment}
+
+不能把行李拖进第 3 天。先选一个临时落脚点，哪怕它不完美。`, forced_housing: true };
     }
 
 
@@ -1020,7 +1166,8 @@
         return event.condition(state);
       });
       if (threshold) return { ...threshold, threshold: true };
-      return events.find((event) => event.day === state.day && !state.flags[`event_day_${event.day}`]);
+      const mainEvent = events.find((event) => event.day === state.day && !state.flags[`event_day_${event.day}`]);
+      return perspectiveMainEvent(mainEvent);
     }
 
 
@@ -1345,7 +1492,7 @@
             onChoose: scenarioChoice({ failure_rejection_processed: true, failure_reviewed_reason: true, failure_rejection_event_seen: true })
           },
           {
-            text: "找阿哲吐槽",
+            text: "找室友吐槽",
             result: "你把截图发给阿哲。\n阿哲回：“它拒绝的是今天的你，不是终身会员版的你。”\n这句话很欠，但你居然看了两遍。",
             effects: { mood: 3, relationship: 2, pressure: -2 },
             onChoose: scenarioChoice({ failure_rejection_processed: true, failure_kept_trying: true, failure_rejection_event_seen: true })
@@ -1421,8 +1568,9 @@
       if (housing.housing_leads >= 2 && housing.viewings_done >= 1 && housing.commute_checked) {
         choices.push({ text: "选远一点但便宜的房间", result: "你选了远一点的便宜房间。通勤会很长，但余额终于没那么像倒计时。", effects: { money: -300, pressure: -2, self_identity: 2 }, onChoose: () => chooseHousing("remote_cheap", "你选择了远一点但便宜的房间。") });
       }
-      if (housing.shared_rent_asked && state.relationship >= 60 && contacts.roommate_azhe?.met) {
-        choices.push({ text: "和阿哲继续看合租", result: "你和阿哲约好继续看合租。它不一定稳，但至少不是一个人面对房租。", effects: { relationship: 3, pressure: -3 }, onChoose: () => chooseHousing("shared_rent", "你和阿哲保留了合租方案。") });
+      const roommate = getCurrentRoommate();
+      if (housing.shared_rent_asked && state.relationship >= 60 && contacts.current_roommate?.met) {
+        choices.push({ text: `和${roommate.name}继续看合租`, result: `你和${roommate.name}约好继续看合租。它不一定稳，但至少不是一个人面对房租。`, effects: { relationship: 3, pressure: -3 }, onChoose: () => chooseHousing("shared_rent", `你和${roommate.name}保留了合租方案。`) });
       }
       choices.push(
         { text: "先续住临时落脚点", result: "你决定先续几天临时住处。不是解决，只是给自己买一点缓冲时间。", effects: { money: -220, pressure: 1 }, onChoose: () => chooseHousing("extend_temporary", "你续住了临时落脚点。") },
@@ -1559,6 +1707,24 @@
         if (contacts[id]) contacts[id] = { ...contacts[id], ...value, id };
       }
       const life = state?.life_profile ? normalizeLifeProfile(state.life_profile) : freshLifeProfile();
+      const perspective = state?.life_perspective ? normalizeLifePerspective(state.life_perspective, life) : freshLifePerspective(life.resolved_gender || life.gender_mode);
+      const preset = lifePerspectivePresets[perspective.mode] || lifePerspectivePresets.neutral;
+      const existingRoommate = existing?.current_roommate || {};
+      contacts.current_roommate = {
+        ...contacts.current_roommate,
+        ...existingRoommate,
+        id: "current_roommate",
+        actual_id: preset.roommate_id,
+        name: preset.roommate_name,
+        role: "大学室友",
+        personality: preset.roommate_style,
+        description: preset.roommate_style,
+        benefit: "情绪支持、合租线索、宿舍告别。",
+        met: existingRoommate.met !== false,
+        intimacy: Number(existingRoommate.intimacy) || 1,
+        last_interaction: existingRoommate.last_interaction || `${preset.roommate_name}从第 1 天开始就坐在你的宿舍里，负责见证毕业。`
+      };
+      contacts[preset.roommate_id] = { ...contacts[preset.roommate_id], met: false, intimacy: 0 };
       if (!life.exclusive_contacts.includes("lin_xia")) {
         contacts.lin_xia.met = false;
         contacts.lin_xia.intimacy = 0;
@@ -1599,7 +1765,7 @@
       state.housing_progress = { ...freshHousingProgress(), ...(state.housing_progress || {}) };
       const labels = {
         cheap_short_rent: "便宜短租",
-        borrow_roommate: "借住阿哲那边",
+        borrow_roommate: `借住${roommateName()}那边`,
         budget_hotel: "快捷酒店"
       };
       state.housing_progress.dorm_checked_out = true;
@@ -1674,6 +1840,7 @@
       state.npc_records = state.npc_records || {};
       state.player_name = sanitizePlayerName(state.player_name || "许迟");
       state.life_profile = normalizeLifeProfile(state.life_profile);
+      state.life_perspective = normalizeLifePerspective(state.life_perspective, state.life_profile);
       state.contacts = normalizeContacts(state.contacts);
       state.job_progress = { ...freshJobProgress(), ...(state.job_progress || {}) };
       state.housing_progress = { ...freshHousingProgress(), ...(state.housing_progress || {}) };
@@ -1699,9 +1866,9 @@
       const inner = el("div", "menu-inner");
       inner.append(
         el("h1", "", "检测到旧版试玩存档"),
-        el("p", "room-text", "检测到旧版试玩存档。\nv0.6.1 继续扩展了毕业处境系统，旧存档无法完整兼容。\n建议从第 0 天重新开始。"),
+        el("p", "room-text", "检测到旧版试玩存档。\nv0.6.2 加入人生视角差异化，旧存档无法完整兼容。\n建议从第 0 天重新开始。"),
         button("导出旧版记录", () => showCopyFallback(JSON.stringify(oldState, null, 2))),
-        button("开始 v0.6.1 新游戏", () => {
+        button("开始 v0.6.2 新游戏", () => {
           state = freshState();
           localStorage.removeItem(SAVE_KEY);
           resetDraftLife();
@@ -1751,7 +1918,7 @@
       const wrap = el("div", "profile");
       wrap.append(el("h1", "", "毕业后的第100天"), el("p", "subtitle", "第 0 天：选择人生视角"));
       const card = el("section", "profile-card");
-      card.append(el("h2", "", "这一次，你想从哪里看毕业后的生活？"), el("p", "room-text", "v0.6.1 已开放四条毕业处境：被陪伴但怕失败、工科女生反复证明、一直失利仍在尝试、普通到难以介绍自己。"));
+      card.append(el("h2", "", "这一次，你想从哪里看毕业后的生活？"), el("p", "room-text", "v0.6.2 会根据人生视角生成不同默认室友、退宿语气、住房顾虑、家庭压力和第 7 天视角总结。"));
       const grid = el("div", "grid");
       for (const option of genderModeOptions) {
         const item = el("article", "card");
@@ -1811,7 +1978,16 @@
       const scenario = draftProfile.scenario;
       card.append(
         el("h2", "", `毕业处境：${scenario.name}`),
-        el("p", "room-text", `这不是你选择的完美人生。\n这只是你这一次的起点。\n\n玩家名字：${draftProfile.player_name}\n人生视角：${genderModeText(draftProfile.gender_mode)}\n\n一句话简介：${scenario.summary}\n核心矛盾：${scenario.core_conflict}`)
+        el("p", "room-text", `这不是你选择的完美人生。
+这只是你这一次的起点。
+
+玩家名字：${draftProfile.player_name}
+人生视角：${draftProfile.life_perspective.label}
+默认室友：${draftProfile.life_perspective.roommate_name}
+视角提示：${draftProfile.life_perspective.perspective_hint}
+
+一句话简介：${scenario.summary}
+核心矛盾：${scenario.core_conflict}`)
       );
       const stats = el("div", "profile-stats");
       for (const key of STAT_ORDER) {
@@ -1863,6 +2039,7 @@
         const [min, max] = picked.stat_ranges[key];
         stats[key] = randomInt(min, max);
       }
+      const lifePerspective = freshLifePerspective(resolved);
       return {
         name: picked.name,
         stats,
@@ -1872,6 +2049,7 @@
         player_name: sanitizePlayerName(draftPlayerName),
         gender_mode: draftGenderMode,
         resolved_gender: resolved,
+        life_perspective: lifePerspective,
         life_profile: {
           ...freshLifeProfile(),
           gender_mode: draftGenderMode,
@@ -1909,6 +2087,7 @@
       state.initial_stats = { ...draftProfile.stats };
       state.player_name = draftProfile.player_name;
       state.life_profile = normalizeLifeProfile(draftProfile.life_profile);
+      state.life_perspective = normalizeLifePerspective(draftProfile.life_perspective, state.life_profile);
       state.start_profile_name = draftProfile.name;
       state.start_tags = draftProfile.tags;
       state.start_risk = state.life_profile.start_risk || startRiskText(state);
@@ -2001,9 +2180,24 @@
       }
     ];
 
+    function perspectiveIntroPage(page) {
+      const roommate = getCurrentRoommate();
+      const title = (page.title || "").replaceAll("阿哲", roommate.name);
+      if (page.title === "阿哲首次登场") {
+        return {
+          ...page,
+          title: `${roommate.name}首次登场`,
+          text: `你推开门，${roommate.name}坐在行李箱旁边，像守着一段即将过期的人生。\n\n${roommate.name}说：“${fillPerspectiveText(roommate.opening_dialogue)}”\n\n${roommate.name}低头看了一眼泡面，又看了一眼你：“毕业证拿到了？很好，现在来决定更重要的事：红烧牛肉味到底算不算公共财产。”`
+        };
+      }
+      const text = (page.text || "").replaceAll("阿哲", roommate.name).replaceAll("{player_name}", state.player_name || "许迟");
+      return { ...page, title, text };
+    }
+
     function renderIntroStory(index = 0) {
       state.flags.intro_story_seen = true;
-      const page = introStoryPages[index];
+      const rawPage = introStoryPages[index];
+      const page = rawPage ? perspectiveIntroPage(rawPage) : null;
       if (!page) {
         autoSave("intro_story_done");
         routeNext();
@@ -2242,22 +2436,19 @@
         backdrop.remove();
       };
       modal.append(
-        el("h2", "", "v0.6.1a｜测试便利热修"),
+        el("h2", "", "v0.6.2｜人生视角差异化版"),
         button(auto ? "进入游戏" : "知道了", dismissAnnouncement),
-        el("p", "room-text", `这次不增加新玩法，只给测试人员加一个 debug 指定毕业处境入口。
+        el("p", "room-text", `这次不扩第 8 天、不加新处境，只让男生人生、女生人生和不强调性别真正影响第一周的剧情表现。
 
-- 新开放三条处境：【工科女生，正在被反复证明】、【一直失利，但还没放弃】、【普通到不知道怎么介绍自己】。
-- 保留并继续支持【有人陪你，但你不敢失败】与林夏线，“被爱不需要等价交换”不会被改掉。
-- 每条新处境都有专属初始数值、风险、优势、2 个一次性事件、面试特殊回答和第 7 天总结分支。
-- 随机人生视角会先确定性别，再按性别筛选可用处境，女性限定处境不会乱进男性视角。
-- 当 URL 带有 ?debug=1&scenario=处境ID 时，第 0 天会优先生成指定处境。
-- 复制本局记录会标记 debug_forced_scenario=true，方便区分正式随机局和测试局。
+- 新增 life_perspective 数据层，记录人生视角、默认室友、家庭压力、住房顾虑和第 7 天视角总结。
+- 三个默认室友分化为阿哲、小满、阿远。
+- 第 1 天开场、第 2 天退宿、合租联系人、住房/家庭提示和第 7 天报告会根据人生视角变化。
 
 这仍然是测试版本。
 如果某条处境太少触发、太像说教，或者第 7 天不像这局玩出来的，请直接告诉开发者。`)
       );
       modal.append(button("查看完整更新记录", () => {
-        modal.querySelector("p").textContent = "完整更新记录：v0.6.1a 只新增测试便利入口：debug=1 时可用 scenario 参数强制第 0 天生成指定 enabled 处境；无效或缺失参数继续正常随机；正式入口不显示；复制本局记录增加 debug_forced_scenario 字段。不新增玩法、不改天数、不影响三次重抽。";
+        modal.querySelector("p").textContent = "完整更新记录：v0.6.2 新增 life_perspective 数据层和 current_roommate 动态联系人；男生人生默认阿哲，女生人生默认小满，不强调性别默认阿远；第 0 天档案、第 1 天宿舍开场、第 2 天退宿、合租/住房/家庭提示、第 7 天报告和复制本局记录都会体现人生视角差异。不扩第 8 天、不新增毕业处境、不改 BGM、不重做 UI。";
       }));
       if (!auto) modal.append(button("关闭", () => backdrop.remove()));
       backdrop.append(modal);
@@ -2435,8 +2626,9 @@
       if (state.day <= 2 && state.current_location === "dorm") {
         content.append(el("h3", "", "宿舍里还能点点什么"));
         const grid = el("div", "grid scene-options");
-        for (const event of dormEvents) {
-          if (!state.flags[`dorm_${event.id}`]) {
+        for (const rawEvent of dormEvents) {
+          const event = perspectiveDormEvent(rawEvent);
+          if (!state.flags[`dorm_${rawEvent.id}`]) {
             const card = el("article", "card");
             card.append(el("h3", "", event.title), el("p", "", event.description), button("查看", () => renderDormEvent(event)));
             grid.append(card);
@@ -2532,7 +2724,7 @@ ${mainline}｜${formatEffects(action.effects)}${unavailableReason ? `
       }
       if (action.id === "contact_landlord" && housing.housing_leads < 1) return "还没有明确的房源线索，先查看租房信息。";
       if (action.id === "view_rental" && !housing.landlord_contacted) return "还没联系房东，不能直接看房。";
-      if (action.id === "ask_shared_rent" && !contacts.roommate_azhe?.met) return "你还没和阿哲建立联系。";
+      if (action.id === "ask_shared_rent" && !contacts.current_roommate?.met) return `你还没和${roommateName()}建立联系。`;
       return "";
     }
 
@@ -2699,7 +2891,7 @@ ${mainline}｜${formatEffects(action.effects)}${unavailableReason ? `
         `通勤评估：${housing.commute_checked ? "已评估" : "未评估"}`,
         `可选方向：${housing.available_options.join("、") || "暂无"}`
       ]) grid.append(el("div", "today-slot", line));
-      body.append(grid, el("p", "hint", "找房入口：在【临时房间】或【咖啡店】点击“查看租房信息”，有线索后再联系房东或问阿哲合租。"));
+      body.append(grid, el("p", "hint", "找房入口：在【临时房间】或【咖啡店】点击“查看租房信息”，有线索后再联系房东或问当前室友合租。"));
       const actionsBox = el("div", "grid");
       for (const id of ["check_rentals", "contact_landlord", "ask_shared_rent"]) actionsBox.append(computerActionButton(id, backdrop));
       body.append(el("h3", "", "可执行住房行动"), actionsBox, el("h3", "", "最近住房记录"), historyList(housing.history));
@@ -2757,7 +2949,7 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       if (job.interview_invites > 0) messages.push({ id: "interview_invite", title: "面试邀请", text: "你收到了一次正式面试邀请，第 6 天可以去面试公司。" });
       if (job.final_result !== "none") messages.push({ id: "interview_result", title: "面试结果", text: job.result_text || "第 7 天求职结果已生成。" });
       if (housing.landlord_contacted) messages.push({ id: "landlord_reply", title: "房东回复", text: "罗姐回复了你的租房咨询，可以继续看房或比较选项。" });
-      if (housing.shared_rent_asked) messages.push({ id: "shared_rent", title: "合租消息", text: "阿哲说可以一起看看合租，但大家都穷得很坦诚。" });
+      if (housing.shared_rent_asked) messages.push({ id: "shared_rent", title: "合租消息", text: `${roommateName()}说可以一起看看合租，但大家都穷得很坦诚。` });
       if (countLogsByActions(["part_time_job"]) > 0 || state.money < 500) messages.push({ id: "store_shift", title: "便利店排班机会", text: "便利店还有临时班次。它不浪漫，但能让余额动一下。" });
       if (isLinxiaScenario() && state.contacts?.lin_xia?.met) {
         const flags = scenarioFlags();
@@ -2938,7 +3130,29 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       return item;
     }
 
+    function perspectiveDormEvent(event) {
+      const roommate = getCurrentRoommate();
+      if (event.id !== "azhe_resume_roast") return event;
+      return {
+        ...event,
+        title: `${roommate.name}点评简历`,
+        description: `${roommate.name}看着你的简历，表情像在看一份还没熟的外卖。`,
+        choices: [
+          {
+            ...event.choices[0],
+            result: `${roommate.name}说：“${roommate.resume_roast}”你本来想反驳，但发现这句话居然有一点准确。`,
+            onChoose: () => { state.flags.azhe_resume_roast_seen = true; meetContact(roommateContactId(), 1, `第 1 天，${roommate.name}帮你看过简历。`); }
+          },
+          {
+            ...event.choices[1],
+            result: `你抢回简历。${roommate.name}举手投降：“行行行，等你上岸了再让我见识一下成熟版本。”`
+          }
+        ]
+      };
+    }
+
     function renderDormEvent(event) {
+      event = perspectiveDormEvent(event);
       if (processing) return;
       app.innerHTML = "";
       const screen = el("section", "screen event-screen");
@@ -3092,11 +3306,12 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       }
       if (action.id === "ask_shared_rent") {
         state.housing_progress.shared_rent_asked = true;
-        meetContact("roommate_azhe", 1, "你问过合租，大家都穷得很坦诚。");
+        const roommate = getCurrentRoommate();
+        meetContact(roommateContactId(), 1, `你问过${roommate.name}合租，大家都穷得很坦诚。`);
         if (state.relationship >= 55) {
           state.housing_progress.housing_leads += 1;
           state.flags.shared_rent_possible = true;
-          addStoryLog("azhe_shared_rent_seen", "阿哲的合租线索", "阿哲帮你把箱子拖到楼下，说：“以后混不下去了找我，虽然我大概率也混不下去。”这句话不太像承诺，但至少像一条线索。");
+          addStoryLog("roommate_shared_rent_seen", `${roommate.name}的合租线索`, `${roommate.name}帮你把箱子拖到楼下，说：“${roommate.checkout_dialogue}”这句话不太像承诺，但至少像一条线索。`);
         }
       }
       if (action.id === "view_rental") {
@@ -3237,6 +3452,18 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       }
       let effects = { ...(action.effects || {}) };
       let description = action.feedback_text || action.description;
+      if (["check_rentals", "contact_landlord", "estimate_commute", "view_rental"].includes(action.id)) {
+        description += `
+${currentLifePerspective().housing_fragment}`;
+      }
+      if (action.id === "message_parents") {
+        description += `
+${currentLifePerspective().family_fragment}`;
+      }
+      if (action.id === "ask_shared_rent") {
+        description = `你试探着问${roommateName()}要不要合租。对方沉默了一会儿，说：“可以看看，但我也挺穷的。”
+${currentLifePerspective().housing_fragment}`;
+      }
       if (action.id === "rest") {
         effects = { mood: 6, pressure: -4 };
         description = "你休息了一会儿。时间没有回来，但你至少没继续坏下去。";
@@ -3719,6 +3946,7 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         el("p", "room-text", report.description),
         renderStartReview(),
         renderScenarioReview(),
+        renderPerspectiveReview(),
         renderWeekReview(),
         renderStats(),
         button("复制本局记录", copyPlayLog),
@@ -3739,10 +3967,13 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       const names = (state.start_tags || []).map((tag) => `【${tag.name || tag}】`).join("");
       const profile = state.start_profile_name || "未知开局";
       const life = normalizeLifeProfile(state.life_profile);
+      const perspective = currentLifePerspective();
       box.append(
         el("div", "log-time", `你的开局：${profile}`),
         el("p", "", names ? `${state.player_name || "许迟"}带着${names}的开局，走过了毕业后的第一周。` : `${state.player_name || "许迟"}从一个没有被记录的旧开局，走过了毕业后的第一周。`),
-        el("p", "muted", `人生视角：${genderModeText(life.gender_mode)}
+        el("p", "muted", `人生视角：${perspective.label || genderModeText(life.gender_mode)}
+默认室友：${perspective.roommate_name || "未记录"}
+视角提示：${perspective.perspective_hint || "未记录"}
 毕业处境：${life.life_scenario_name || "未记录"}
 核心矛盾：${life.core_conflict || "未记录"}
 重抽次数：${state.reroll_used || 0}
@@ -3755,6 +3986,7 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
     function renderScenarioReview() {
       const box = el("div", "log-item");
       const life = normalizeLifeProfile(state.life_profile);
+      const perspective = currentLifePerspective();
       box.append(el("div", "log-time", "毕业处境总结"));
       if (!life.life_scenario_id) {
         box.append(el("p", "", "这局没有记录到专属处境线。"));
@@ -3788,6 +4020,21 @@ scenario_ending_branch：${branch}
         return `空白简历 ${flags.ordinary_blank_resume ? "是" : "否"} / 具体小事 ${flags.ordinary_specific_small_story ? "是" : "否"} / 诚实介绍 ${flags.ordinary_honest_intro ? "是" : "否"} / 找到重量 ${flags.ordinary_found_weight ? "是" : "否"}`;
       }
       return JSON.stringify(flags);
+    }
+
+    function renderPerspectiveReview() {
+      const perspective = currentLifePerspective();
+      const roommate = getCurrentRoommate();
+      const box = el("div", "log-item");
+      box.append(
+        el("div", "log-time", "人生视角总结"),
+        el("p", "", perspective.ending_perspective_fragment || "这周的人生视角没有留下额外总结。"),
+        el("p", "muted", `默认室友：${roommate.name}（${roommate.actual_id}）
+室友风格：${perspective.roommate_style}
+住房顾虑：${perspective.housing_concern_style}
+家庭压力：${perspective.family_pressure_style}`)
+      );
+      return box;
     }
 
     function copyPlayLog() {
@@ -3911,6 +4158,8 @@ scenario_ending_branch：${branch}
       const actionsOnly = logs.filter((entry) => entry.type === "action");
       const changes = statDiff(state.initial_stats || snapshotStats(), snapshotStats());
       const life = normalizeLifeProfile(state.life_profile);
+      const perspective = currentLifePerspective();
+      const roommate = getCurrentRoommate();
       const flags = life.scenario_flags;
       const byDay = [];
       for (let day = 1; day <= 7; day += 1) {
@@ -3936,6 +4185,10 @@ scenario_ending_branch：${branch}
         `player_name：${state.player_name || "许迟"}`,
         `gender_mode：${life.gender_mode || "neutral"}`,
         `resolved_gender：${life.resolved_gender || "neutral"}`,
+        `life_perspective：${perspective.mode}`,
+        `life_perspective_label：${perspective.label}`,
+        `actual_roommate_id：${roommate.actual_id}`,
+        `current_roommate_name：${roommate.name}`,
         `life_scenario_id：${life.life_scenario_id || "none"}`,
         `life_scenario_name：${life.life_scenario_name || "未记录"}`,
         `debug_forced_scenario：${life.debug_forced_scenario ? "true" : "false"}`,
@@ -4036,12 +4289,12 @@ scenario_ending_branch：${branch}
     }
 
     function temporaryPlaceText(place) {
-      return ({ cheap_short_rent: "便宜短租", borrow_roommate: "借住阿哲", budget_hotel: "快捷酒店", none: "未确定" })[place] || place || "未确定";
+      return ({ cheap_short_rent: "便宜短租", borrow_roommate: `借住${roommateName()}`, budget_hotel: "快捷酒店", none: "未确定" })[place] || place || "未确定";
     }
 
     function housingSummaryText() {
       const housing = state.housing_progress || freshHousingProgress();
-      return `${housingStageText(housing.stage)}｜临时住处 ${temporaryPlaceText(housing.temporary_place)}｜线索 ${housing.housing_leads || 0}｜看房 ${housing.viewings_done || 0}｜租房压力 ${housing.rent_pressure || 0}${housing.result_text ? `｜${housing.result_text}` : ""}`;
+      return `${housingStageText(housing.stage)}｜临时住处 ${temporaryPlaceText(housing.temporary_place)}｜线索 ${housing.housing_leads || 0}｜看房 ${housing.viewings_done || 0}｜租房压力 ${housing.rent_pressure || 0}${housing.result_text ? `｜${housing.result_text}` : ""}｜${currentLifePerspective().housing_concern_style}`;
     }
 
     function variantLogsAll() {
@@ -4291,7 +4544,7 @@ scenario_ending_branch：${branch}
     async function loadRuntimeData() {
       renderLoading();
       try {
-        const locationResponse = await fetch("./data/locations.json?v=061a");
+        const locationResponse = await fetch("./data/locations.json?v=0622");
         if (!locationResponse.ok) throw new Error(`locations ${locationResponse.status}`);
         locations = await locationResponse.json();
       } catch (error) {
@@ -4300,7 +4553,7 @@ scenario_ending_branch：${branch}
         return false;
       }
       try {
-        const scenarioResponse = await fetch("./data/life_scenarios.json?v=061a");
+        const scenarioResponse = await fetch("./data/life_scenarios.json?v=0622");
         if (scenarioResponse.ok) lifeScenarios = await scenarioResponse.json();
       } catch (error) {
         console.warn("life scenarios load failed", error);
