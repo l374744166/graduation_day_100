@@ -2,7 +2,7 @@
    结构拆分后，后续建议继续拆 state/ui/events/actions。 */
 "use strict";
 
-    const APP_VERSION = "0.6.0";
+    const APP_VERSION = "0.6.1";
     const SAVE_KEY = "graduation_day_100_save_v2";
     const SAVE_VERSION = 6;
     const VERSION_SEEN_KEY = "graduation_day_100_last_seen_version";
@@ -381,25 +381,182 @@
     let lifeScenarios = [];
     const fallbackLifeScenarios = [
       {
-        id: "accompanied_but_afraid_to_fail",
-        name: "有人陪你，但你不敢失败",
-        enabled: true,
-        allowed_gender_modes: ["male", "female", "neutral"],
-        summary: "恋人是你的安全网，但也是你不敢掉下去的原因。",
-        core_conflict: "因为被爱着，反而更害怕让对方失望，压力成了不敢说出口的负担。",
-        stat_ranges: {
-          money: [1200, 2200],
-          mood: [48, 62],
-          skill: [42, 56],
-          relationship: [70, 82],
-          pressure: [62, 78],
-          self_identity: [38, 52]
-        },
-        start_risk: "压力持续累积时，你更容易选择隐瞒，而不是求助。",
-        start_advantage: "林夏会给你提供情绪支撑，有时也会带来实际帮助。",
-        exclusive_contacts: ["lin_xia"]
+            "id": "accompanied_but_afraid_to_fail",
+            "name": "有人陪你，但你不敢失败",
+            "enabled": true,
+            "allowed_gender_modes": [
+                  "male",
+                  "female",
+                  "neutral"
+            ],
+            "summary": "恋人是你的安全网，但也是你不敢掉下去的原因。",
+            "core_conflict": "因为被爱着，反而更害怕让对方失望，压力成了不敢说出口的负担。",
+            "stat_ranges": {
+                  "money": [
+                        1200,
+                        2200
+                  ],
+                  "mood": [
+                        48,
+                        62
+                  ],
+                  "skill": [
+                        42,
+                        56
+                  ],
+                  "relationship": [
+                        70,
+                        82
+                  ],
+                  "pressure": [
+                        62,
+                        78
+                  ],
+                  "self_identity": [
+                        38,
+                        52
+                  ]
+            },
+            "start_risk": "压力持续累积时，你更容易选择隐瞒，而不是求助。",
+            "start_advantage": "林夏会给你提供情绪支撑，有时也会带来实际帮助。",
+            "exclusive_contacts": [
+                  "lin_xia"
+            ]
+      },
+      {
+            "id": "female_engineering_repeatedly_proving",
+            "name": "工科女生，正在被反复证明",
+            "enabled": true,
+            "allowed_gender_modes": [
+                  "female"
+            ],
+            "summary": "你不是没有能力，但有些场合总会让你多回答几道和能力无关的题。",
+            "core_conflict": "你不是来证明女生也可以，你只是本来就可以。可有些人总想先确认你是不是“能扛住”。",
+            "stat_ranges": {
+                  "money": [
+                        1500,
+                        3200
+                  ],
+                  "mood": [
+                        45,
+                        62
+                  ],
+                  "skill": [
+                        52,
+                        68
+                  ],
+                  "relationship": [
+                        38,
+                        60
+                  ],
+                  "pressure": [
+                        62,
+                        82
+                  ],
+                  "self_identity": [
+                        45,
+                        62
+                  ]
+            },
+            "start_risk": "求职和面试中可能遇到额外的怀疑，你的压力会更容易因为“被审视”而上升。",
+            "start_advantage": "你确实做过东西。只要把经历讲具体，能力会成为你最稳定的支撑。",
+            "exclusive_contacts": []
+      },
+      {
+            "id": "repeated_failures_still_trying",
+            "name": "一直失利，但还没放弃",
+            "enabled": true,
+            "allowed_gender_modes": [
+                  "male",
+                  "female",
+                  "neutral"
+            ],
+            "summary": "你不是没有努力，只是这段时间什么都没有轮到你。",
+            "core_conflict": "考研失败、秋招失败、比赛失败。你明明做过很多事，却很难向别人解释为什么结果还是这样。",
+            "stat_ranges": {
+                  "money": [
+                        1000,
+                        2600
+                  ],
+                  "mood": [
+                        28,
+                        48
+                  ],
+                  "skill": [
+                        42,
+                        60
+                  ],
+                  "relationship": [
+                        40,
+                        62
+                  ],
+                  "pressure": [
+                        68,
+                        88
+                  ],
+                  "self_identity": [
+                        25,
+                        45
+                  ]
+            },
+            "start_risk": "你容易把一次新的失败理解成“又证明了我不行”，压力和情绪波动会更明显。",
+            "start_advantage": "你不是空白开局。过去的失败里有经验，只是你还没把它们整理成能继续走的东西。",
+            "exclusive_contacts": []
+      },
+      {
+            "id": "ordinary_and_hard_to_introduce",
+            "name": "普通到不知道怎么介绍自己",
+            "enabled": true,
+            "allowed_gender_modes": [
+                  "male",
+                  "female",
+                  "neutral"
+            ],
+            "summary": "你没有特别惨，也没有特别顺。你的人生普通到不知道该怎么讲给别人听。",
+            "core_conflict": "你不是没有活过，只是不知道哪些普通经历值得被写进简历、说进面试、放进人生里。",
+            "stat_ranges": {
+                  "money": [
+                        1800,
+                        3600
+                  ],
+                  "mood": [
+                        45,
+                        62
+                  ],
+                  "skill": [
+                        38,
+                        55
+                  ],
+                  "relationship": [
+                        42,
+                        62
+                  ],
+                  "pressure": [
+                        42,
+                        65
+                  ],
+                  "self_identity": [
+                        35,
+                        52
+                  ]
+            },
+            "start_risk": "因为没有明显优势，你容易觉得自己“没什么可说的”，从而在简历和面试里不断变得模糊。",
+            "start_advantage": "你没有极端崩盘，也没有被某一个失败定义。普通让你慢，但也让你还能调整。",
+            "exclusive_contacts": []
+      },
+      {
+            "id": "unseen_wants_to_prove_self",
+            "name": "从没被看见，想证明自己",
+            "enabled": false,
+            "placeholder": true
+      },
+      {
+            "id": "family_wants_stability_but_wants_to_stay",
+            "name": "家庭催稳定，但你还想留下",
+            "enabled": false,
+            "placeholder": true
       }
-    ];
+];
 
     const AudioManager = {
       enabled: true,
@@ -602,7 +759,29 @@
           linxia_relationship_turning_point: false,
           linxia_event_1_seen: false,
           linxia_event_2_seen: false,
-          linxia_event_3_seen: false
+          linxia_event_3_seen: false,
+          engineering_project_claimed: false,
+          engineering_avoided_project: false,
+          engineering_professional_answer: false,
+          engineering_bias_question_seen: false,
+          engineering_self_proved_by_work: false,
+          engineering_project_event_seen: false,
+          engineering_interview_event_seen: false,
+          failure_materials_opened: false,
+          failure_deleted_past: false,
+          failure_reviewed_reason: false,
+          failure_rejection_processed: false,
+          failure_spoke_about_review: false,
+          failure_kept_trying: false,
+          failure_old_folder_seen: false,
+          failure_rejection_event_seen: false,
+          ordinary_blank_resume: false,
+          ordinary_specific_small_story: false,
+          ordinary_used_cliche: false,
+          ordinary_honest_intro: false,
+          ordinary_found_weight: false,
+          ordinary_blank_resume_seen: false,
+          ordinary_interview_intro_seen: false
         },
         scenario_events_seen: [],
         scenario_special_options_used: [],
@@ -871,26 +1050,47 @@
     }
 
     function nextScenarioEvent() {
-      if (!isLinxiaScenario()) return null;
       const flags = scenarioFlags();
       const job = state.job_progress || freshJobProgress();
-      if (state.day === 2 && !temporaryPlaceMissing() && !flags.linxia_event_1_seen) {
-        return linxiaEvent1();
+      const scenarioId = state.life_profile?.life_scenario_id || "";
+      if (scenarioId === "accompanied_but_afraid_to_fail") {
+        if (state.day === 2 && !temporaryPlaceMissing() && !flags.linxia_event_1_seen) {
+          return linxiaEvent1();
+        }
+        const hadJobFriction = job.hr_replies > 0 || job.applications_sent > 0 || state.flags.interview_completed || state.pressure >= 70;
+        if (state.day === 4 && !flags.linxia_event_2_seen && hadJobFriction) {
+          return linxiaEvent2();
+        }
+        const day6Trigger = state.flags.interview_completed || state.flags.day6_no_interview || job.final_result === "no_progress" || ((job.interview_invites || 0) < 1 && state.pressure >= 75);
+        if (state.day === 6 && !flags.linxia_event_3_seen && day6Trigger) {
+          return linxiaEvent3();
+        }
       }
-      const hadJobFriction = job.hr_replies > 0 || job.applications_sent > 0 || state.flags.interview_completed || state.pressure >= 70;
-      if (state.day === 4 && !flags.linxia_event_2_seen && hadJobFriction) {
-        return linxiaEvent2();
+      if (scenarioId === "female_engineering_repeatedly_proving") {
+        if (state.day === 3 && !flags.engineering_project_event_seen && dayHasAction(3, ["modify_resume", "browse_jobs", "pretend_to_work"])) return engineeringProjectMemoryEvent();
+        if (state.day === 6 && !flags.engineering_interview_event_seen && state.flags.interview_completed) return engineeringInterviewExtraQuestionEvent();
       }
-      const day6Trigger = state.flags.interview_completed || state.flags.day6_no_interview || job.final_result === "no_progress" || ((job.interview_invites || 0) < 1 && state.pressure >= 75);
-      if (state.day === 6 && !flags.linxia_event_3_seen && day6Trigger) {
-        return linxiaEvent3();
+      if (scenarioId === "repeated_failures_still_trying") {
+        if (state.day === 3 && !flags.failure_old_folder_seen && dayHasAction(3, ["modify_resume", "browse_jobs", "pretend_to_work", "send_application"])) return failureOldFolderEvent();
+        const hasJobSetback = job.hr_replies > 0 || job.applications_sent > 0 || job.final_result === "no_progress" || state.flags.day6_no_interview || state.pressure >= 75;
+        if (state.day >= 5 && state.day <= 6 && !flags.failure_rejection_event_seen && hasJobSetback) return failureAnotherRejectionEvent();
+      }
+      if (scenarioId === "ordinary_and_hard_to_introduce") {
+        if (state.day === 3 && !flags.ordinary_blank_resume_seen && dayHasAction(3, ["modify_resume", "browse_jobs", "pretend_to_work"])) return ordinaryBlankResumeEvent();
+        const introTrigger = state.flags.interview_completed || dayHasAction(6, ["prepare_interview", "overhear_interview", "pretend_not_nervous", "attend_interview"]);
+        if (state.day === 6 && !flags.ordinary_interview_intro_seen && introTrigger) return ordinaryInterviewIntroEvent();
       }
       return null;
+    }
+
+    function dayHasAction(day, actionIds) {
+      return (state.action_log || []).some((entry) => entry.day === day && actionIds.includes(entry.action_id));
     }
 
     function setScenarioFlag(key, value = true) {
       const flags = scenarioFlags();
       flags[key] = value;
+      unlockScenarioAchievements();
       return flags;
     }
 
@@ -898,7 +1098,23 @@
       const flags = scenarioFlags();
       flags[key] = (Number(flags[key]) || 0) + amount;
       if (key === "linxia_truth_count" && flags[key] >= 1) addScenarioAchievement("said_one_true_sentence");
+      unlockScenarioAchievements();
       return flags;
+    }
+
+    function unlockScenarioAchievements() {
+      const id = state.life_profile?.life_scenario_id || "";
+      const flags = state.life_profile?.scenario_flags || {};
+      if (id === "female_engineering_repeatedly_proving" && (flags.engineering_professional_answer || flags.engineering_self_proved_by_work)) addScenarioAchievement("already_capable");
+      if (id === "repeated_failures_still_trying" && (flags.failure_reviewed_reason || flags.failure_kept_trying)) addScenarioAchievement("ordinary_not_failure");
+      if (id === "ordinary_and_hard_to_introduce" && flags.ordinary_found_weight) addScenarioAchievement("ordinary_has_weight");
+    }
+
+    function applyScenarioJobPatch(patch = {}) {
+      if (!patch || !Object.keys(patch).length) return;
+      state.job_progress = { ...freshJobProgress(), ...(state.job_progress || {}) };
+      applyProgressPatch(state.job_progress, patch);
+      updateJobStage();
     }
 
     function updateLinxiaContact(amount = 1, lastInteraction = "") {
@@ -915,12 +1131,13 @@
       for (const id of seen) if (!contact.events_seen.includes(id)) contact.events_seen.push(id);
     }
 
-    function scenarioChoice(flagsPatch = {}, contactText = "") {
+    function scenarioChoice(flagsPatch = {}, contactText = "", jobPatch = {}) {
       return () => {
         for (const [key, value] of Object.entries(flagsPatch)) {
           if (typeof value === "number") bumpScenarioFlag(key, value);
           else setScenarioFlag(key, value);
         }
+        applyScenarioJobPatch(jobPatch);
         updateLinxiaContact(1, contactText);
       };
     }
@@ -1010,6 +1227,186 @@
             result: "“那就不知道呗。”林夏递给你一杯水。杯子是你们一起在跳蚤市场买的，杯壁上有一道细细的裂纹。“不知道的时候，就先喝水，吃饭，睡觉。明天再不知道。”她的语气像在说一个很简单的道理。",
             effects: { mood: 4, pressure: -4, self_identity: 3 },
             onChoose: scenarioChoice({ linxia_silent_count: 1, linxia_relationship_turning_point: true, linxia_event_3_seen: true }, "第 6 天，你说不知道该怎么办。她递给你一杯水。")
+          }
+        ]
+      };
+    }
+
+    function engineeringProjectMemoryEvent() {
+      return {
+        id: "engineering_project_memory",
+        day: 3,
+        scenario_event: true,
+        title: "项目经历不是附属",
+        description: "你盯着简历里的“参与项目”四个字，看了很久。\n那个项目最后能跑起来，不只是因为组里有人会说话。你调过接口，改过报错，也在凌晨两点把一个没人想碰的问题修好。\n可你写下来的时候，还是下意识把自己放在了“协助”后面。",
+        choices: [
+          {
+            text: "把自己做的写清楚",
+            result: "你把“协助完成项目”改成了“负责接口调试和异常处理”。字数没多多少，但你忽然觉得，这行字终于像你真的在里面待过。",
+            effects: { skill: 2, self_identity: 2, pressure: 1 },
+            onChoose: scenarioChoice({ engineering_project_claimed: true, engineering_self_proved_by_work: true, engineering_project_event_seen: true }, "", { resume_quality: 1 })
+          },
+          {
+            text: "保守一点，别太冒头",
+            result: "你把经历写得很稳，也很安全。安全到像是谁都可以放进那一行里。你没有写错，只是又把自己往后放了一点。",
+            effects: { pressure: -1, self_identity: -2 },
+            onChoose: scenarioChoice({ engineering_avoided_project: true, engineering_project_event_seen: true })
+          },
+          {
+            text: "先删掉，免得被追问",
+            result: "你删掉了那段项目经历。简历变短了，也变轻了。轻得让你有点不服气——明明那些夜晚真的发生过。",
+            effects: { mood: -2, pressure: 2, self_identity: -2 },
+            onChoose: scenarioChoice({ engineering_avoided_project: true, engineering_project_event_seen: true })
+          }
+        ]
+      };
+    }
+
+    function engineeringInterviewExtraQuestionEvent() {
+      return {
+        id: "engineering_interview_extra_question",
+        day: 6,
+        scenario_event: true,
+        title: "“这个岗位可能比较辛苦”",
+        description: "面试官翻着你的简历，停在项目经历那一栏。\n他点了点头，又问了一句：\n“这个岗位可能会比较辛苦，加班和出差也会有，你能接受吗？”\n这句话听起来像是在问岗位要求，又像是在确认你是不是应该坐在这里。",
+        choices: [
+          {
+            text: "礼貌回答可以接受",
+            result: "你点点头，说自己可以接受压力，也愿意学习。这个回答很安全，安全得像很多人都能说。面试官记了两笔，你不知道那是不是好事。",
+            effects: { pressure: 2 },
+            onChoose: scenarioChoice({ engineering_bias_question_seen: true, engineering_interview_event_seen: true }, "", { interview_score: 1 })
+          },
+          {
+            text: "把话题拉回专业能力",
+            result: "你停了一下，说：“我理解岗位强度，所以我想具体说一下之前项目里我负责的部分。”\n你把接口调试、报错处理和最终结果讲清楚。面试官终于放下了那个泛泛的问题，开始问你技术细节。",
+            effects: { skill: 1, self_identity: 3, pressure: -1 },
+            onChoose: scenarioChoice({ engineering_bias_question_seen: true, engineering_professional_answer: true, engineering_self_proved_by_work: true, engineering_interview_event_seen: true }, "", { interview_score: 3 })
+          },
+          {
+            text: "反问岗位具体强度",
+            result: "你问：“可以具体说一下加班和出差的频率吗？我想判断自己是否能长期稳定地做好。”\n空气停了一秒。这个问题不算冒犯，但它让对方也必须把话说具体。",
+            effects: { self_identity: 2, pressure: 1 },
+            onChoose: scenarioChoice({ engineering_bias_question_seen: true, engineering_professional_answer: true, engineering_interview_event_seen: true }, "", { interview_score: 2 })
+          }
+        ]
+      };
+    }
+
+    function failureOldFolderEvent() {
+      return {
+        id: "failure_old_folder",
+        day: 3,
+        scenario_event: true,
+        title: "那个叫“最后一次努力”的文件夹",
+        description: "你在电脑里翻简历时，看见一个旧文件夹。\n名字叫“最后一次努力”。\n里面有考研资料、秋招记录、比赛报名表，还有几张你曾经以为会用上的截图。\n你盯着文件夹，突然发现，当时的自己是真的相信过。",
+        choices: [
+          {
+            text: "打开看看",
+            result: "你点开文件夹。很多东西已经用不上了，但你还是看见了自己当时做过的笔记、改过的题、投过的岗位。它们没有换来结果，但也不是假的。",
+            effects: { self_identity: 3, pressure: 2, skill: 1 },
+            onChoose: scenarioChoice({ failure_materials_opened: true, failure_reviewed_reason: true, failure_old_folder_seen: true })
+          },
+          {
+            text: "改个名字留着",
+            result: "你把“最后一次努力”改成了“以前努力过”。\n这名字没那么悲壮，也没那么像遗言。只是一个普通文件夹，放着一段普通但真实的过去。",
+            effects: { mood: 2, self_identity: 2, pressure: -1 },
+            onChoose: scenarioChoice({ failure_materials_opened: true, failure_kept_trying: true, failure_old_folder_seen: true })
+          },
+          {
+            text: "删掉",
+            result: "你把文件夹拖进回收站。屏幕干净了一点，但心里没有轻多少。你知道删掉文件，不等于删掉那段时间。",
+            effects: { mood: -2, pressure: 2, self_identity: -1 },
+            onChoose: scenarioChoice({ failure_deleted_past: true, failure_old_folder_seen: true })
+          }
+        ]
+      };
+    }
+
+    function failureAnotherRejectionEvent() {
+      return {
+        id: "failure_another_rejection",
+        day: state.day,
+        scenario_event: true,
+        title: "又一次没有轮到你",
+        description: "邮箱弹出一封回复。\n开头很礼貌，结尾也很礼貌。\n中间那句你已经见过很多次：\n“很遗憾……”\n你盯着这三个字，看了一会儿，甚至没觉得意外。",
+        choices: [
+          {
+            text: "关掉邮箱",
+            result: "你关掉页面，假装这封邮件没有发生。可它还是发生了。它没有声音，却像把房间里的空气抽走了一点。",
+            effects: { mood: -3, pressure: 3 },
+            onChoose: scenarioChoice({ failure_rejection_processed: false, failure_rejection_event_seen: true })
+          },
+          {
+            text: "看完拒绝理由",
+            result: "你把邮件看完了。理由很模糊，但你还是从里面抠出一点东西：经验不够，项目描述不清，岗位匹配度一般。\n这些话不好听，但至少比沉默具体。",
+            effects: { mood: -2, pressure: 1, skill: 2, self_identity: 1 },
+            onChoose: scenarioChoice({ failure_rejection_processed: true, failure_reviewed_reason: true, failure_rejection_event_seen: true })
+          },
+          {
+            text: "找阿哲吐槽",
+            result: "你把截图发给阿哲。\n阿哲回：“它拒绝的是今天的你，不是终身会员版的你。”\n这句话很欠，但你居然看了两遍。",
+            effects: { mood: 3, relationship: 2, pressure: -2 },
+            onChoose: scenarioChoice({ failure_rejection_processed: true, failure_kept_trying: true, failure_rejection_event_seen: true })
+          }
+        ]
+      };
+    }
+
+    function ordinaryBlankResumeEvent() {
+      return {
+        id: "ordinary_blank_resume",
+        day: 3,
+        scenario_event: true,
+        title: "自我介绍困难户",
+        description: "简历里有一栏写着“个人优势”。\n你盯着那四个字，想了很久。\n你没有拿过什么特别厉害的奖，也没有一眼能让 HR 停下来的经历。\n你的大学四年好像不是空白，但也不知道该怎么证明它不是空白。",
+        choices: [
+          {
+            text: "写“学习能力强”",
+            result: "你打下“学习能力强、责任心强、抗压能力强”。\n这三句话很完整，也很像从别人的简历里借来的。你没有写错，只是写完以后更不像自己了。",
+            effects: { pressure: 1, self_identity: -1 },
+            onChoose: scenarioChoice({ ordinary_used_cliche: true, ordinary_blank_resume: true, ordinary_blank_resume_seen: true }, "", { resume_quality: 1 })
+          },
+          {
+            text: "写一件真的做完的小事",
+            result: "你写下自己曾经负责过一次社团活动的物资整理。它不宏大，也不闪光，但确实是你一点点做完的。\n你突然发现，普通经历也可以具体。",
+            effects: { skill: 1, self_identity: 3 },
+            onChoose: scenarioChoice({ ordinary_specific_small_story: true, ordinary_found_weight: true, ordinary_blank_resume_seen: true }, "", { resume_quality: 1 })
+          },
+          {
+            text: "先空着",
+            result: "你把那一栏留空。\n空白看起来很干净，也很刺眼。你知道自己不是没有东西可写，只是不知道哪一件配得上被写下来。",
+            effects: { pressure: 2, mood: -1 },
+            onChoose: scenarioChoice({ ordinary_blank_resume: true, ordinary_blank_resume_seen: true })
+          }
+        ]
+      };
+    }
+
+    function ordinaryInterviewIntroEvent() {
+      return {
+        id: "ordinary_interview_intro",
+        day: 6,
+        scenario_event: true,
+        title: "“请简单介绍一下你自己”",
+        description: "面试官说：“请简单介绍一下你自己。”\n这是最常见的问题。\n也可能是最难的问题。\n因为你突然发现，自己既不是传奇，也不是反面教材，只是一个普通到很难概括的人。",
+        choices: [
+          {
+            text: "背一段标准模板",
+            result: "你说自己性格认真、学习能力强、愿意接受挑战。\n这些话都没错，只是说完以后，连你自己也很难从里面认出自己。",
+            effects: { pressure: 1, self_identity: -1 },
+            onChoose: scenarioChoice({ ordinary_used_cliche: true, ordinary_interview_intro_seen: true }, "", { interview_score: 1 })
+          },
+          {
+            text: "讲一件小事",
+            result: "你讲了一个很小的经历：一次项目延期，你负责把混乱的资料整理成可交接的表格。\n这事不酷，也不传奇。\n但面试官开始追问细节时，你反而放松了一点——因为这是真的。",
+            effects: { self_identity: 3, pressure: -1 },
+            onChoose: scenarioChoice({ ordinary_honest_intro: true, ordinary_found_weight: true, ordinary_interview_intro_seen: true }, "", { interview_score: 3 })
+          },
+          {
+            text: "承认自己还在整理",
+            result: "你说：“我可能还没有一句很漂亮的自我介绍，但我最近在认真整理自己做过什么、适合什么。”\n这句话不够完美，却比刚才那些套话更像你。",
+            effects: { self_identity: 2, pressure: 1 },
+            onChoose: scenarioChoice({ ordinary_honest_intro: true, ordinary_interview_intro_seen: true }, "", { interview_score: 2 })
           }
         ]
       };
@@ -1300,9 +1697,9 @@
       const inner = el("div", "menu-inner");
       inner.append(
         el("h1", "", "检测到旧版试玩存档"),
-        el("p", "room-text", "检测到旧版试玩存档。\nv0.6.0 重做了第 0 天毕业档案和人生处境系统，旧存档无法完整兼容。\n建议从第 0 天重新开始。"),
+        el("p", "room-text", "检测到旧版试玩存档。\nv0.6.1 继续扩展了毕业处境系统，旧存档无法完整兼容。\n建议从第 0 天重新开始。"),
         button("导出旧版记录", () => showCopyFallback(JSON.stringify(oldState, null, 2))),
-        button("开始 v0.6.0 新游戏", () => {
+        button("开始 v0.6.1 新游戏", () => {
           state = freshState();
           localStorage.removeItem(SAVE_KEY);
           resetDraftLife();
@@ -1352,7 +1749,7 @@
       const wrap = el("div", "profile");
       wrap.append(el("h1", "", "毕业后的第100天"), el("p", "subtitle", "第 0 天：选择人生视角"));
       const card = el("section", "profile-card");
-      card.append(el("h2", "", "这一次，你想从哪里看毕业后的生活？"), el("p", "room-text", "v0.6.0 Alpha 只完整开放一条处境线：有人陪你，但你不敢失败。其他处境先预留，不写临时烂剧情。"));
+      card.append(el("h2", "", "这一次，你想从哪里看毕业后的生活？"), el("p", "room-text", "v0.6.1 已开放四条毕业处境：被陪伴但怕失败、工科女生反复证明、一直失利仍在尝试、普通到难以介绍自己。"));
       const grid = el("div", "grid");
       for (const option of genderModeOptions) {
         const item = el("article", "card");
@@ -1446,7 +1843,9 @@
     }
 
     function generateLifeProfile(scenario) {
-      const enabled = enabledLifeScenarios(draftGenderMode);
+      const resolved = resolveGender(draftGenderMode);
+      const scenarioMode = draftGenderMode === "random" ? resolved : draftGenderMode;
+      const enabled = enabledLifeScenarios(scenarioMode);
       const source = (lifeScenarios && lifeScenarios.length) ? lifeScenarios : fallbackLifeScenarios;
       const picked = scenario || enabled[randomInt(0, Math.max(0, enabled.length - 1))] || source.find((item) => item.enabled);
       if (!picked) throw new Error("No enabled life scenario");
@@ -1455,7 +1854,6 @@
         const [min, max] = picked.stat_ranges[key];
         stats[key] = randomInt(min, max);
       }
-      const resolved = resolveGender(draftGenderMode);
       return {
         name: picked.name,
         stats,
@@ -1673,7 +2071,7 @@
 
     function enabledLifeScenarios(mode = draftGenderMode) {
       const source = (lifeScenarios && lifeScenarios.length) ? lifeScenarios : fallbackLifeScenarios;
-      if (mode === "random") return source.filter((item) => item.enabled);
+      if (mode === "random") return source.filter((item) => item.enabled && (item.allowed_gender_modes || []).some((gender) => ["male", "female", "neutral"].includes(gender)));
       return source.filter((item) => item.enabled && (item.allowed_gender_modes || []).includes(mode));
     }
 
@@ -1834,12 +2232,21 @@
         backdrop.remove();
       };
       modal.append(
-        el("h2", "", "v0.6.0｜毕业处境系统 Alpha"),
+        el("h2", "", "v0.6.1｜多处境剧情补全测试版"),
         button(auto ? "进入游戏" : "知道了", dismissAnnouncement),
-        el("p", "room-text", "这次不扩展天数，不做 30 天或 100 天，先把第 0 天改成真正的“人生处境”入口。\n\n- 新游戏会先选择人生视角、输入玩家名字，再生成毕业处境。\n- 完整接入第一条处境：【有人陪你，但你不敢失败】。\n- 新增专属联系人林夏，她不是攻略对象，而是压力、坦白与隐瞒的镜子。\n- 第 2 / 4 / 6 天加入林夏专属事件，并记录坦白、隐瞒、沉默 flags。\n- 面试中会根据关系和坦白情况触发林夏的特殊帮助。\n- 第 7 天报告新增“毕业处境总结”，会按林夏线分支收束。\n- 复制本局记录加入 life_profile、player_name 和林夏线测试字段。\n\n这仍然是 Alpha 测试版本。\n如果你感觉某个林夏事件太早、太晚，或者第 7 天不像你玩出来的，请直接告诉开发者。")
+        el("p", "room-text", `这次不增加新玩法，只补全第 0 天毕业处境系统。
+
+- 新开放三条处境：【工科女生，正在被反复证明】、【一直失利，但还没放弃】、【普通到不知道怎么介绍自己】。
+- 保留并继续支持【有人陪你，但你不敢失败】与林夏线，“被爱不需要等价交换”不会被改掉。
+- 每条新处境都有专属初始数值、风险、优势、2 个一次性事件、面试特殊回答和第 7 天总结分支。
+- 随机人生视角会先确定性别，再按性别筛选可用处境，女性限定处境不会乱进男性视角。
+- 复制本局记录现在会输出 scenario_flags 和 scenario_ending_branch，方便测试复盘。
+
+这仍然是测试版本。
+如果某条处境太少触发、太像说教，或者第 7 天不像这局玩出来的，请直接告诉开发者。`)
       );
       modal.append(button("查看完整更新记录", () => {
-        modal.querySelector("p").textContent = "完整更新记录：v0.6.0 将第 0 天改为人生视角 + 玩家名字 + 毕业处境生成；新增 docs/data/life_scenarios.json；启用处境“有人陪你，但你不敢失败”；预留五条 disabled 处境；接入林夏联系人、三个一次性事件、面试特殊帮助、第 7 天处境报告分支与复制记录字段。未新增天数、地图、恋爱/约会系统、背包或职业树。";
+        modal.querySelector("p").textContent = "完整更新记录：v0.6.1 基于 v0.6.0 扩充毕业处境，不增加天数、地图、恋爱、背包或职业树。新增三条 enabled 处境及对应 flags、剧情事件、面试特殊回答、成就标记和第 7 天报告；保留林夏线原有文案与分支；随机视角改为先解析性别再筛选处境；复制本局记录加入完整 scenario_flags 与通用 scenario_ending_branch。";
       }));
       if (!auto) modal.append(button("关闭", () => backdrop.remove()));
       backdrop.append(modal);
@@ -2877,17 +3284,43 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         score += 1;
         lines.push("额外帮助：周学长之前提醒过你别只说态度，要说例子。这句话在会议室里救了你一次。");
       }
-      const flags = isLinxiaScenario() ? scenarioFlags() : {};
+      const flags = scenarioFlags();
+      const scenarioId = state.life_profile?.life_scenario_id || "";
+      let scenarioEffects = {};
       const canUseLinxiaQuestion = isLinxiaScenario() && (flags.linxia_interview_advice || state.relationship >= 72 || (Number(flags.linxia_truth_count) || 0) >= 1);
-      let linxiaEffects = {};
       if (canUseLinxiaQuestion) {
         score += 2;
         flags.linxia_interview_advice = true;
         addScenarioSpecialOption("linxia_interview_real_question");
         lines.push("特殊回答：你想起林夏说：“问一个你真的想知道的。”你没有表演完美，而是问了一个真正关心的实际问题。面试官的表情变了——不是满意，是认真。走出门时，你给林夏发了条消息：“问了。”她秒回：“酷。”");
-        linxiaEffects = { skill: 2, pressure: -3, relationship: 3 };
+        scenarioEffects = mergeEffects(scenarioEffects, { skill: 2, pressure: -3, relationship: 3 });
         updateLinxiaContact(1, "第 6 天面试时，你想起她说：问一个你真的想知道的。");
       }
+      if (scenarioId === "female_engineering_repeatedly_proving" && (flags.engineering_project_claimed || state.skill >= 55)) {
+        score += 2;
+        flags.engineering_self_proved_by_work = true;
+        flags.engineering_professional_answer = true;
+        addScenarioSpecialOption("engineering_project_result_answer");
+        lines.push("处境回答：你没有先解释“我为什么适合工科”，而是把项目里真正由你负责的部分、遇到的问题和结果讲清楚。会议室安静了几秒，那几秒不是质疑，是终于开始听专业内容。");
+        scenarioEffects = mergeEffects(scenarioEffects, { self_identity: 2, pressure: -2 });
+      }
+      if (scenarioId === "repeated_failures_still_trying" && (flags.failure_reviewed_reason || flags.failure_materials_opened)) {
+        score += 2;
+        flags.failure_spoke_about_review = true;
+        flags.failure_kept_trying = true;
+        addScenarioSpecialOption("failure_review_answer");
+        lines.push("处境回答：你没有把过去几次失败包装成励志故事，只是讲清楚自己复盘了什么、改了什么、这次准备怎么避免同一个坑。它不漂亮，但很可信。");
+        scenarioEffects = mergeEffects(scenarioEffects, { self_identity: 3, pressure: -2 });
+      }
+      if (scenarioId === "ordinary_and_hard_to_introduce" && (flags.ordinary_specific_small_story || state.self_identity >= 45)) {
+        score += 2;
+        flags.ordinary_found_weight = true;
+        flags.ordinary_honest_intro = true;
+        addScenarioSpecialOption("ordinary_specific_story_answer");
+        lines.push("处境回答：你没有说“我很普通所以没什么可讲”，而是讲了一件小事：你怎么把一件不起眼的事做完。面试官没有立刻惊艳，但终于能看见一个具体的人。");
+        scenarioEffects = mergeEffects(scenarioEffects, { self_identity: 3, pressure: -1 });
+      }
+      unlockScenarioAchievements();
       if (state.pressure >= 85) score -= 1;
       job.interview_score = Math.max(0, Math.min(10, score));
       job.history.push(`第 ${state.day} 天面试得分 ${job.interview_score}/10`);
@@ -2896,7 +3329,7 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         : job.interview_score >= 4
           ? { skill: 2, self_identity: 1, pressure: 3 }
           : { skill: 1, mood: -3, pressure: 5 };
-      const effects = mergeEffects(baseEffects, linxiaEffects);
+      const effects = mergeEffects(baseEffects, scenarioEffects);
       return { description: `${baseDescription}\n\n${lines.join("\n")}\n\n面试评分：${job.interview_score}/10。第 7 天会给出明确后续。`, effects };
     }
 
@@ -3312,21 +3745,38 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       const box = el("div", "log-item");
       const life = normalizeLifeProfile(state.life_profile);
       box.append(el("div", "log-time", "毕业处境总结"));
-      if (life.life_scenario_id !== "accompanied_but_afraid_to_fail") {
-        box.append(el("p", "", "这局没有启用专属处境线。"));
+      if (!life.life_scenario_id) {
+        box.append(el("p", "", "这局没有记录到专属处境线。"));
         return box;
       }
-      const branch = linxiaEndingBranch();
+      const branch = scenarioEndingBranch();
       box.append(
-        el("p", "", linxiaEndingText(branch)),
-        el("p", "muted", `林夏线分支：${linxiaEndingBranchLabel(branch)}
-坦白次数：${life.scenario_flags.linxia_truth_count}
-隐瞒次数：${life.scenario_flags.linxia_hide_count}
-沉默次数：${life.scenario_flags.linxia_silent_count}
+        el("p", "", scenarioEndingText(branch)),
+        el("p", "muted", `处境分支：${scenarioEndingBranchLabel(branch)}
+scenario_ending_branch：${branch}
+关键 flags：${scenarioFlagSummary(life)}
 触发事件：${life.scenario_events_seen.join("、") || "无"}
 特殊选项：${life.scenario_special_options_used.join("、") || "无"}`)
       );
       return box;
+    }
+
+    function scenarioFlagSummary(life = normalizeLifeProfile(state.life_profile)) {
+      const flags = life.scenario_flags || {};
+      const id = life.life_scenario_id || "";
+      if (id === "accompanied_but_afraid_to_fail") {
+        return `坦白 ${flags.linxia_truth_count || 0} / 隐瞒 ${flags.linxia_hide_count || 0} / 沉默 ${flags.linxia_silent_count || 0} / 面试建议 ${flags.linxia_interview_advice ? "已用" : "未用"}`;
+      }
+      if (id === "female_engineering_repeatedly_proving") {
+        return `写清项目 ${flags.engineering_project_claimed ? "是" : "否"} / 专业回答 ${flags.engineering_professional_answer ? "是" : "否"} / 识别偏见 ${flags.engineering_bias_question_seen ? "是" : "否"} / 被作品证明 ${flags.engineering_self_proved_by_work ? "是" : "否"}`;
+      }
+      if (id === "repeated_failures_still_trying") {
+        return `打开旧材料 ${flags.failure_materials_opened ? "是" : "否"} / 复盘原因 ${flags.failure_reviewed_reason ? "是" : "否"} / 说出复盘 ${flags.failure_spoke_about_review ? "是" : "否"} / 还在尝试 ${flags.failure_kept_trying ? "是" : "否"}`;
+      }
+      if (id === "ordinary_and_hard_to_introduce") {
+        return `空白简历 ${flags.ordinary_blank_resume ? "是" : "否"} / 具体小事 ${flags.ordinary_specific_small_story ? "是" : "否"} / 诚实介绍 ${flags.ordinary_honest_intro ? "是" : "否"} / 找到重量 ${flags.ordinary_found_weight ? "是" : "否"}`;
+      }
+      return JSON.stringify(flags);
     }
 
     function copyPlayLog() {
@@ -3489,7 +3939,8 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         `linxia_relationship_turning_point：${flags.linxia_relationship_turning_point ? "true" : "false"}`,
         `scenario_events_seen：${life.scenario_events_seen.join(", ") || "none"}`,
         `scenario_special_options_used：${life.scenario_special_options_used.join(", ") || "none"}`,
-        `scenario_ending_branch：${linxiaEndingBranch()}`,
+        `scenario_flags：${JSON.stringify(flags)}`,
+        `scenario_ending_branch：${scenarioEndingBranch()}`,
         "",
         "每天行动：",
         byDay.join("\n"),
@@ -3675,6 +4126,101 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
       return "你没有立刻变好，但每一天的选择都留下了一点痕迹。";
     }
 
+    function scenarioEndingBranch() {
+      const id = state.life_profile?.life_scenario_id || "";
+      const flags = scenarioFlags();
+      if (id === "accompanied_but_afraid_to_fail") return linxiaEndingBranch();
+      if (id === "female_engineering_repeatedly_proving") {
+        if (flags.engineering_self_proved_by_work || flags.engineering_professional_answer) return "engineering_professional";
+        if (flags.engineering_avoided_project) return "engineering_avoid";
+        return "engineering_uncertain";
+      }
+      if (id === "repeated_failures_still_trying") {
+        if (flags.failure_spoke_about_review || flags.failure_reviewed_reason) return "failure_reviewed";
+        if (flags.failure_deleted_past) return "failure_erased";
+        return "failure_still_trying";
+      }
+      if (id === "ordinary_and_hard_to_introduce") {
+        if (flags.ordinary_found_weight || flags.ordinary_specific_small_story) return "ordinary_specific";
+        if (flags.ordinary_used_cliche) return "ordinary_template";
+        return "ordinary_blank";
+      }
+      return "none";
+    }
+
+    function scenarioEndingBranchLabel(branch = scenarioEndingBranch()) {
+      const labels = {
+        truth: "林夏线：坦白型",
+        hide: "林夏线：回避型",
+        silent: "林夏线：沉默型",
+        mixed: "林夏线：混合型",
+        engineering_professional: "工科女生线：让作品说话",
+        engineering_avoid: "工科女生线：暂时避开证明",
+        engineering_uncertain: "工科女生线：还在被追问",
+        failure_reviewed: "失利线：复盘后继续尝试",
+        failure_erased: "失利线：把过去删掉",
+        failure_still_trying: "失利线：还没放弃",
+        ordinary_specific: "普通线：讲出具体的小事",
+        ordinary_template: "普通线：仍在模板里",
+        ordinary_blank: "普通线：还没找到介绍自己的方式",
+        none: "无专属处境"
+      };
+      return labels[branch] || "专属处境";
+    }
+
+    function scenarioEndingText(branch = scenarioEndingBranch()) {
+      if (["truth", "hide", "silent", "mixed"].includes(branch)) return linxiaEndingText(branch);
+      const map = {
+        engineering_professional: `这一周，你还是被问了很多次“你真的可以吗”。
+
+但你开始把回答从辩解换成结果：哪个模块是你写的，哪个 bug 是你查出来的，哪一次协作里你真正承担了责任。
+你不需要每一次都证明所有女生都适合工科。你只需要在这一刻，把属于你的专业能力讲清楚。
+
+“不是证明我也行，是这件事本来就是我做的。”`,
+        engineering_avoid: `这一周，你有几次把自己的项目写轻了一点，把锋芒收回去了一点。
+
+那不是懦弱，只是长期被质疑后形成的保护动作。只是如果还有下一周，也许你可以试着少替别人预判一点。
+你的能力不应该总是先通过怀疑，才被允许出现。
+
+“我不想再把自己写得比真实更小。”`,
+        engineering_uncertain: `这一周，你还在被“适不适合”这类问题追着跑。
+
+你没有完全找到漂亮的回答，但已经开始意识到：问题不一定都在你身上。
+下一次，也许你可以不急着解释自己为什么可以，而是直接讲你做成了什么。`,
+        failure_reviewed: `这一周，你没有把失败全部藏起来。
+
+你打开旧文件夹，看完新的拒绝理由，把那些难看的记录整理成了下一次能用的东西。
+失败还是失败，但它不再只是压在你身上的标签，也开始变成一点经验。
+
+“我不是失败本身，我只是失败过很多次的人。”`,
+        failure_erased: `这一周，你删掉了一些旧材料，也删掉了一部分还没来得及被理解的自己。
+
+这让你短暂轻松了一点，但那些经历并不会因为文件夹消失就真的不存在。
+如果还有下一周，也许你可以先不急着和过去和解，只是把它放在一个不会刺伤你的地方。`,
+        failure_still_trying: `这一周，你又遇见了没有回复、拒信和不确定。
+
+你没有突然逆袭，也没有把每一次失利都说成礼物。可你还在刷新、修改、出门、回来。
+这不浪漫，但很重要。
+
+“我还没赢，但我也还没退场。”`,
+        ordinary_specific: `这一周，你没有把自己介绍成一个宏大的故事。
+
+你只是讲了一件具体的小事：怎么做完、怎么出错、怎么补上。奇怪的是，当你愿意这样讲，普通并没有消失，却开始有了重量。
+
+“普通不是没有内容，只是需要被具体地说出来。”`,
+        ordinary_template: `这一周，你很多次想用标准答案保护自己。
+
+“学习能力强”“抗压能力好”“愿意成长”都很安全，也很容易把你藏起来。
+你不是没有东西可说，只是还没找到一个不需要夸张也能站住的说法。`,
+        ordinary_blank: `这一周，你还是常常卡在自我介绍那里。
+
+你觉得自己普通，不知道该从哪里讲起。可这七天里，你去过便利店、改过简历、找过住处，也撑过了很多没有人鼓掌的小事。
+它们也许还没有变成答案，但已经是材料。`,
+        none: "这局没有启用专属处境线。"
+      };
+      return map[branch] || map.none;
+    }
+
     function linxiaEndingBranch() {
       if (!isLinxiaScenario()) return "none";
       const flags = scenarioFlags();
@@ -3733,7 +4279,7 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
     async function loadRuntimeData() {
       renderLoading();
       try {
-        const locationResponse = await fetch("./data/locations.json?v=060");
+        const locationResponse = await fetch("./data/locations.json?v=062");
         if (!locationResponse.ok) throw new Error(`locations ${locationResponse.status}`);
         locations = await locationResponse.json();
       } catch (error) {
@@ -3742,7 +4288,7 @@ ${contact.benefit || "暂时只是让你知道城市里还有别人。"}`)
         return false;
       }
       try {
-        const scenarioResponse = await fetch("./data/life_scenarios.json?v=060");
+        const scenarioResponse = await fetch("./data/life_scenarios.json?v=062");
         if (scenarioResponse.ok) lifeScenarios = await scenarioResponse.json();
       } catch (error) {
         console.warn("life scenarios load failed", error);

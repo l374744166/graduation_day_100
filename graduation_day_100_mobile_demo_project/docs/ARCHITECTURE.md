@@ -1,6 +1,6 @@
 # 《毕业后的第100天》网页原型结构说明
 
-当前公开游戏版本为 v0.6.0：毕业处境系统 Alpha。
+当前公开游戏版本为 v0.6.1：多处境剧情补全测试版。
 
 ## 当前结构
 
@@ -13,7 +13,7 @@ docs/
     app.js                # 游戏逻辑入口：状态、事件、行动、UI 渲染、存档
   data/
     locations.json        # 地点数据
-    life_scenarios.json   # 第 0 天人生处境数据；当前仅启用“有人陪你，但你不敢失败”
+    life_scenarios.json   # 第 0 天人生处境数据；当前启用 4 条处境，保留 2 条 disabled placeholder
   assets/audio/           # BGM 和音频清单
 ```
 
@@ -24,7 +24,7 @@ docs/
 - `index.html` 保持很小，避免每次改代码都卡。
 - `css/app.split.css` 单独维护视觉主题和响应式布局。
 - `js/app.js` 单独维护游戏逻辑。
-- `data/life_scenarios.json` 单独维护毕业处境，未启用处境只做 disabled placeholder。
+- `data/life_scenarios.json` 单独维护毕业处境，已启用处境包括“有人陪你，但你不敢失败”“工科女生，正在被反复证明”“一直失利，但还没放弃”“普通到不知道怎么介绍自己”；未启用处境只做 disabled placeholder。
 - 不引入打包器，不影响 GitHub Pages 直接发布。
 
 ## 后续建议拆分方向

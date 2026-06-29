@@ -755,7 +755,7 @@
       background: linear-gradient(90deg, var(--accent-primary), var(--accent-yellow), var(--accent-secondary), var(--accent-purple));
     }
     .update-modal h2::after {
-      content: "这次让第 0 天变成处境入口，而不只是随机数值。";
+      content: "这次补全多条毕业处境，但不扩天数、不加新玩法。";
       display: block;
       margin-top: 8px;
       color: var(--text-muted);
